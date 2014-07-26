@@ -16,4 +16,11 @@ func TestRead(t *testing.T) {
 		gtl = Read(r)
 		So(gtl.IsEmpty(), ShouldBeTrue)
 	})
+
+	Convey("An reader can read groups", t, func() {
+		r := strings.NewReader("@developers     =   dilbert alice wally")
+		gtl := Read(r)
+		So(gtl.IsEmpty(), ShouldBeFalse)
+	})
+
 }
