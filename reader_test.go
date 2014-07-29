@@ -21,6 +21,7 @@ func TestRead(t *testing.T) {
 		r := strings.NewReader("  @developers     =   dilbert alice wally  ")
 		gtl := Read(r)
 		So(gtl.IsEmpty(), ShouldBeFalse)
+		So(gtl.NbGroup(), ShouldEqual, 1)
 	})
 
 }

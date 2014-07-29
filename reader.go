@@ -72,3 +72,8 @@ func readGroup(c *content) stateFn {
 	c.s = c.s[res[5]:]
 	return readUpToRepoOrGroup
 }
+
+// NbGroup returns the number of groups (people or repos)
+func (gtl *Gitolite) NbGroup() int {
+	return len(gtl.groups)
+}
