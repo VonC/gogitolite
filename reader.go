@@ -3,6 +3,7 @@ package gogitolite
 import (
 	"io"
 	"io/ioutil"
+	"log"
 	"regexp"
 	"strings"
 )
@@ -60,10 +61,13 @@ func readUpToRepoOrGroup(c *content) stateFn {
 	return nil
 }
 
-var readGroupRx = regexp.MustCompile(`^@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
+var readGroupRx = regexp.MustCompile(`(?m)^@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
 
 func readGroup(c *content) stateFn {
 	res := readGroupRx.FindStringSubmatchIndex(c.s)
+	if len(res) == 0 {
+		log.Fatalf("Error ReadGroup")
+	}
 	//fmt.Println(res, "'"+c.s+"'", "'"+c.s[res[2]:res[3]]+"'", "'"+c.s[res[4]:res[5]]+"'")
 	grpname := c.s[res[2]:res[3]]
 	grpmembers := strings.Split(strings.TrimSpace(c.s[res[4]:res[5]]), " ")
