@@ -65,6 +65,7 @@ var readGroupRx = regexp.MustCompile(`(?m)^@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z
 
 func readGroup(c *content) stateFn {
 	res := readGroupRx.FindStringSubmatchIndex(c.s)
+	// fmt.Println(res, "'"+c.s+"'")
 	if len(res) == 0 {
 		log.Fatalf("Error ReadGroup")
 	}
@@ -74,6 +75,7 @@ func readGroup(c *content) stateFn {
 	grp := &Group{name: grpname, members: grpmembers}
 	c.gtl.groups = append(c.gtl.groups, grp)
 	c.s = c.s[res[5]:]
+	// fmt.Println("'" + c.s + "'")
 	return readUpToRepoOrGroup
 }
 
