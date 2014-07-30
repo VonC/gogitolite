@@ -37,11 +37,20 @@ func TestRead(t *testing.T) {
 	})
 
 	Convey("An reader can read groups", t, func() {
-		r := strings.NewReader("  @developers     =   dilbert alice wally  \nrepo ")
-		gtl, err := Read(r)
-		So(err, ShouldBeNil)
-		So(gtl.IsEmpty(), ShouldBeFalse)
-		So(gtl.NbGroup(), ShouldEqual, 1)
+		Convey("single group, followed by content", func() {
+			r := strings.NewReader("  @developers     =   dilbert alice wally  \nrepo ")
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbGroup(), ShouldEqual, 1)
+		})
+		Convey("single group, followed by no content", func() {
+			r := strings.NewReader("  @developers2  =   dilbert alice wally2")
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbGroup(), ShouldEqual, 1)
+		})
 	})
 
 	Convey("An group name must be [a-zA-Z0-9_-]", t, func() {
