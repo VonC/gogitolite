@@ -75,7 +75,7 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 			t = c.s.Text()
 		}
 	}
-	return nil, ParseError{msg: fmt.Sprintf("group or repo expected after line %v ('%v')", c.l, t)}
+	return nil, ParseError{msg: fmt.Sprintf("comment, group or repo expected at line %v ('%v')", c.l, t)}
 }
 
 var readRepoOrGroupRx = regexp.MustCompile(`^\s*?(repo |@)`)
@@ -84,7 +84,7 @@ func readRepoOrGroup(c *content) (stateFn, error) {
 	t := c.s.Text()
 	res := readRepoOrGroupRx.FindStringSubmatchIndex(t)
 	if res == nil {
-		return nil, ParseError{msg: fmt.Sprintf("group or repo expect after line %v ('%v')", c.l, t)}
+		return nil, ParseError{msg: fmt.Sprintf("group or repo expected after line %v ('%v')", c.l, t)}
 	}
 	prefix := t[res[2]:res[3]]
 	if prefix == "@" {

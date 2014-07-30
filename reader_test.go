@@ -17,6 +17,13 @@ func TestRead(t *testing.T) {
 		So(gtl.IsEmpty(), ShouldBeTrue)
 	})
 
+	Convey("If the content is not empty, it should declare a group or repo", t, func() {
+		r := strings.NewReader("  foobar")
+		gtl, err := Read(r)
+		So(gtl.IsEmpty(), ShouldBeTrue)
+		So(strings.Contains(err.Error(), ": group or repo expected"), ShouldBeTrue)
+	})
+
 	Convey("An reader can read groups", t, func() {
 		r := strings.NewReader("  @developers     =   dilbert alice wally  \nrepo ")
 		gtl, err := Read(r)
