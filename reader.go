@@ -64,6 +64,7 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 	for keepReading := true; keepReading; {
 		t := c.s.Text()
 		res := readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
+		//fmt.Println(res, ">'"+t+"'")
 		if res == nil {
 			return readRepoOrGroup, nil
 		}
@@ -90,12 +91,12 @@ func readRepoOrGroup(c *content) (stateFn, error) {
 	return nil, nil
 }
 
-var readGroupRx = regexp.MustCompile(`(?m)^@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
+var readGroupRx = regexp.MustCompile(`(?m)^\s*?@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
 
 func readGroup(c *content) (stateFn, error) {
 	t := c.s.Text()
 	res := readGroupRx.FindStringSubmatchIndex(t)
-	// fmt.Println(res, "'"+c.s+"'")
+	//fmt.Println(res, "'"+t+"'")
 	if len(res) == 0 {
 		return nil, ParseError{msg: fmt.Sprintf("Incorrect repo declaration at line %v ('%v')", c.l, t)}
 	}
@@ -105,6 +106,10 @@ func readGroup(c *content) (stateFn, error) {
 	grp := &Group{name: grpname, members: grpmembers}
 	c.gtl.groups = append(c.gtl.groups, grp)
 	// fmt.Println("'" + c.s + "'")
+	if !c.s.Scan() {
+		return nil, nil
+	}
+	c.l = c.l + 1
 	return readEmptyOrCommentLines, nil
 }
 
