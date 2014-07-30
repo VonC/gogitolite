@@ -61,19 +61,21 @@ func (pe ParseError) Error() string {
 var readEmptyOrCommentLinesRx = regexp.MustCompile(`(?m)^\s*?$|^\s*?#(.*?)$`)
 
 func readEmptyOrCommentLines(c *content) (stateFn, error) {
+	t := c.s.Text()
 	for keepReading := true; keepReading; {
-		t := c.s.Text()
 		res := readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">'"+t+"'")
 		if res == nil {
 			return readRepoOrGroup, nil
 		}
 		if !c.s.Scan() {
-			return nil, ParseError{msg: fmt.Sprintf("group or repo expected after line %v ('%v')", c.l, t)}
+			keepReading = false
+		} else {
+			c.l = c.l + 1
+			t = c.s.Text()
 		}
-		c.l = c.l + 1
 	}
-	return nil, nil
+	return nil, ParseError{msg: fmt.Sprintf("group or repo expected after line %v ('%v')", c.l, t)}
 }
 
 var readRepoOrGroupRx = regexp.MustCompile(`^\s*?(repo |@)`)
