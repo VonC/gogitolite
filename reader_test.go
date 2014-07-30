@@ -19,10 +19,21 @@ func TestRead(t *testing.T) {
 	})
 
 	Convey("If the content is not empty, it should declare a group or repo", t, func() {
-		r := strings.NewReader("  foobar")
-		gtl, err := Read(r)
-		So(gtl.IsEmpty(), ShouldBeTrue)
-		So(strings.Contains(err.Error(), ": group or repo expected"), ShouldBeTrue)
+
+		Convey("no comment, dummy content", func() {
+			r := strings.NewReader("  foobar")
+			gtl, err := Read(r)
+			So(gtl.IsEmpty(), ShouldBeTrue)
+			So(strings.Contains(err.Error(), ": group or repo expected"), ShouldBeTrue)
+		})
+
+		Convey("comments only, no content", func() {
+			r := strings.NewReader(" # foo\n# bar")
+			gtl, err := Read(r)
+			So(gtl.IsEmpty(), ShouldBeTrue)
+			So(strings.Contains(err.Error(), ": comment, group or repo expected"), ShouldBeTrue)
+		})
+
 	})
 
 	Convey("An reader can read groups", t, func() {
