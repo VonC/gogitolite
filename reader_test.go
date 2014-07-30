@@ -13,8 +13,9 @@ func TestRead(t *testing.T) {
 		gtl, _ := Read(nil)
 		So(gtl.IsEmpty(), ShouldBeTrue)
 		r := strings.NewReader("")
-		gtl, _ = Read(r)
+		gtl, err := Read(r)
 		So(gtl.IsEmpty(), ShouldBeTrue)
+		So(strings.Contains(err.Error(), ": comment, group or repo expected"), ShouldBeTrue)
 	})
 
 	Convey("If the content is not empty, it should declare a group or repo", t, func() {
@@ -36,6 +37,6 @@ func TestRead(t *testing.T) {
 		r := strings.NewReader("  @develop;ers     =   dilbert alice wally")
 		gtl, err := Read(r)
 		So(gtl.IsEmpty(), ShouldBeTrue)
-		So(err, ShouldNotBeNil)
+		So(strings.Contains(err.Error(), ": Incorrect repo declaration"), ShouldBeTrue)
 	})
 }
