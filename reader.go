@@ -1,9 +1,9 @@
 package gogitolite
 
 import (
+	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"regexp"
 	"strings"
 )
@@ -14,7 +14,8 @@ type Gitolite struct {
 }
 
 type content struct {
-	s   string
+	s   *bufio.Scanner
+	l   int
 	gtl *Gitolite
 }
 
@@ -32,11 +33,12 @@ func Read(r io.Reader) (*Gitolite, error) {
 	if r == nil {
 		return res, nil
 	}
-	s, _ := ioutil.ReadAll(r)
-	c := &content{s: string(s), gtl: res}
+	s := bufio.NewScanner(r)
+	s.Scan()
+	c := &content{s: s, gtl: res}
 	var state stateFn
 	var err error
-	for state, err = readUpToRepoOrGroup(c); state != nil && err == nil; {
+	for state, err = readEmptyOrCommentLines(c); state != nil && err == nil; {
 		state, err = state(c)
 	}
 	return res, err
@@ -56,16 +58,32 @@ func (pe ParseError) Error() string {
 	return fmt.Sprintf("Parse Error: %s", pe.msg)
 }
 
-var readUpToRepoOrGroupRx = regexp.MustCompile(`(^\s*?$|^\s*?#.*?$)*?^\s*?(repo |@)`)
+var readEmptyOrCommentLinesRx = regexp.MustCompile(`(?m)^\s*?$|^\s*?#(.*?)$`)
 
-func readUpToRepoOrGroup(c *content) (stateFn, error) {
-	res := readUpToRepoOrGroupRx.FindStringSubmatchIndex(c.s)
-	if res == nil {
-		return nil, nil
+func readEmptyOrCommentLines(c *content) (stateFn, error) {
+	for keepReading := true; keepReading; {
+		t := c.s.Text()
+		res := readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
+		if res == nil {
+			return readRepoOrGroup, nil
+		}
+		if !c.s.Scan() {
+			return nil, ParseError{msg: fmt.Sprintf("group or repo expected after line %v ('%v')", c.l, t)}
+		}
+		c.l = c.l + 1
 	}
-	// c.i = res[4]
-	prefix := c.s[res[4]:res[5]]
-	c.s = c.s[res[4]:]
+	return nil, nil
+}
+
+var readRepoOrGroupRx = regexp.MustCompile(`^\s*?(repo |@)`)
+
+func readRepoOrGroup(c *content) (stateFn, error) {
+	t := c.s.Text()
+	res := readRepoOrGroupRx.FindStringSubmatchIndex(t)
+	if res == nil {
+		return nil, ParseError{msg: fmt.Sprintf("group or repo expect after line %v ('%v')", c.l, t)}
+	}
+	prefix := t[res[2]:res[3]]
 	if prefix == "@" {
 		return readGroup, nil
 	}
@@ -75,19 +93,19 @@ func readUpToRepoOrGroup(c *content) (stateFn, error) {
 var readGroupRx = regexp.MustCompile(`(?m)^@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
 
 func readGroup(c *content) (stateFn, error) {
-	res := readGroupRx.FindStringSubmatchIndex(c.s)
+	t := c.s.Text()
+	res := readGroupRx.FindStringSubmatchIndex(t)
 	// fmt.Println(res, "'"+c.s+"'")
 	if len(res) == 0 {
-		return nil, ParseError{msg: "bad repo line"}
+		return nil, ParseError{msg: fmt.Sprintf("Incorrect repo declaration at line %v ('%v')", c.l, t)}
 	}
 	//fmt.Println(res, "'"+c.s+"'", "'"+c.s[res[2]:res[3]]+"'", "'"+c.s[res[4]:res[5]]+"'")
-	grpname := c.s[res[2]:res[3]]
-	grpmembers := strings.Split(strings.TrimSpace(c.s[res[4]:res[5]]), " ")
+	grpname := t[res[2]:res[3]]
+	grpmembers := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
 	grp := &Group{name: grpname, members: grpmembers}
 	c.gtl.groups = append(c.gtl.groups, grp)
-	c.s = c.s[res[5]:]
 	// fmt.Println("'" + c.s + "'")
-	return readUpToRepoOrGroup, nil
+	return readEmptyOrCommentLines, nil
 }
 
 // NbGroup returns the number of groups (people or repos)
