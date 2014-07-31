@@ -51,12 +51,12 @@ func TestRead(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbGroup(), ShouldEqual, 1)
 		})
+		Convey("An group name must be [a-zA-Z0-9_-]", func() {
+			r := strings.NewReader("  @develop;ers     =   dilbert alice wally")
+			gtl, err := Read(r)
+			So(gtl.IsEmpty(), ShouldBeTrue)
+			So(strings.Contains(err.Error(), ": Incorrect repo declaration"), ShouldBeTrue)
+		})
 	})
 
-	Convey("An group name must be [a-zA-Z0-9_-]", t, func() {
-		r := strings.NewReader("  @develop;ers     =   dilbert alice wally")
-		gtl, err := Read(r)
-		So(gtl.IsEmpty(), ShouldBeTrue)
-		So(strings.Contains(err.Error(), ": Incorrect repo declaration"), ShouldBeTrue)
-	})
 }
