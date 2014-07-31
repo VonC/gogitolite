@@ -64,6 +64,12 @@ func TestRead(t *testing.T) {
 			So(strings.Contains(err.Error(), ": Duplicate group name"), ShouldBeTrue)
 		})
 
+		Convey("An group element  must be unique", func() {
+			r := strings.NewReader("@grp1     =   elt1 elt2 elt1")
+			gtl, err := Read(r)
+			So(gtl.NbGroup(), ShouldEqual, 0)
+			So(strings.Contains(err.Error(), ": Duplicate group element name"), ShouldBeTrue)
+		})
 	})
 
 }

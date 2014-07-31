@@ -111,6 +111,16 @@ func readGroup(c *content) (stateFn, error) {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate group name '%v' at line %v ('%v')", grpname, c.l, t)}
 		}
 	}
+	// http://cats.groups.google.com.meowbify.com/forum/#!topic/golang-nuts/-pqkICuokio
+	//fmt.Printf("'%v'\n", grpmembers)
+	seen := map[string]bool{}
+	for _, val := range grpmembers {
+		if _, ok := seen[val]; !ok {
+			seen[val] = true
+		} else {
+			return nil, ParseError{msg: fmt.Sprintf("Duplicate group element name '%v' at line %v ('%v')", val, c.l, t)}
+		}
+	}
 	c.gtl.groups = append(c.gtl.groups, grp)
 	// fmt.Println("'" + c.s + "'")
 	if !c.s.Scan() {
