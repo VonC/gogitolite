@@ -106,6 +106,11 @@ func readGroup(c *content) (stateFn, error) {
 	grpname := t[res[2]:res[3]]
 	grpmembers := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
 	grp := &Group{name: grpname, members: grpmembers}
+	for _, g := range c.gtl.groups {
+		if g.name == grpname {
+			return nil, ParseError{msg: fmt.Sprintf("Duplicate group name '%v' at line %v ('%v')", grpname, c.l, t)}
+		}
+	}
 	c.gtl.groups = append(c.gtl.groups, grp)
 	// fmt.Println("'" + c.s + "'")
 	if !c.s.Scan() {

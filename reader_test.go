@@ -57,6 +57,13 @@ func TestRead(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeTrue)
 			So(strings.Contains(err.Error(), ": Incorrect repo declaration"), ShouldBeTrue)
 		})
+		Convey("An group name must be unique", func() {
+			r := strings.NewReader("  @grp1     =   el1 elt2\n @grp1     =   el4 elt5")
+			gtl, err := Read(r)
+			So(gtl.NbGroup(), ShouldEqual, 1)
+			So(strings.Contains(err.Error(), ": Duplicate group name"), ShouldBeTrue)
+		})
+
 	})
 
 }
