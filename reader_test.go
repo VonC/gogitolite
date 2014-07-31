@@ -38,7 +38,7 @@ func TestRead(t *testing.T) {
 
 	Convey("An reader can read groups", t, func() {
 		Convey("single group, followed by content", func() {
-			r := strings.NewReader("  @developers     =   dilbert alice wally  \nrepo ")
+			r := strings.NewReader("  @developers     =   dilbert alice wally  \n#comment ")
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -72,4 +72,13 @@ func TestRead(t *testing.T) {
 		})
 	})
 
+	Convey("An reader can read repos", t, func() {
+		Convey("single repo", func() {
+			r := strings.NewReader("  repo arepo1")
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 1)
+		})
+	})
 }

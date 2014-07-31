@@ -11,6 +11,7 @@ import (
 // Gitolite config decoded
 type Gitolite struct {
 	groups []*Group
+	repos  []*Repo
 }
 
 type content struct {
@@ -25,6 +26,11 @@ type stateFn func(*content) (stateFn, error)
 type Group struct {
 	name    string
 	members []string
+}
+
+// Repo (single or group name)
+type Repo struct {
+	name string
 }
 
 // Read a gitolite config file
@@ -46,7 +52,7 @@ func Read(r io.Reader) (*Gitolite, error) {
 
 // IsEmpty checks if config includes any repo or groups
 func (gtl *Gitolite) IsEmpty() bool {
-	return gtl.groups == nil || len(gtl.groups) == 0
+	return (gtl.groups == nil || len(gtl.groups) == 0) && (gtl.repos == nil || len(gtl.repos) == 0)
 }
 
 // ParseError indicates gitolite.conf parsing error
@@ -93,7 +99,7 @@ func readRepoOrGroup(c *content) (stateFn, error) {
 	if prefix == "@" {
 		return readGroup, nil
 	}
-	return nil, nil
+	return readRepo, nil
 }
 
 var readGroupRx = regexp.MustCompile(`(?m)^\s*?@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
@@ -136,4 +142,26 @@ func readGroup(c *content) (stateFn, error) {
 // NbGroup returns the number of groups (people or repos)
 func (gtl *Gitolite) NbGroup() int {
 	return len(gtl.groups)
+}
+
+// NbRepos returns the number of repos (single or groups)
+func (gtl *Gitolite) NbRepos() int {
+	return len(gtl.repos)
+}
+
+var readRepoRx = regexp.MustCompile(`(?m)^\s*?repo\s*?((?:@?[a-zA-Z0-9_-]+\s*?)+)$`)
+
+func readRepo(c *content) (stateFn, error) {
+	t := c.s.Text()
+	//fmt.Println(res, "'"+t+"'")
+	res := readRepoRx.FindStringSubmatchIndex(t)
+	if len(res) == 0 {
+		return nil, ParseError{msg: fmt.Sprintf("Incorrect repo declaration at line %v ('%v')", c.l, t)}
+	}
+	rpmembers := strings.Split(strings.TrimSpace(t[res[2]:res[3]]), " ")
+	for _, rpname := range rpmembers {
+		repo := &Repo{name: rpname}
+		c.gtl.repos = append(c.gtl.repos, repo)
+	}
+	return nil, nil
 }
