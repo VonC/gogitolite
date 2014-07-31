@@ -35,7 +35,7 @@ func Read(r io.Reader) (*Gitolite, error) {
 	}
 	s := bufio.NewScanner(r)
 	s.Scan()
-	c := &content{s: s, gtl: res}
+	c := &content{s: s, gtl: res, l: 1}
 	var state stateFn
 	var err error
 	for state, err = readEmptyOrCommentLines(c); state != nil && err == nil; {
