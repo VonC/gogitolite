@@ -86,5 +86,11 @@ func TestRead(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeTrue)
 			So(strings.Contains(err.Error(), ": Incorrect repo declaration"), ShouldBeTrue)
 		})
+		Convey("Repo names must be unique on one line", func() {
+			r := strings.NewReader("repo rep1 rep2 rep1")
+			gtl, err := Read(r)
+			So(gtl.IsEmpty(), ShouldBeTrue)
+			So(strings.Contains(err.Error(), ": Duplicate repo element name"), ShouldBeTrue)
+		})
 	})
 }

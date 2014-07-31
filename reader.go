@@ -159,6 +159,14 @@ func readRepo(c *content) (stateFn, error) {
 		return nil, ParseError{msg: fmt.Sprintf("Incorrect repo declaration at line %v ('%v')", c.l, t)}
 	}
 	rpmembers := strings.Split(strings.TrimSpace(t[res[2]:res[3]]), " ")
+	seen := map[string]bool{}
+	for _, val := range rpmembers {
+		if _, ok := seen[val]; !ok {
+			seen[val] = true
+		} else {
+			return nil, ParseError{msg: fmt.Sprintf("Duplicate repo element name '%v' at line %v ('%v')", val, c.l, t)}
+		}
+	}
 	for _, rpname := range rpmembers {
 		repo := &Repo{name: rpname}
 		c.gtl.repos = append(c.gtl.repos, repo)
