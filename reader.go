@@ -103,7 +103,7 @@ func readGroup(c *content) (stateFn, error) {
 	res := readGroupRx.FindStringSubmatchIndex(t)
 	//fmt.Println(res, "'"+t+"'")
 	if len(res) == 0 {
-		return nil, ParseError{msg: fmt.Sprintf("Incorrect repo declaration at line %v ('%v')", c.l, t)}
+		return nil, ParseError{msg: fmt.Sprintf("Incorrect group declaration at line %v ('%v')", c.l, t)}
 	}
 	//fmt.Println(res, "'"+c.s+"'", "'"+c.s[res[2]:res[3]]+"'", "'"+c.s[res[4]:res[5]]+"'")
 	grpname := t[res[2]:res[3]]
