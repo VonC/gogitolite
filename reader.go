@@ -75,7 +75,10 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 			t = c.s.Text()
 		}
 	}
-	return nil, ParseError{msg: fmt.Sprintf("comment, group or repo expected at line %v ('%v')", c.l, t)}
+	if c.gtl.IsEmpty() {
+		return nil, ParseError{msg: fmt.Sprintf("comment, group or repo expected at line %v ('%v')", c.l, t)}
+	}
+	return nil, nil
 }
 
 var readRepoOrGroupRx = regexp.MustCompile(`^\s*?(repo |@)`)
