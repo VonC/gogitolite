@@ -80,5 +80,11 @@ func TestRead(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 1)
 		})
+		Convey("Repo names must be [a-zA-Z0-9_-]", func() {
+			r := strings.NewReader("repo rep,1 rep2")
+			gtl, err := Read(r)
+			So(gtl.IsEmpty(), ShouldBeTrue)
+			So(strings.Contains(err.Error(), ": Incorrect repo declaration"), ShouldBeTrue)
+		})
 	})
 }
