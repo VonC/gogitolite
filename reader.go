@@ -67,7 +67,7 @@ func (pe ParseError) Error() string {
 var readEmptyOrCommentLinesRx = regexp.MustCompile(`(?m)^\s*?$|^\s*?#(.*?)$`)
 
 func readEmptyOrCommentLines(c *content) (stateFn, error) {
-	t := c.s.Text()
+	t := strings.TrimSpace(c.s.Text())
 	for keepReading := true; keepReading; {
 		res := readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">'"+t+"'")
@@ -78,7 +78,7 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 			keepReading = false
 		} else {
 			c.l = c.l + 1
-			t = c.s.Text()
+			t = strings.TrimSpace(c.s.Text())
 		}
 	}
 	if c.gtl.IsEmpty() {
@@ -90,7 +90,7 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 var readRepoOrGroupRx = regexp.MustCompile(`^\s*?(repo |@)`)
 
 func readRepoOrGroup(c *content) (stateFn, error) {
-	t := c.s.Text()
+	t := strings.TrimSpace(c.s.Text())
 	res := readRepoOrGroupRx.FindStringSubmatchIndex(t)
 	if res == nil {
 		return nil, ParseError{msg: fmt.Sprintf("group or repo expected after line %v ('%v')", c.l, t)}
@@ -105,7 +105,7 @@ func readRepoOrGroup(c *content) (stateFn, error) {
 var readGroupRx = regexp.MustCompile(`(?m)^\s*?@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
 
 func readGroup(c *content) (stateFn, error) {
-	t := c.s.Text()
+	t := strings.TrimSpace(c.s.Text())
 	res := readGroupRx.FindStringSubmatchIndex(t)
 	//fmt.Println(res, "'"+t+"'")
 	if len(res) == 0 {
@@ -152,7 +152,7 @@ func (gtl *Gitolite) NbRepos() int {
 var readRepoRx = regexp.MustCompile(`(?m)^\s*?repo\s*?((?:@?[a-zA-Z0-9_-]+\s*?)+)$`)
 
 func readRepo(c *content) (stateFn, error) {
-	t := c.s.Text()
+	t := strings.TrimSpace(c.s.Text())
 	//fmt.Println(res, "'"+t+"'")
 	res := readRepoRx.FindStringSubmatchIndex(t)
 	if len(res) == 0 {
