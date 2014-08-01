@@ -94,8 +94,8 @@ func TestRead(t *testing.T) {
 		})
 		Convey("Repo names can be part of a group", func() {
 			r := strings.NewReader(
-				`@grp1 rep1 rep2
-				 repo  rep1 rep2 rep1`)
+				`@grp1 = rep1 rep2
+				 repo  rep1 rep2 rep3`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
