@@ -173,3 +173,8 @@ func readRepo(c *content) (stateFn, error) {
 	}
 	return nil, nil
 }
+
+// NbGroupRepos returns the number of groups identified as repos
+func (gtl *Gitolite) NbGroupRepos() int {
+	return 1
+}

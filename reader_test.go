@@ -92,5 +92,13 @@ func TestRead(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeTrue)
 			So(strings.Contains(err.Error(), ": Duplicate repo element name"), ShouldBeTrue)
 		})
+		Convey("Repo names can be part of a group", func() {
+			r := strings.NewReader(
+				`@grp1 rep1 rep2
+				 repo  rep1 rep2 rep1`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.NbGroupRepos(), ShouldEqual, 1)
+		})
 	})
 }
