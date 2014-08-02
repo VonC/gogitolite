@@ -2,6 +2,7 @@ package gogitolite
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -10,8 +11,10 @@ import (
 
 // Gitolite config decoded
 type Gitolite struct {
-	groups []*Group
-	repos  []*Repo
+	groups       []*Group
+	repos        []*Repo
+	namesToGroup map[string]*Group
+	repoGroups   []*Group
 }
 
 type content struct {
@@ -24,9 +27,23 @@ type stateFn func(*content) (stateFn, error)
 
 // Group (of repo or resources, ie people)
 type Group struct {
-	name    string
-	members []string
+	name      string
+	members   []string
+	kind      Kind
+	container container
 }
+
+type container interface {
+	addReposGroup(grp *Group)
+}
+
+type Kind int
+
+const (
+	undefined = iota
+	members
+	repos
+)
 
 // Repo (single or group name)
 type Repo struct {
@@ -35,7 +52,7 @@ type Repo struct {
 
 // Read a gitolite config file
 func Read(r io.Reader) (*Gitolite, error) {
-	res := &Gitolite{}
+	res := &Gitolite{namesToGroup: make(map[string]*Group)}
 	if r == nil {
 		return res, nil
 	}
@@ -114,7 +131,7 @@ func readGroup(c *content) (stateFn, error) {
 	//fmt.Println(res, "'"+c.s+"'", "'"+c.s[res[2]:res[3]]+"'", "'"+c.s[res[4]:res[5]]+"'")
 	grpname := t[res[2]:res[3]]
 	grpmembers := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
-	grp := &Group{name: grpname, members: grpmembers}
+	grp := &Group{name: grpname, members: grpmembers, container: c.gtl}
 	for _, g := range c.gtl.groups {
 		if g.name == grpname {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate group name '%v' at line %v ('%v')", grpname, c.l, t)}
@@ -129,8 +146,10 @@ func readGroup(c *content) (stateFn, error) {
 		} else {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate group element name '%v' at line %v ('%v')", val, c.l, t)}
 		}
+		c.gtl.namesToGroup[val] = grp
 	}
 	c.gtl.groups = append(c.gtl.groups, grp)
+	c.gtl.namesToGroup[grpname] = grp
 	// fmt.Println("'" + c.s + "'")
 	if !c.s.Scan() {
 		return nil, nil
@@ -170,11 +189,31 @@ func readRepo(c *content) (stateFn, error) {
 	for _, rpname := range rpmembers {
 		repo := &Repo{name: rpname}
 		c.gtl.repos = append(c.gtl.repos, repo)
+		if grp, ok := c.gtl.namesToGroup[rpname]; ok {
+			if err := grp.markAsRepoGroup(); err != nil {
+				return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used member group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
+			}
+		}
 	}
 	return nil, nil
 }
 
+func (gtl *Gitolite) addReposGroup(grp *Group) {
+	gtl.repoGroups = append(gtl.repoGroups, grp)
+}
+
+func (grp *Group) markAsRepoGroup() error {
+	if grp.kind == members {
+		return errors.New(fmt.Sprintf("group '%v' is a member group, not a repo one", grp.name))
+	}
+	if grp.kind == undefined {
+		grp.kind = repos
+		grp.container.addReposGroup(grp)
+	}
+	return nil
+}
+
 // NbGroupRepos returns the number of groups identified as repos
 func (gtl *Gitolite) NbGroupRepos() int {
-	return 1
+	return len(gtl.repoGroups)
 }
