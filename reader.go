@@ -28,19 +28,20 @@ type stateFn func(*content) (stateFn, error)
 type Group struct {
 	name      string
 	members   []string
-	kind      Kind
+	kind      kind
 	container container
 }
 
 type container interface {
 	addReposGroup(grp *Group)
+	addUsersGroup(grp *Group)
 }
 
-type Kind int
+type kind int
 
 const (
 	undefined = iota
-	members
+	users
 	repos
 )
 
@@ -202,7 +203,7 @@ func (gtl *Gitolite) addReposGroup(grp *Group) {
 }
 
 func (grp *Group) markAsRepoGroup() error {
-	if grp.kind == members {
+	if grp.kind == users {
 		return fmt.Errorf("group '%v' is a users group, not a repo one", grp.name)
 	}
 	if grp.kind == undefined {
