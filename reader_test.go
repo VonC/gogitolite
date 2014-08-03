@@ -142,6 +142,7 @@ func TestRead(t *testing.T) {
 			So(strings.Contains(err.Error(), "already used user group at line"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 1)
+			So(gtl.NbGroupUsers(), ShouldEqual, 1)
 		})
 		Convey("A user name shouldn't be part of a repo group", func() {
 			r := strings.NewReader(
