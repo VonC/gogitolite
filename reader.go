@@ -2,7 +2,6 @@ package gogitolite
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -204,7 +203,7 @@ func (gtl *Gitolite) addReposGroup(grp *Group) {
 
 func (grp *Group) markAsRepoGroup() error {
 	if grp.kind == members {
-		return errors.New(fmt.Sprintf("group '%v' is a member group, not a repo one", grp.name))
+		return fmt.Errorf("group '%v' is a users group, not a repo one", grp.name)
 	}
 	if grp.kind == undefined {
 		grp.kind = repos
