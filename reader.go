@@ -270,6 +270,7 @@ func readRepoRules(c *content) (stateFn, error) {
 }
 
 func (grp *Group) markAsUserGroup() error {
+	//fmt.Printf("\nmarkAsUserGroup '%v'", grp)
 	if grp.kind == repos {
 		return fmt.Errorf("group '%v' is a repos group, not a user one", grp.name)
 	}
