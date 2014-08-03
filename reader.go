@@ -12,8 +12,11 @@ import (
 type Gitolite struct {
 	groups       []*Group
 	repos        []*Repo
+	users        []*User
 	namesToGroup map[string]*Group
 	repoGroups   []*Group
+	userGroups   []*Group
+	currentRepos []*Repo
 }
 
 type content struct {
@@ -186,16 +189,22 @@ func readRepo(c *content) (stateFn, error) {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate repo element name '%v' at line %v ('%v')", val, c.l, t)}
 		}
 	}
+	c.gtl.currentRepos = []*Repo{}
 	for _, rpname := range rpmembers {
 		repo := &Repo{name: rpname}
 		c.gtl.repos = append(c.gtl.repos, repo)
+		c.gtl.currentRepos = append(c.gtl.currentRepos, repo)
 		if grp, ok := c.gtl.namesToGroup[rpname]; ok {
 			if err := grp.markAsRepoGroup(); err != nil {
-				return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used member group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
+				return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used user group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
 			}
 		}
 	}
-	return nil, nil
+	if !c.s.Scan() {
+		return nil, nil
+	}
+	c.l = c.l + 1
+	return readRepoRules, nil
 }
 
 func (gtl *Gitolite) addReposGroup(grp *Group) {
@@ -216,4 +225,71 @@ func (grp *Group) markAsRepoGroup() error {
 // NbGroupRepos returns the number of groups identified as repos
 func (gtl *Gitolite) NbGroupRepos() int {
 	return len(gtl.repoGroups)
+}
+
+// User (or group of users)
+type User struct {
+	name string
+}
+
+// Rule (of access to repo)
+type Rule struct{}
+
+var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
+
+func readRepoRules(c *content) (stateFn, error) {
+	t := strings.TrimSpace(c.s.Text())
+	//fmt.Printf("readRepoRules '%v'\n", t)
+	//rules := []*Rule{}
+	for keepReading := true; keepReading; {
+		res := readRepoRuleRx.FindStringSubmatchIndex(t)
+		//fmt.Println(res, ">'"+t+"'")
+		if res == nil {
+			return readEmptyOrCommentLines, nil
+		}
+
+		users := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
+		for _, username := range users {
+			user := &User{name: username}
+			c.gtl.users = append(c.gtl.users, user)
+			if grp, ok := c.gtl.namesToGroup[username]; ok {
+				if err := grp.markAsUserGroup(); err != nil {
+					return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+				}
+			}
+		}
+
+		if !c.s.Scan() {
+			keepReading = false
+			return nil, nil
+		}
+		c.l = c.l + 1
+		t = strings.TrimSpace(c.s.Text())
+	}
+	return readEmptyOrCommentLines, nil
+}
+
+func (grp *Group) markAsUserGroup() error {
+	if grp.kind == repos {
+		return fmt.Errorf("group '%v' is a repos group, not a user one", grp.name)
+	}
+	if grp.kind == undefined {
+		grp.kind = users
+		grp.container.addUsersGroup(grp)
+	}
+	return nil
+}
+
+// NbUsers returns the number of users (single or groups)
+func (gtl *Gitolite) NbUsers() int {
+	return len(gtl.users)
+}
+
+// NbGroupUsers returns the number of groups identified as users
+func (gtl *Gitolite) NbGroupUsers() int {
+	return len(gtl.userGroups)
+}
+
+func (gtl *Gitolite) addUsersGroup(grp *Group) {
+	gtl.userGroups = append(gtl.userGroups, grp)
 }

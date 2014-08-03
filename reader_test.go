@@ -101,4 +101,16 @@ func TestRead(t *testing.T) {
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
 		})
 	})
+
+	Convey("An reader can read repo rules", t, func() {
+		Convey("single rule", func() {
+			r := strings.NewReader(
+				`repo arepo1
+				   RW+ = user1`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbUsers(), ShouldEqual, 1)
+		})
+	})
 }
