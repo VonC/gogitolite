@@ -129,4 +129,19 @@ func TestRead(t *testing.T) {
 			So(gtl.NbUsers(), ShouldEqual, 1)
 		})
 	})
+
+	Convey("An reader can read repo and users", t, func() {
+		Convey("A repo name shouldn't be part of a users group", func() {
+			r := strings.NewReader(
+				`@ausergrp = user1 user2 user3
+				 repo arepo1
+				   RW+ = user1
+				 repo user1`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(strings.Contains(err.Error(), "already used user group at line"), ShouldBeTrue)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbUsers(), ShouldEqual, 1)
+		})
+	})
 }
