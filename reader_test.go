@@ -154,5 +154,6 @@ func TestRead(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 1)
 		})
+
 	})
 }

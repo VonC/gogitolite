@@ -245,7 +245,7 @@ func readRepoRules(c *content) (stateFn, error) {
 		res := readRepoRuleRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">'"+t+"'")
 		if res == nil {
-			return readEmptyOrCommentLines, nil
+			break
 		}
 
 		users := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
