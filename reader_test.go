@@ -7,6 +7,22 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+/*
+# sample conf/gitolite.conf file
+
+@staff              =   dilbert alice           # groups
+@projects           =   foo bar
+
+repo @projects baz                              # repos
+    RW+             =   @staff                  # rules
+    -       master  =   ashok
+    RW              =   ashok
+    R               =   wally
+
+    option deny-rules           =   1           # options
+    config hooks.emailprefix    = '[%GL_REPO] ' # git-config
+*/
+
 func TestRead(t *testing.T) {
 
 	Convey("An empty reader means no repos", t, func() {
