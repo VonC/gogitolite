@@ -10,13 +10,14 @@ import (
 
 // Gitolite config decoded
 type Gitolite struct {
-	groups       []*Group
-	repos        []*Repo
-	users        []*User
-	namesToGroup map[string]*Group
-	repoGroups   []*Group
-	userGroups   []*Group
-	configs      []*Config
+	groups         []*Group
+	repos          []*Repo
+	users          []*User
+	namesToGroups  map[string][]*Group
+	repoGroups     []*Group
+	userGroups     []*Group
+	configs        []*Config
+	reposToConfigs map[string][]*Config
 }
 
 type content struct {
@@ -55,7 +56,7 @@ type Repo struct {
 
 // Read a gitolite config file
 func Read(r io.Reader) (*Gitolite, error) {
-	res := &Gitolite{namesToGroup: make(map[string]*Group)}
+	res := &Gitolite{namesToGroups: make(map[string][]*Group)}
 	if r == nil {
 		return res, nil
 	}
@@ -149,10 +150,10 @@ func readGroup(c *content) (stateFn, error) {
 		} else {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate group element name '%v' at line %v ('%v')", val, c.l, t)}
 		}
-		c.gtl.namesToGroup[val] = grp
+		c.gtl.namesToGroups[val] = append(c.gtl.namesToGroups[val], grp)
 	}
 	c.gtl.groups = append(c.gtl.groups, grp)
-	c.gtl.namesToGroup[grpname] = grp
+	c.gtl.namesToGroups[grpname] = append(c.gtl.namesToGroups[grpname], grp)
 	// fmt.Println("'" + c.s + "'")
 	if !c.s.Scan() {
 		return nil, nil
@@ -195,9 +196,11 @@ func readRepo(c *content) (stateFn, error) {
 		repo := &Repo{name: rpname}
 		c.gtl.repos = append(c.gtl.repos, repo)
 		config.repos = append(config.repos, repo)
-		if grp, ok := c.gtl.namesToGroup[rpname]; ok {
-			if err := grp.markAsRepoGroup(); err != nil {
-				return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used user group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
+		if grps, ok := c.gtl.namesToGroups[rpname]; ok {
+			for _, grp := range grps {
+				if err := grp.markAsRepoGroup(); err != nil {
+					return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used user group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
+				}
 			}
 		}
 	}
@@ -281,14 +284,20 @@ func readRepoRules(c *content) (stateFn, error) {
 			user := &User{name: username}
 			c.gtl.users = append(c.gtl.users, user)
 			rule.users = append(rule.users, user)
-			if grp, ok := c.gtl.namesToGroup[username]; ok {
-				if err := grp.markAsUserGroup(); err != nil {
-					return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+			if grps, ok := c.gtl.namesToGroups[username]; ok {
+				for _, grp := range grps {
+					if err := grp.markAsUserGroup(); err != nil {
+						return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+					}
 				}
 			}
 		}
 
 		config.rules = append(config.rules, rule)
+		for _, repo := range config.repos {
+
+			c.gtl.reposToConfigs[repo.name] = append(c.gtl.reposToConfigs[repo.name], config)
+		}
 
 		if !c.s.Scan() {
 			keepReading = false
@@ -324,4 +333,31 @@ func (gtl *Gitolite) NbGroupUsers() int {
 
 func (gtl *Gitolite) addUsersGroup(grp *Group) {
 	gtl.userGroups = append(gtl.userGroups, grp)
+}
+
+// Rules get all  rules for a given repo
+func (gtl *Gitolite) Rules(reponame string) ([]*Rule, error) {
+	var res []*Rule
+	res = append(res, gtl.rulesRepo(reponame)...)
+	if groups, ok := gtl.namesToGroups[reponame]; ok {
+		for _, group := range groups {
+			if group.kind != repos {
+				return nil, fmt.Errorf("repo name '%v' is part of a user group '%v', not a repo one", reponame, group)
+			}
+			for _, reponame := range group.members {
+				res = append(res, gtl.rulesRepo(reponame)...)
+			}
+		}
+	}
+	return res, nil
+}
+
+func (gtl *Gitolite) rulesRepo(name string) []*Rule {
+	var res []*Rule
+	if configs, ok := gtl.reposToConfigs[name]; ok {
+		for _, config := range configs {
+			res = append(res, config.rules...)
+		}
+	}
+	return res
 }

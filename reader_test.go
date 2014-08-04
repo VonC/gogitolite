@@ -149,8 +149,11 @@ func TestRead(t *testing.T) {
 			r := strings.NewReader(
 				`repo arepo1
 				   RW+ master = user1`)
-			_, err := Read(r)
+			gtl, err := Read(r)
 			So(err, ShouldBeNil)
+			rules, err := gtl.Rules("arepo1")
+			So(err, ShouldBeNil)
+			So(rules[0], ShouldEqual, "e")
 		})
 
 	})
