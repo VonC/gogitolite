@@ -153,7 +153,8 @@ func TestRead(t *testing.T) {
 			So(err, ShouldBeNil)
 			rules, err := gtl.Rules("arepo1")
 			So(err, ShouldBeNil)
-			So(rules[0], ShouldEqual, "e")
+			So(len(rules), ShouldEqual, 1)
+			So(rules[0].String(), ShouldEqual, "RW+ master user1")
 		})
 
 	})

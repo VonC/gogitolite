@@ -56,7 +56,7 @@ type Repo struct {
 
 // Read a gitolite config file
 func Read(r io.Reader) (*Gitolite, error) {
-	res := &Gitolite{namesToGroups: make(map[string][]*Group)}
+	res := &Gitolite{namesToGroups: make(map[string][]*Group), reposToConfigs: make(map[string][]*Config)}
 	if r == nil {
 		return res, nil
 	}
@@ -304,7 +304,9 @@ func readRepoRules(c *content) (stateFn, error) {
 
 		config.rules = append(config.rules, rule)
 		for _, repo := range config.repos {
-
+			if _, ok := c.gtl.reposToConfigs[repo.name]; !ok {
+				c.gtl.reposToConfigs[repo.name] = []*Config{}
+			}
 			c.gtl.reposToConfigs[repo.name] = append(c.gtl.reposToConfigs[repo.name], config)
 		}
 
