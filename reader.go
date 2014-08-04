@@ -250,8 +250,17 @@ type Rule struct {
 	users  []*User
 }
 
+func (r *Rule) String() string {
+	users := ""
+	for _, user := range r.users {
+		users = " " + user.name
+	}
+	users = strings.TrimSpace(users)
+	return fmt.Sprintf("%v %v %v", r.access, r.param, users)
+}
+
 var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
-var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?(\s[a-zA-Z0-9_.-/]+)?$`)
+var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?(?:\s([a-zA-Z0-9_.-/]+))?$`)
 
 func readRepoRules(c *content) (stateFn, error) {
 	t := strings.TrimSpace(c.s.Text())
