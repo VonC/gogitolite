@@ -123,7 +123,7 @@ func readRepoOrGroup(c *content) (stateFn, error) {
 	return readRepo, nil
 }
 
-var readGroupRx = regexp.MustCompile(`(?m)^\s*?@([a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
+var readGroupRx = regexp.MustCompile(`(?m)^\s*?(@[a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
 
 func readGroup(c *content) (stateFn, error) {
 	t := strings.TrimSpace(c.s.Text())
@@ -193,15 +193,27 @@ func readRepo(c *content) (stateFn, error) {
 	config := &Config{repos: []*Repo{}}
 	c.gtl.configs = append(c.gtl.configs, config)
 	for _, rpname := range rpmembers {
-		repo := &Repo{name: rpname}
-		c.gtl.repos = append(c.gtl.repos, repo)
-		config.repos = append(config.repos, repo)
-		if grps, ok := c.gtl.namesToGroups[rpname]; ok {
-			for _, grp := range grps {
-				if err := grp.markAsRepoGroup(); err != nil {
-					return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used user group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
+		if !strings.HasPrefix(rpname, "@") {
+			repo := &Repo{name: rpname}
+			c.gtl.repos = append(c.gtl.repos, repo)
+			config.repos = append(config.repos, repo)
+			if grps, ok := c.gtl.namesToGroups[rpname]; ok {
+				for _, grp := range grps {
+					if err := grp.markAsRepoGroup(); err != nil {
+						return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used user group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
+					}
 				}
 			}
+		} else {
+			group := &Group{name: rpname, container: c.gtl}
+			for _, g := range c.gtl.groups {
+				if g.name == group.name {
+					group = g
+					break
+				}
+			}
+			fmt.Printf("\n%v\n", group)
+			group.markAsRepoGroup()
 		}
 	}
 	if !c.s.Scan() {
