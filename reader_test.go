@@ -157,6 +157,19 @@ func TestRead(t *testing.T) {
 			So(rules[0].String(), ShouldEqual, "RW+ master user1")
 		})
 
+		Convey("Access rule can reference a group of repos", func() {
+			r := strings.NewReader(
+				`@grp1 = rep1 rep2
+				repo @grp1
+				   RW+ master = user11`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			rules, err := gtl.Rules("rep1")
+			So(err, ShouldBeNil)
+			So(len(rules), ShouldEqual, 1)
+			So(rules[0].String(), ShouldEqual, "RW+ master user11")
+		})
+
 	})
 
 	Convey("An reader can read repo and users", t, func() {
