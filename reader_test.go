@@ -144,6 +144,15 @@ func TestRead(t *testing.T) {
 			_, err := Read(r)
 			So(strings.Contains(err.Error(), ": Incorrect access rule"), ShouldBeTrue)
 		})
+
+		Convey("Access rule can have a param", func() {
+			r := strings.NewReader(
+				`repo arepo1
+				   RW+ master = user1`)
+			_, err := Read(r)
+			So(err, ShouldBeNil)
+		})
+
 	})
 
 	Convey("An reader can read repo and users", t, func() {
