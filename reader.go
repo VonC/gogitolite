@@ -248,7 +248,7 @@ type Rule struct {
 }
 
 var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
-var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?([a-zA-Z0-9_.-/]+)?$`)
+var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?(\s[a-zA-Z0-9_.-/]+)?$`)
 
 func readRepoRules(c *content) (stateFn, error) {
 	t := strings.TrimSpace(c.s.Text())
@@ -269,7 +269,7 @@ func readRepoRules(c *content) (stateFn, error) {
 		respre := repoRulePreRx.FindStringSubmatchIndex(pre)
 		//fmt.Printf("\nrespre='%v' for '%v'\n", respre, pre)
 		if respre == nil {
-			return nil, ParseError{msg: fmt.Sprintf("Incorrect rule '%v' at line %v ('%v')", pre, c.l, t)}
+			return nil, ParseError{msg: fmt.Sprintf("Incorrect access rule '%v' at line %v ('%v')", pre, c.l, t)}
 		}
 		rule.access = pre[respre[2]:respre[3]]
 		if respre[4] > -1 {

@@ -128,6 +128,22 @@ func TestRead(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 1)
 		})
+
+		Convey("Access rule must be well formed: RW+- only", func() {
+			r := strings.NewReader(
+				`repo arepo1
+				   RW+a = user1`)
+			_, err := Read(r)
+			So(strings.Contains(err.Error(), ": Incorrect access rule"), ShouldBeTrue)
+		})
+
+		Convey("Access rule must be well formed: data alphanum only", func() {
+			r := strings.NewReader(
+				`repo arepo1
+				   RW+ a,b = user1`)
+			_, err := Read(r)
+			So(strings.Contains(err.Error(), ": Incorrect access rule"), ShouldBeTrue)
+		})
 	})
 
 	Convey("An reader can read repo and users", t, func() {
