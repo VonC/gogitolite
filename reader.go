@@ -16,7 +16,7 @@ type Gitolite struct {
 	namesToGroup map[string]*Group
 	repoGroups   []*Group
 	userGroups   []*Group
-	currentRepos []*Repo
+	configs      []*Config
 }
 
 type content struct {
@@ -189,11 +189,12 @@ func readRepo(c *content) (stateFn, error) {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate repo element name '%v' at line %v ('%v')", val, c.l, t)}
 		}
 	}
-	c.gtl.currentRepos = []*Repo{}
+	config := &Config{repos: []*Repo{}}
+	c.gtl.configs = append(c.gtl.configs, config)
 	for _, rpname := range rpmembers {
 		repo := &Repo{name: rpname}
 		c.gtl.repos = append(c.gtl.repos, repo)
-		c.gtl.currentRepos = append(c.gtl.currentRepos, repo)
+		config.repos = append(config.repos, repo)
 		if grp, ok := c.gtl.namesToGroup[rpname]; ok {
 			if err := grp.markAsRepoGroup(); err != nil {
 				return nil, ParseError{msg: fmt.Sprintf("repo name '%v' already used user group at line %v ('%v')\n%v", rpname, c.l, t, err.Error())}
@@ -232,15 +233,28 @@ type User struct {
 	name string
 }
 
+// Config for repos with access rules
+type Config struct {
+	repos []*Repo
+	rules []*Rule
+	desc  string
+}
+
 // Rule (of access to repo)
-type Rule struct{}
+type Rule struct {
+	access string
+	param  string
+	users  []*User
+}
 
 var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
+var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?([a-zA-Z0-9_.-/]+)?$`)
 
 func readRepoRules(c *content) (stateFn, error) {
 	t := strings.TrimSpace(c.s.Text())
 	//fmt.Printf("readRepoRules '%v'\n", t)
 	//rules := []*Rule{}
+	config := c.gtl.configs[len(c.gtl.configs)-1]
 	for keepReading := true; keepReading; {
 		res := readRepoRuleRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">'"+t+"'")
@@ -248,16 +262,33 @@ func readRepoRules(c *content) (stateFn, error) {
 			break
 		}
 
-		users := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
+		rule := &Rule{}
+		pre := strings.TrimSpace(t[res[2]:res[3]])
+		post := strings.TrimSpace(t[res[4]:res[5]])
+
+		respre := repoRulePreRx.FindStringSubmatchIndex(pre)
+		//fmt.Printf("\nrespre='%v' for '%v'\n", respre, pre)
+		if respre == nil {
+			return nil, ParseError{msg: fmt.Sprintf("Incorrect rule '%v' at line %v ('%v')", pre, c.l, t)}
+		}
+		rule.access = pre[respre[2]:respre[3]]
+		if respre[4] > -1 {
+			rule.param = pre[respre[4]:respre[5]]
+		}
+
+		users := strings.Split(post, " ")
 		for _, username := range users {
 			user := &User{name: username}
 			c.gtl.users = append(c.gtl.users, user)
+			rule.users = append(rule.users, user)
 			if grp, ok := c.gtl.namesToGroup[username]; ok {
 				if err := grp.markAsUserGroup(); err != nil {
 					return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
 				}
 			}
 		}
+
+		config.rules = append(config.rules, rule)
 
 		if !c.s.Scan() {
 			keepReading = false
