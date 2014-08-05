@@ -322,9 +322,9 @@ func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer)
 	}
 	if repo == nil {
 		repo = &Repo{name: rpname}
-	}
-	if rc != allReposCtn {
-		allReposCtn.addRepo(repo)
+		if rc != allReposCtn {
+			allReposCtn.addRepo(repo)
+		}
 	}
 	seen := false
 	for _, arepo := range rc.getRepos() {
