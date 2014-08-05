@@ -96,22 +96,8 @@ func (gtl *Gitolite) String() string {
 	}
 	res = res + "]\n"
 
-	res = res + fmt.Sprintf("NbRepos: %v [", len(gtl.repos))
-	for i, repo := range gtl.repos {
-		if i > 1 {
-			res = res + ", "
-		}
-		res = res + repo.name
-	}
-	res = res + "]\n"
-	res = res + fmt.Sprintf("NbUsers: %v [", len(gtl.users))
-	for i, user := range gtl.users {
-		if i > 1 {
-			res = res + ", "
-		}
-		res = res + user.name
-	}
-	res = res + "]\n"
+	res = res + fmt.Sprintf("NbRepos: %v %+v\n", len(gtl.repos), gtl.repos)
+	res = res + fmt.Sprintf("NbUsers: %v %+v\n", len(gtl.users), gtl.users)
 	res = res + fmt.Sprintf("NbUserGroups: %v [", len(gtl.userGroups))
 	for i, usergrp := range gtl.userGroups {
 		if i > 1 {
@@ -299,6 +285,13 @@ func readRepo(c *content) (stateFn, error) {
 	}
 	c.l = c.l + 1
 	return readRepoRules, nil
+}
+
+func (r *Repo) String() string {
+	return fmt.Sprintf("repo '%v'", r.name)
+}
+func (u *User) String() string {
+	return fmt.Sprintf("user '%v'", u.name)
 }
 
 type repoContainer interface {
