@@ -89,7 +89,7 @@ func (gtl *Gitolite) String() string {
 
 	res = res + fmt.Sprintf("NbRepoGroups: %v [", len(gtl.repoGroups))
 	for i, repogrp := range gtl.repoGroups {
-		if i > 1 {
+		if i > 0 {
 			res = res + ", "
 		}
 		res = res + repogrp.name
@@ -122,7 +122,7 @@ func (gtl *Gitolite) String() string {
 	res = res + "]\n"
 	res = res + fmt.Sprintf("NbConfigs: %v [", len(gtl.configs))
 	for i, config := range gtl.configs {
-		if i > 1 {
+		if i > 0 {
 			res = res + ", "
 		}
 		res = res + config.String()
