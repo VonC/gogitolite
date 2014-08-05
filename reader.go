@@ -36,6 +36,11 @@ type Group struct {
 	container container
 }
 
+func (g *Group) String() string {
+	res := fmt.Sprintf("group '%v'(%v): %+v", g.name, g.kind, g.members)
+	return res
+}
+
 type container interface {
 	addReposGroup(grp *Group)
 	addUsersGroup(grp *Group)
@@ -68,7 +73,73 @@ func Read(r io.Reader) (*Gitolite, error) {
 	for state, err = readEmptyOrCommentLines(c); state != nil && err == nil; {
 		state, err = state(c)
 	}
+	fmt.Printf("\nGitolite res='%v'\n", res)
 	return res, err
+}
+
+func (gtl *Gitolite) String() string {
+	res := fmt.Sprintf("NbGroups: %v [", len(gtl.groups))
+	for i, group := range gtl.groups {
+		if i > 1 {
+			res = res + ", "
+		}
+		res = res + group.name
+	}
+	res = res + "]\n"
+
+	res = res + fmt.Sprintf("NbRepoGroups: %v [", len(gtl.repoGroups))
+	for i, repogrp := range gtl.repoGroups {
+		if i > 1 {
+			res = res + ", "
+		}
+		res = res + repogrp.name
+	}
+	res = res + "]\n"
+
+	res = res + fmt.Sprintf("NbRepos: %v [", len(gtl.repos))
+	for i, repo := range gtl.repos {
+		if i > 1 {
+			res = res + ", "
+		}
+		res = res + repo.name
+	}
+	res = res + "]\n"
+	res = res + fmt.Sprintf("NbUsers: %v [", len(gtl.users))
+	for i, user := range gtl.users {
+		if i > 1 {
+			res = res + ", "
+		}
+		res = res + user.name
+	}
+	res = res + "]\n"
+	res = res + fmt.Sprintf("NbUserGroups: %v [", len(gtl.userGroups))
+	for i, usergrp := range gtl.userGroups {
+		if i > 1 {
+			res = res + ", "
+		}
+		res = res + usergrp.name
+	}
+	res = res + "]\n"
+	res = res + fmt.Sprintf("NbConfigs: %v [", len(gtl.configs))
+	for i, config := range gtl.configs {
+		if i > 1 {
+			res = res + ", "
+		}
+		res = res + config.String()
+	}
+	res = res + "]\n"
+	res = res + fmt.Sprintf("namesToGroups: %v [", len(gtl.namesToGroups))
+	first := true
+	for name, groups := range gtl.namesToGroups {
+		if !first {
+			res = res + ", "
+		}
+		first = false
+		res = res + fmt.Sprintf("%v => %+v", name, groups)
+	}
+	res = res + "]\n"
+
+	return res
 }
 
 // IsEmpty checks if config includes any repo or groups
@@ -253,6 +324,11 @@ type Config struct {
 	repos []*Repo
 	rules []*Rule
 	desc  string
+}
+
+func (cfg *Config) String() string {
+	res := fmt.Sprintf("config %+v => %+v", cfg.repos, cfg.rules)
+	return res
 }
 
 // Rule (of access to repo)
