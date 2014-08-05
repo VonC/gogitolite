@@ -265,9 +265,8 @@ func readRepo(c *content) (stateFn, error) {
 	c.gtl.configs = append(c.gtl.configs, config)
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
-			repo := &Repo{name: rpname}
-			c.gtl.repos = append(c.gtl.repos, repo)
-			config.repos = append(config.repos, repo)
+			addRepoFromName(c.gtl, rpname, c.gtl)
+			addRepoFromName(config, rpname, c.gtl)
 			if grps, ok := c.gtl.namesToGroups[rpname]; ok {
 				for _, grp := range grps {
 					if err := grp.markAsRepoGroup(); err != nil {
@@ -276,17 +275,25 @@ func readRepo(c *content) (stateFn, error) {
 				}
 			}
 		} else {
-			group := &Group{name: rpname, container: c.gtl}
+			var group *Group
 			for _, g := range c.gtl.groups {
-				if g.name == group.name {
+				if g.name == rpname {
 					group = g
 					break
 				}
 			}
+			if group == nil {
+				return nil, ParseError{msg: fmt.Sprintf("repo group name '%v' undefined at line %v ('%v')", rpname, c.l, t)}
+			}
 			fmt.Printf("\n%v\n", group)
 			group.markAsRepoGroup()
+			for _, rpname := range group.members {
+				addRepoFromName(c.gtl, rpname, c.gtl)
+				addRepoFromName(config, rpname, c.gtl)
+			}
 		}
 	}
+
 	if !c.s.Scan() {
 		return nil, nil
 	}
@@ -294,8 +301,56 @@ func readRepo(c *content) (stateFn, error) {
 	return readRepoRules, nil
 }
 
+type repoContainer interface {
+	getRepos() []*Repo
+	addRepo(repo *Repo)
+}
+
+func (gtl *Gitolite) getRepos() []*Repo {
+	return gtl.repos
+}
+func (gtl *Gitolite) addRepo(repo *Repo) {
+	gtl.repos = append(gtl.repos, repo)
+}
+
+func (cfg *Config) getRepos() []*Repo {
+	return cfg.repos
+}
+func (cfg *Config) addRepo(repo *Repo) {
+	cfg.repos = append(cfg.repos, repo)
+}
+
+func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer) {
+	var repo *Repo
+	for _, r := range allReposCtn.getRepos() {
+		if r.name == rpname {
+			repo = r
+		}
+	}
+	if repo == nil {
+		repo = &Repo{name: rpname}
+	}
+	if rc != allReposCtn {
+		allReposCtn.addRepo(repo)
+	}
+	seen := false
+	for _, arepo := range rc.getRepos() {
+		if arepo.name == repo.name {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		rc.addRepo(repo)
+	}
+
+}
+
 func (gtl *Gitolite) addReposGroup(grp *Group) {
 	gtl.repoGroups = append(gtl.repoGroups, grp)
+	for _, reponame := range grp.members {
+		addRepoFromName(gtl, reponame, gtl)
+	}
 }
 
 func (grp *Group) markAsRepoGroup() error {
