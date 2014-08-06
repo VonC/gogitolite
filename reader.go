@@ -453,7 +453,16 @@ func readRepoRules(c *content) (stateFn, error) {
 			if _, ok := c.gtl.reposToConfigs[repo.name]; !ok {
 				c.gtl.reposToConfigs[repo.name] = []*Config{}
 			}
-			c.gtl.reposToConfigs[repo.name] = append(c.gtl.reposToConfigs[repo.name], config)
+			seen := false
+			for _, aconfig := range c.gtl.reposToConfigs[repo.name] {
+				if aconfig == config {
+					seen = true
+					break
+				}
+			}
+			if !seen {
+				c.gtl.reposToConfigs[repo.name] = append(c.gtl.reposToConfigs[repo.name], config)
+			}
 		}
 
 		if !c.s.Scan() {
