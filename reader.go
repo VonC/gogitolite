@@ -80,7 +80,7 @@ func Read(r io.Reader) (*Gitolite, error) {
 func (gtl *Gitolite) String() string {
 	res := fmt.Sprintf("NbGroups: %v [", len(gtl.groups))
 	for i, group := range gtl.groups {
-		if i > 1 {
+		if i > 0 {
 			res = res + ", "
 		}
 		res = res + group.name
@@ -100,7 +100,7 @@ func (gtl *Gitolite) String() string {
 	res = res + fmt.Sprintf("NbUsers: %v %+v\n", len(gtl.users), gtl.users)
 	res = res + fmt.Sprintf("NbUserGroups: %v [", len(gtl.userGroups))
 	for i, usergrp := range gtl.userGroups {
-		if i > 1 {
+		if i > 0 {
 			res = res + ", "
 		}
 		res = res + usergrp.name
