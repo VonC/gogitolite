@@ -505,16 +505,6 @@ func (gtl *Gitolite) addUsersGroup(grp *Group) {
 func (gtl *Gitolite) Rules(reponame string) ([]*Rule, error) {
 	var res []*Rule
 	res = append(res, gtl.rulesRepo(reponame)...)
-	if groups, ok := gtl.namesToGroups[reponame]; ok {
-		for _, group := range groups {
-			if group.kind != repos {
-				return nil, fmt.Errorf("repo name '%v' is part of a user group '%v', not a repo one", reponame, group)
-			}
-			for _, reponame := range group.members {
-				res = append(res, gtl.rulesRepo(reponame)...)
-			}
-		}
-	}
 	return res, nil
 }
 
