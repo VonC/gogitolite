@@ -73,7 +73,7 @@ func Read(r io.Reader) (*Gitolite, error) {
 	for state, err = readEmptyOrCommentLines(c); state != nil && err == nil; {
 		state, err = state(c)
 	}
-	fmt.Printf("\nGitolite res='%v'\n", res)
+	//fmt.Printf("\nGitolite res='%v'\n", res)
 	return res, err
 }
 
@@ -281,7 +281,7 @@ func readRepo(c *content) (stateFn, error) {
 			if group == nil {
 				return nil, ParseError{msg: fmt.Sprintf("repo group name '%v' undefined at line %v ('%v')", rpname, c.l, t)}
 			}
-			fmt.Printf("\n%v\n", group)
+			//fmt.Printf("\n%v\n", group)
 			group.markAsRepoGroup()
 			for _, rpname := range group.members {
 				addRepoFromName(c.gtl, rpname, c.gtl)
@@ -515,6 +515,6 @@ func (gtl *Gitolite) rulesRepo(reponame string) []*Rule {
 			res = append(res, config.rules...)
 		}
 	}
-	fmt.Printf("\nrulesRepo for rpname '%v': %v\n", reponame, res)
+	//fmt.Printf("\nrulesRepo for rpname '%v': %v\n", reponame, res)
 	return res
 }
