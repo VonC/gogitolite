@@ -124,6 +124,16 @@ func (gtl *Gitolite) String() string {
 		res = res + fmt.Sprintf("%v => %+v", name, groups)
 	}
 	res = res + "]\n"
+	res = res + fmt.Sprintf("reposToConfigs: %v [", len(gtl.reposToConfigs))
+	first = true
+	for reponame, config := range gtl.reposToConfigs {
+		if !first {
+			res = res + ", "
+		}
+		first = false
+		res = res + fmt.Sprintf("%v => %+v", reponame, config)
+	}
+	res = res + "]\n"
 
 	return res
 }
