@@ -508,12 +508,13 @@ func (gtl *Gitolite) Rules(reponame string) ([]*Rule, error) {
 	return res, nil
 }
 
-func (gtl *Gitolite) rulesRepo(name string) []*Rule {
+func (gtl *Gitolite) rulesRepo(reponame string) []*Rule {
 	var res []*Rule
-	if configs, ok := gtl.reposToConfigs[name]; ok {
+	if configs, ok := gtl.reposToConfigs[reponame]; ok {
 		for _, config := range configs {
 			res = append(res, config.rules...)
 		}
 	}
+	fmt.Printf("\nrulesRepo for rpname '%v': %v\n", reponame, res)
 	return res
 }
