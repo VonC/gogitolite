@@ -198,6 +198,17 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(rules[0].String(), ShouldEqual, "RW+ dev user21")
 		})
 
+		Convey("undefined group", func() {
+			r := strings.NewReader(
+				`repo @grp1
+					   RW+ = user1`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(strings.Contains(err.Error(), ": repo group name"), ShouldBeTrue)
+			So(gtl.IsEmpty(), ShouldBeTrue)
+			So(gtl.NbUsers(), ShouldEqual, 0)
+		})
+
 	})
 
 	Convey("An reader can read repo and users", t, func() {
