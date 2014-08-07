@@ -274,8 +274,8 @@ func readRepo(c *content) (stateFn, error) {
 	c.gtl.configs = append(c.gtl.configs, config)
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
-			addRepoFromName(c.gtl, rpname, c.gtl)
 			addRepoFromName(config, rpname, c.gtl)
+			addRepoFromName(c.gtl, rpname, c.gtl)
 			if grps, ok := c.gtl.namesToGroups[rpname]; ok {
 				for _, grp := range grps {
 					if err := grp.markAsRepoGroup(); err != nil {

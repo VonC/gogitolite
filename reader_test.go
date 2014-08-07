@@ -208,6 +208,16 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(gtl.IsEmpty(), ShouldBeTrue)
 			So(gtl.NbUsers(), ShouldEqual, 0)
 		})
+		Convey("undefined repo used in group", func() {
+			r := strings.NewReader(
+				`@grp1 = rep1
+				repo @grp1 rep2
+					   RW+ = user1`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 2)
+		})
 
 	})
 
