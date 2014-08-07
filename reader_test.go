@@ -160,14 +160,28 @@ func TestRead(t *testing.T) {
 		Convey("Access rule can reference a group of repos", func() {
 			r := strings.NewReader(
 				`@grp1 = rep1 rep2
+				@grp2 = rep1 rep3
+				@usr1 = user11
+				@usr2 = user12
 				repo @grp1
-				   RW+ master = user11`)
+				   RW+ master = user11
+				repo @grp2
+				   RW+ dev = user12`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			rules, err := gtl.Rules("rep1")
 			So(err, ShouldBeNil)
-			So(len(rules), ShouldEqual, 1)
+			So(len(rules), ShouldEqual, 2)
 			So(rules[0].String(), ShouldEqual, "RW+ master user11")
+			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@grp1, @grp2, @usr1, @usr2]
+NbRepoGroups: 2 [@grp1, @grp2]
+NbRepos: 3 [repo 'rep1' repo 'rep2' repo 'rep3']
+NbUsers: 2 [user 'user11' user 'user12']
+NbUserGroups: 2 [@usr1, @usr2]
+NbConfigs: 2 [config [repo 'rep1' repo 'rep2'] => [RW+ master user11], config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]]
+namesToGroups: 9 [@grp1 => [group '@grp1'(2): [rep1 rep2]], @grp2 => [group '@grp2'(2): [rep1 rep3]], @usr1 => [group '@usr1'(1): [user11]], @usr2 => [group '@usr2'(1): [user12]], rep1 => [group '@grp1'(2): [rep1 rep2] group '@grp2'(2): [rep1 rep3]], rep2 => [group '@grp1'(2): [rep1 rep2]], rep3 => [group '@grp2'(2): [rep1 rep3]], user11 => [group '@usr1'(1): [user11]], user12 => [group '@usr2'(1): [user12]]]
+reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user11] config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]], rep2 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user11]], rep3 => [config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]]]
+`)
 		})
 
 		Convey("Access rules can reference a group of repos", func() {

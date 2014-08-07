@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -115,8 +116,14 @@ func (gtl *Gitolite) String() string {
 	}
 	res = res + "]\n"
 	res = res + fmt.Sprintf("namesToGroups: %v [", len(gtl.namesToGroups))
+	names := make([]string, 0, len(gtl.namesToGroups))
+	for i := range gtl.namesToGroups {
+		names = append(names, i)
+	}
+	sort.Strings(names)
 	first := true
-	for name, groups := range gtl.namesToGroups {
+	for _, name := range names {
+		groups := gtl.namesToGroups[name]
 		if !first {
 			res = res + ", "
 		}
@@ -125,8 +132,14 @@ func (gtl *Gitolite) String() string {
 	}
 	res = res + "]\n"
 	res = res + fmt.Sprintf("reposToConfigs: %v [", len(gtl.reposToConfigs))
+	reponames := make([]string, 0, len(gtl.reposToConfigs))
+	for i := range gtl.reposToConfigs {
+		reponames = append(reponames, i)
+	}
+	sort.Strings(reponames)
 	first = true
-	for reponame, config := range gtl.reposToConfigs {
+	for _, reponame := range reponames {
+		config := gtl.reposToConfigs[reponame]
 		if !first {
 			res = res + ", "
 		}
