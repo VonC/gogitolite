@@ -248,27 +248,4 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 		})
 
 	})
-
-	/*
-			@project = module1 module2
-
-			repo gitolite-admin
-		      RW+     =   gitoliteadm @almadmins
-		      RW                                = projectowner
-		      RW VREF/NAME/conf/subs/project    = projectowner
-		      -  VREF/NAME/                     = projectowner
-
-		    repo module1
-		      desc = module1 repo for repos group project1
-		      RW+ = projectowner @almadmins
-
-		    subconf "subs/*.conf"
-
-		    more subs/project.conf
-
-		    repo @project
-		      RW = projectowner @almadmins
-		      RW = otheruser1 otheruser2...
-
-	*/
 }
