@@ -459,10 +459,10 @@ func (r *Rule) String() string {
 		users = " " + user.name
 	}
 	users = strings.TrimSpace(users)
-	return fmt.Sprintf("%v %v %v", r.access, r.param, users)
+	return strings.TrimSpace(fmt.Sprintf("%v %v %v", r.access, r.param, users))
 }
 
-var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
+var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:@?[a-zA-Z0-9_-]+\s*?)+)$`)
 var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?(?:\s([a-zA-Z0-9_.-/]+))?$`)
 
 func readRepoRules(c *content) (stateFn, error) {
@@ -496,14 +496,38 @@ func readRepoRules(c *content) (stateFn, error) {
 
 		users := strings.Split(post, " ")
 		for _, username := range users {
-			user := &User{name: username}
-			c.gtl.users = append(c.gtl.users, user)
-			rule.users = append(rule.users, user)
-			if grps, ok := c.gtl.namesToGroups[username]; ok {
-				for _, grp := range grps {
-					if err := grp.markAsUserGroup(); err != nil {
-						return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+			if !strings.HasPrefix(username, "@") {
+				user := &User{name: username}
+				c.gtl.users = append(c.gtl.users, user)
+				rule.users = append(rule.users, user)
+				if grps, ok := c.gtl.namesToGroups[username]; ok {
+					for _, grp := range grps {
+						if err := grp.markAsUserGroup(); err != nil {
+							return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+						}
 					}
+				}
+			} else {
+				var group *Group
+				for _, g := range c.gtl.groups {
+					if g.name == username {
+						group = g
+						break
+					}
+				}
+				if group == nil {
+					group = &Group{name: username, container: c.gtl}
+					group.markAsUserGroup()
+				}
+				if group.kind == repos {
+					return nil, ParseError{msg: fmt.Sprintf("user group '%v' named after a repo group at line %v ('%v')", username, c.l, t)}
+				}
+				if group.kind == undefined {
+					group.markAsUserGroup()
+				}
+				for _, username := range group.members {
+					addUserFromName(rule, username, c.gtl)
+					addUserFromName(c.gtl, username, c.gtl)
 				}
 			}
 		}
