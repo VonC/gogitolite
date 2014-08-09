@@ -321,6 +321,10 @@ type repoContainer interface {
 	getRepos() []*Repo
 	addRepo(repo *Repo)
 }
+type userContainer interface {
+	getUsers() []*User
+	addUser(user *User)
+}
 
 func (gtl *Gitolite) getRepos() []*Repo {
 	return gtl.repos
@@ -329,11 +333,25 @@ func (gtl *Gitolite) addRepo(repo *Repo) {
 	gtl.repos = append(gtl.repos, repo)
 }
 
+func (gtl *Gitolite) getUsers() []*User {
+	return gtl.users
+}
+func (gtl *Gitolite) addUser(user *User) {
+	gtl.users = append(gtl.users, user)
+}
+
 func (cfg *Config) getRepos() []*Repo {
 	return cfg.repos
 }
 func (cfg *Config) addRepo(repo *Repo) {
 	cfg.repos = append(cfg.repos, repo)
+}
+
+func (rule *Rule) getUsers() []*User {
+	return rule.users
+}
+func (rule *Rule) addUser(user *User) {
+	rule.users = append(rule.users, user)
 }
 
 func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer) {
@@ -378,6 +396,32 @@ func (grp *Group) markAsRepoGroup() error {
 		grp.container.addReposGroup(grp)
 	}
 	return nil
+}
+
+func addUserFromName(uc userContainer, username string, allUsersCtn userContainer) {
+	var user *User
+	for _, u := range allUsersCtn.getUsers() {
+		if u.name == username {
+			user = u
+		}
+	}
+	if user == nil {
+		user = &User{name: username}
+		if uc != allUsersCtn {
+			allUsersCtn.addUser(user)
+		}
+	}
+	seen := false
+	for _, auser := range uc.getUsers() {
+		if auser.name == user.name {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		uc.addUser(user)
+	}
+
 }
 
 // NbGroupRepos returns the number of groups identified as repos
