@@ -206,6 +206,22 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(rules[0].String(), ShouldEqual, "RW+ dev user21")
 		})
 
+		Convey("Access rules can reference a group of repos in param", func() {
+			r := strings.NewReader(
+				`@grp1 = rep1 rep2
+				@grp3 = user3
+				repo @grp1
+				   RW+ dev = @grp2
+				   RW+ master = user11 @grp3`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			rules, err := gtl.Rules("rep1")
+			So(err, ShouldBeNil)
+			So(len(rules), ShouldEqual, 2)
+			So(rules[0].String(), ShouldEqual, "RW+ dev")
+			So(len(gtl.getUsers()), ShouldEqual, 2)
+		})
+
 		Convey("undefined group", func() {
 			r := strings.NewReader(
 				`repo @grp1
