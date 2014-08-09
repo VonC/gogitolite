@@ -31,11 +31,12 @@ var gitoliteconf = `
 */
 func TestProject(t *testing.T) {
 
-	Convey("An empty reader means no repos", t, func() {
+	Convey("Detects projects", t, func() {
 		r := strings.NewReader(gitoliteconf)
 		gtl, err := Read(r)
 		So(err, ShouldBeNil)
 		So(gtl.IsEmpty(), ShouldBeFalse)
 		So(gtl.NbRepos(), ShouldEqual, 3)
+		So(gtl.NbProjects(), ShouldEqual, 1)
 	})
 }
