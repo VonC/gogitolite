@@ -430,6 +430,9 @@ func readRepoRules(c *content) (stateFn, error) {
 		res := readRepoRuleRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">'"+t+"'")
 		if res == nil {
+			if len(config.rules) == 0 {
+				return nil, ParseError{msg: fmt.Sprintf("At least one access rule expected at line %v ('%v')", c.l, t)}
+			}
 			break
 		}
 

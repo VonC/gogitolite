@@ -129,6 +129,14 @@ func TestRead(t *testing.T) {
 			So(gtl.NbUsers(), ShouldEqual, 1)
 		})
 
+		Convey("at least one rule is expected", func() {
+			r := strings.NewReader(
+				`repo arepo1
+					   ,,,`)
+			_, err := Read(r)
+			So(strings.Contains(err.Error(), ": At least one access rule expected"), ShouldBeTrue)
+		})
+
 		Convey("Access rule must be well formed: RW+- only", func() {
 			r := strings.NewReader(
 				`repo arepo1
