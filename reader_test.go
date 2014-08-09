@@ -222,7 +222,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(len(gtl.getUsers()), ShouldEqual, 2)
 		})
 
-		Convey("undefined group", func() {
+		Convey("undefined repo group", func() {
 			r := strings.NewReader(
 				`repo @grp1
 					   RW+ = user1`)
@@ -243,6 +243,17 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(gtl.NbRepos(), ShouldEqual, 2)
 		})
 
+		Convey("Invalid user group named after repo group", func() {
+			r := strings.NewReader(
+				`@grp1 = rep1
+				repo @grp1 rep2
+					   RW+ = user1 @grp1`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(strings.Contains(err.Error(), ": user group"), ShouldBeTrue)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 2)
+		})
 	})
 
 	Convey("An reader can read repo and users", t, func() {
