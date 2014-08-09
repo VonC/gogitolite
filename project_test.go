@@ -17,18 +17,18 @@ var gitoliteconf = `
 	      -  VREF/NAME/                     = projectowner
 
 	    repo module1
-	      desc = module1 repo for repos group project1
 	      RW+ = projectowner @almadmins
-
-	    subconf "subs/*.conf"
-
-	    more subs/project.conf
-
-	    repo @project
-	      RW = projectowner @almadmins
-	      RW = otheruser1 otheruser2...
 `
 
+/*
+   subconf "subs/*.conf"
+
+   more subs/project.conf
+
+   repo @project
+     RW = projectowner @almadmins
+     RW = otheruser1 otheruser2...
+*/
 func TestProject(t *testing.T) {
 
 	Convey("An empty reader means no repos", t, func() {
@@ -36,6 +36,6 @@ func TestProject(t *testing.T) {
 		gtl, err := Read(r)
 		So(err, ShouldBeNil)
 		So(gtl.IsEmpty(), ShouldBeFalse)
-		So(gtl.NbRepos(), ShouldEqual, 1)
+		So(gtl.NbRepos(), ShouldEqual, 3)
 	})
 }
