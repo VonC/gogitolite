@@ -19,6 +19,7 @@ type Gitolite struct {
 	userGroups     []*Group
 	configs        []*Config
 	reposToConfigs map[string][]*Config
+	projects       []*Project
 }
 
 type content struct {
