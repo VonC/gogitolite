@@ -7,19 +7,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var gitoliteconf = `
-		@project = module1 module2
-
-		repo gitolite-admin
-	      RW+     =   gitoliteadm @almadmins
-	      RW                                = projectowner
-	      RW VREF/NAME/conf/subs/project    = projectowner
-	      -  VREF/NAME/                     = projectowner
-
-	    repo module1
-	      RW+ = projectowner @almadmins
-`
-
 /*
    subconf "subs/*.conf"
 
@@ -32,11 +19,64 @@ var gitoliteconf = `
 func TestProject(t *testing.T) {
 
 	Convey("Detects projects", t, func() {
-		r := strings.NewReader(gitoliteconf)
-		gtl, err := Read(r)
-		So(err, ShouldBeNil)
-		So(gtl.IsEmpty(), ShouldBeFalse)
-		So(gtl.NbRepos(), ShouldEqual, 3)
-		So(gtl.NbProjects(), ShouldEqual, 1)
+		Convey("Detects one project", func() {
+			var gitoliteconf = `
+		@project = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner
+	      RW VREF/NAME/conf/subs/project    = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(gtl.NbProjects(), ShouldEqual, 1)
+		})
+
+		Convey("No project if no RW rule before", func() {
+			var gitoliteconf = `
+		@project = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW VREF/NAME/conf/subs/project    = projectowner
+	      RW                                = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(gtl.NbProjects(), ShouldEqual, 0)
+		})
+
+		Convey("No project if none detected", func() {
+			var gitoliteconf = `
+		@project = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(gtl.NbProjects(), ShouldEqual, 0)
+		})
 	})
 }
