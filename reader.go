@@ -43,6 +43,15 @@ func (g *Group) String() string {
 	return res
 }
 
+func (gtl *Gitolite) getGroup(groupname string) *Group {
+	for _, group := range gtl.groups {
+		if group.name == groupname {
+			return group
+		}
+	}
+	return nil
+}
+
 type container interface {
 	addReposGroup(grp *Group)
 	addUsersGroup(grp *Group)

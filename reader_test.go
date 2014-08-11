@@ -259,6 +259,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 		Convey("Users are detected", func() {
 			var gitoliteconf = `
 		@project = module1 module2
+		@almadmins = alm1 alm2
 
 		repo gitolite-admin
 	      RW+     =   gitoliteadm @almadmins
@@ -274,8 +275,11 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(gtl.NbUsers(), ShouldEqual, 2)
-			So(fmt.Sprintf("%v", gtl.getUsers()), ShouldEqual, "[user 'gitoliteadm' user 'projectowner']")
+			So(gtl.NbUsers(), ShouldEqual, 4)
+			So(fmt.Sprintf("%v", gtl.getUsers()), ShouldEqual, "[user 'gitoliteadm' user 'alm1' user 'alm2' user 'projectowner']")
+			almadmin := gtl.getGroup("@almadmins")
+			So(almadmin, ShouldNotBeNil)
+			So(fmt.Sprintf("%v", almadmin.members), ShouldEqual, "[alm1 alm2]")
 		})
 	})
 
