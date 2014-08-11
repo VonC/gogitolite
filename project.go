@@ -34,7 +34,7 @@ func (gtl *Gitolite) updateProjects() {
 					currentProject.name = projectname
 				}
 				if currentProject != nil && !currentProject.hasSameUsers(rule.getUsers()) {
-					fmt.Printf("\nIgnore project name '%v': users differ (%v vs. %v)\n", projectname,
+					fmt.Printf("\nIgnore project name '%v': users differ on 'RW' (%v vs. %v)\n", projectname,
 						currentProject.users, rule.getUsers())
 					currentProject = nil
 				}
@@ -43,7 +43,7 @@ func (gtl *Gitolite) updateProjects() {
 					fmt.Printf("\nIgnore project with no name\n")
 				}
 				if currentProject != nil && !currentProject.hasSameUsers(rule.getUsers()) {
-					fmt.Printf("\nIgnore project name '%v': users differ (%v vs. %v)\n", currentProject.name,
+					fmt.Printf("\nIgnore project name '%v': users differ on '-' (%v vs. %v)\n", currentProject.name,
 						currentProject.users, rule.getUsers())
 					currentProject = nil
 				}
