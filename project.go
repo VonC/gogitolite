@@ -33,12 +33,22 @@ func (gtl *Gitolite) updateProjects() {
 				} else {
 					currentProject.name = projectname
 				}
-			} else if rule.access == "-" && rule.param == "VREF/NAME/" {
-				if currentProject != nil && currentProject.name != "" {
-					gtl.projects = append(gtl.projects, currentProject)
+				if currentProject != nil && !currentProject.hasSameUsers(rule.getUsers()) {
+					fmt.Printf("\nIgnore project name '%v': users differ (%v vs. %v)\n", projectname,
+						currentProject.users, rule.getUsers())
+					currentProject = nil
 				}
+			} else if rule.access == "-" && rule.param == "VREF/NAME/" {
 				if currentProject != nil && currentProject.name == "" {
 					fmt.Printf("\nIgnore project with no name\n")
+				}
+				if currentProject != nil && !currentProject.hasSameUsers(rule.getUsers()) {
+					fmt.Printf("\nIgnore project name '%v': users differ (%v vs. %v)\n", currentProject.name,
+						currentProject.users, rule.getUsers())
+					currentProject = nil
+				}
+				if currentProject != nil && currentProject.name != "" {
+					gtl.projects = append(gtl.projects, currentProject)
 				}
 				currentProject = nil
 			} else {
@@ -46,4 +56,24 @@ func (gtl *Gitolite) updateProjects() {
 			}
 		}
 	}
+}
+
+func (p *Project) hasSameUsers(users []*User) bool {
+	//fmt.Printf("\nusers '%v'\n", users)
+	if len(p.users) != len(users) {
+		return false
+	}
+	for _, pusers := range p.users {
+		seen := false
+		for _, user := range users {
+			if pusers.name == user.name {
+				seen = true
+				break
+			}
+		}
+		if !seen {
+			return false
+		}
+	}
+	return true
 }
