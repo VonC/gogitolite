@@ -1,6 +1,7 @@
 package gogitolite
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -39,6 +40,28 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbProjects(), ShouldEqual, 1)
+			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'(2): [module1 module2]]'")
+		})
+
+		Convey("Detects one project even if group undefined", func() {
+			var gitoliteconf = `
+		@project = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner
+	      RW VREF/NAME/conf/subs/project    = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 1)
+			So(gtl.NbProjects(), ShouldEqual, 1)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'(2): [module1 module2]]'")
 		})
 
 		Convey("No project if no RW rule before", func() {
@@ -121,6 +144,49 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 3)
+			So(gtl.NbProjects(), ShouldEqual, 0)
+		})
+
+		Convey("No project if no repo group", func() {
+			var gitoliteconf = `
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner
+	      RW VREF/NAME/conf/subs/project    = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 2)
+			So(gtl.NbProjects(), ShouldEqual, 0)
+		})
+
+		Convey("No project if user group", func() {
+			var gitoliteconf = `
+	    @project = user1 user2
+
+	    repo arepo
+	      RW+ = @project
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner
+	      RW VREF/NAME/conf/subs/project    = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbProjects(), ShouldEqual, 0)
 		})
 

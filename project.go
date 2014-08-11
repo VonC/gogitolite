@@ -41,14 +41,27 @@ func (gtl *Gitolite) updateProjects() {
 			} else if rule.access == "-" && rule.param == "VREF/NAME/" {
 				if currentProject != nil && currentProject.name == "" {
 					fmt.Printf("\nIgnore project with no name\n")
+					currentProject = nil
 				}
 				if currentProject != nil && !currentProject.hasSameUsers(rule.getUsers()) {
 					fmt.Printf("\nIgnore project name '%v': users differ on '-' (%v vs. %v)\n", currentProject.name,
 						currentProject.users, rule.getUsers())
 					currentProject = nil
 				}
-				if currentProject != nil && currentProject.name != "" {
-					gtl.projects = append(gtl.projects, currentProject)
+				if currentProject != nil {
+					group := gtl.getGroup("@" + currentProject.name)
+					if group == nil {
+						fmt.Printf("\nIgnore project name '%v': no repo group found\n", currentProject.name)
+						currentProject = nil
+					} else if group.kind == users {
+						fmt.Printf("\nIgnore project name '%v': user group found (instead of repo group)\n", currentProject.name)
+						currentProject = nil
+					} else if group.kind == undefined {
+						group.markAsRepoGroup()
+					}
+					if currentProject != nil {
+						gtl.projects = append(gtl.projects, currentProject)
+					}
 				}
 				currentProject = nil
 			} else {
