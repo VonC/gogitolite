@@ -498,9 +498,8 @@ func readRepoRules(c *content) (stateFn, error) {
 		users := strings.Split(post, " ")
 		for _, username := range users {
 			if !strings.HasPrefix(username, "@") {
-				user := &User{name: username}
-				c.gtl.users = append(c.gtl.users, user)
-				rule.users = append(rule.users, user)
+				addUserFromName(rule, username, c.gtl)
+				addUserFromName(c.gtl, username, c.gtl)
 				if grps, ok := c.gtl.namesToGroups[username]; ok {
 					for _, grp := range grps {
 						if err := grp.markAsUserGroup(); err != nil {
