@@ -311,4 +311,29 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 		})
 
 	})
+
+	Convey("An reader can get configs", t, func() {
+		test = ""
+
+		Convey("A gitolite.conf must have at least a gitolite-admin config", func() {
+			r := strings.NewReader(
+				`@ausergrp = user1 user2 user3`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "There must be at least a gitolite-admin repo config")
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbUsers(), ShouldEqual, 0)
+			So(gtl.NbGroupUsers(), ShouldEqual, 0)
+		})
+
+		Convey("Asking for a config for no rpeos means no config", func() {
+			r := strings.NewReader(
+				`repo gitolite-admin`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+		})
+
+	})
 }
