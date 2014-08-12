@@ -54,6 +54,7 @@ func TestRead(t *testing.T) {
 	})
 
 	Convey("An reader can read groups", t, func() {
+		test = "ignorega"
 		Convey("single group, followed by content", func() {
 			r := strings.NewReader("  @developers     =   dilbert alice wally  \n#comment ")
 			gtl, err := Read(r)

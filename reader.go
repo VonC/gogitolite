@@ -52,6 +52,27 @@ func (gtl *Gitolite) getGroup(groupname string) *Group {
 	return nil
 }
 
+func (gtl *Gitolite) GetConfigs(reponames []string) []*Config {
+	res := []*Config{}
+	if len(reponames) == 0 {
+		return res
+	}
+	for _, config := range gtl.configs {
+		rpn := []string{}
+		for _, repo := range config.repos {
+			for _, reponame := range reponames {
+				if repo.name == reponame {
+					rpn = append(rpn, reponame)
+				}
+			}
+		}
+		if len(rpn) == len(reponames) {
+			res = append(res, config)
+		}
+	}
+	return res
+}
+
 type container interface {
 	addReposGroup(grp *Group)
 	addUsersGroup(grp *Group)
@@ -70,6 +91,8 @@ type Repo struct {
 	name string
 }
 
+var test = ""
+
 // Read a gitolite config file
 func Read(r io.Reader) (*Gitolite, error) {
 	res := &Gitolite{namesToGroups: make(map[string][]*Group), reposToConfigs: make(map[string][]*Config)}
@@ -83,6 +106,9 @@ func Read(r io.Reader) (*Gitolite, error) {
 	var err error
 	for state, err = readEmptyOrCommentLines(c); state != nil && err == nil; {
 		state, err = state(c)
+	}
+	if err == nil && len(res.GetConfigs([]string{"gitolite-admin"})) == 0 && test != "ignorega" {
+		err = fmt.Errorf("There must be at least a gitolite-admin repo config")
 	}
 	//fmt.Printf("\nGitolite res='%v'\n", res)
 	return res, err
