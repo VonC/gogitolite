@@ -320,20 +320,53 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 				`@ausergrp = user1 user2 user3`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldEqual, "There must be at least a gitolite-admin repo config")
+			So(err.Error(), ShouldEqual, "There must be one and only gitolite-admin repo config")
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 0)
 			So(gtl.NbGroupUsers(), ShouldEqual, 0)
 		})
 
-		Convey("Asking for a config for no rpeos means no config", func() {
+		Convey("A gitolite-admin config must have at least one rule", func() {
 			r := strings.NewReader(
 				`repo gitolite-admin`)
 			gtl, err := Read(r)
-			So(err, ShouldBeNil)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "There must be at least one rule for gitolite-admin repo config")
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
 		})
 
+		Convey("A gitolite-admin must have one RW+ rule", func() {
+			r := strings.NewReader(
+				`repo gitolite-admin
+				   RW = user1`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldContainSubstring, "First rule for gitolite-admin repo config must be 'RW+', empty param")
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+		})
+
+		Convey("A gitolite-admin must have one RW+ rule with no param", func() {
+			r := strings.NewReader(
+				`repo gitolite-admin
+				   RW+ param= user2`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldContainSubstring, "First rule for gitolite-admin repo config must be 'RW+', empty param")
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+		})
+
+		Convey("A gitolite-admin must have one RW+ rule with at least one user", func() {
+			r := strings.NewReader(
+				`repo gitolite-admin
+				   RW+ = @users`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "First rule for gitolite-admin repo must have at least one user")
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+		})
 	})
 }

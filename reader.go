@@ -107,8 +107,26 @@ func Read(r io.Reader) (*Gitolite, error) {
 	for state, err = readEmptyOrCommentLines(c); state != nil && err == nil; {
 		state, err = state(c)
 	}
-	if err == nil && len(res.GetConfigs([]string{"gitolite-admin"})) == 0 && test != "ignorega" {
-		err = fmt.Errorf("There must be at least a gitolite-admin repo config")
+	if err == nil && test != "ignorega" {
+		configs := res.GetConfigs([]string{"gitolite-admin"})
+		if len(configs) != 1 {
+			err = fmt.Errorf("There must be one and only gitolite-admin repo config")
+			return res, err
+		}
+		config := configs[0]
+		if len(config.rules) == 0 {
+			err = fmt.Errorf("There must be at least one rule for gitolite-admin repo config")
+			return res, err
+		}
+		rule := config.rules[0]
+		if rule.access != "RW+" || rule.param != "" {
+			err = fmt.Errorf("First rule for gitolite-admin repo config must be 'RW+', empty param, instead of '%v'-'%v'", rule.access, rule.param)
+			return res, err
+		}
+		if len(rule.users) == 0 {
+			err = fmt.Errorf("First rule for gitolite-admin repo must have at least one user")
+			return res, err
+		}
 	}
 	//fmt.Printf("\nGitolite res='%v'\n", res)
 	return res, err
