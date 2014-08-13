@@ -222,7 +222,7 @@ func (pe ParseError) Error() string {
 var readEmptyOrCommentLinesRx = regexp.MustCompile(`(?m)^\s*?$|^\s*?#(.*?)$`)
 
 func readEmptyOrCommentLines(c *content) (stateFn, error) {
-	t := strings.TrimSpace(c.s.Text())
+	t := c.s.Text()
 	for keepReading := true; keepReading; {
 		res := readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">'"+t+"'")
@@ -233,7 +233,8 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 			keepReading = false
 		} else {
 			c.l = c.l + 1
-			t = strings.TrimSpace(c.s.Text())
+			currentComment.addComment(t)
+			t = c.s.Text()
 		}
 	}
 	if c.gtl.IsEmpty() {
