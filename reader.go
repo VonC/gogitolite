@@ -36,6 +36,7 @@ type Group struct {
 	members   []string
 	kind      kind
 	container container
+	cmt       Comment
 }
 
 func (g *Group) String() string {
@@ -270,7 +271,8 @@ func readGroup(c *content) (stateFn, error) {
 	//fmt.Println(res, "'"+c.s+"'", "'"+c.s[res[2]:res[3]]+"'", "'"+c.s[res[4]:res[5]]+"'")
 	grpname := t[res[2]:res[3]]
 	grpmembers := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
-	grp := &Group{name: grpname, members: grpmembers, container: c.gtl}
+	grp := &Group{name: grpname, members: grpmembers, container: c.gtl, cmt: currentComment}
+	currentComment = Comment{}
 	for _, g := range c.gtl.groups {
 		if g.name == grpname {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate group name '%v' at line %v ('%v')", grpname, c.l, t)}
