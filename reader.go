@@ -655,3 +655,13 @@ func (gtl *Gitolite) rulesRepo(reponame string) []*Rule {
 	//fmt.Printf("\nrulesRepo for rpname '%v': %v\n", reponame, res)
 	return res
 }
+
+type Comment struct {
+	comments []string
+}
+
+var currentComment Comment
+
+func (c *Comment) addComment(comment string) {
+	c.comments = append(c.comments, comment)
+}
