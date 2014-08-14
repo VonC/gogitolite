@@ -668,3 +668,11 @@ var currentComment Comment
 func (c *Comment) addComment(comment string) {
 	c.comments = append(c.comments, comment)
 }
+
+func (c *Comment) String() string {
+	res := ""
+	for _, comment := range c.comments {
+		res = res + comment + "\n"
+	}
+	return res
+}

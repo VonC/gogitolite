@@ -369,4 +369,23 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
 		})
 	})
+
+	Convey("An reader can get comments and empty lines", t, func() {
+		test = "ignorega"
+
+		Convey("A reader can get comments before a Group", func() {
+			r := strings.NewReader(
+				`
+				  #  a   comment
+
+				@grpusers = user1 user2`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.getGroup("@grpusers").cmt.String(), ShouldEqual, `
+				  #  a   comment
+
+`)
+		})
+	})
 }
