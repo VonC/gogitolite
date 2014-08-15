@@ -5,11 +5,13 @@ import (
 	"strings"
 )
 
+// Project has a name and users
 type Project struct {
 	name  string
 	users []*User
 }
 
+// NbProjects returns the number of detected projects
 func (gtl *Gitolite) NbProjects() int {
 	gtl.updateProjects()
 	return len(gtl.projects)
@@ -20,7 +22,7 @@ var prefix = "VREF/NAME/conf/subs/"
 func (gtl *Gitolite) updateProjects() {
 	configs := gtl.reposToConfigs["gitolite-admin"]
 	for _, config := range configs {
-		var currentProject *Project = nil
+		var currentProject *Project
 		rules := config.rules
 		for _, rule := range rules {
 			//fmt.Printf("\nRule looked at: '%v' => '%v' '%v'\n", rule, rule.access, rule.param)

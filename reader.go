@@ -39,8 +39,8 @@ type Group struct {
 	cmt       Comment
 }
 
-func (g *Group) String() string {
-	res := fmt.Sprintf("group '%v'(%v): %+v", g.name, g.kind, g.members)
+func (grp *Group) String() string {
+	res := fmt.Sprintf("group '%v'(%v): %+v", grp.name, grp.kind, grp.members)
 	return res
 }
 
@@ -53,6 +53,7 @@ func (gtl *Gitolite) getGroup(groupname string) *Group {
 	return nil
 }
 
+// GetConfigs return config for a given list of repos
 func (gtl *Gitolite) GetConfigs(reponames []string) []*Config {
 	res := []*Config{}
 	if len(reponames) == 0 {
@@ -510,13 +511,13 @@ type Rule struct {
 	users  []*User
 }
 
-func (r *Rule) String() string {
+func (rule *Rule) String() string {
 	users := ""
-	for _, user := range r.users {
+	for _, user := range rule.users {
 		users = " " + user.name
 	}
 	users = strings.TrimSpace(users)
-	return strings.TrimSpace(fmt.Sprintf("%v %v %v", r.access, r.param, users))
+	return strings.TrimSpace(fmt.Sprintf("%v %v %v", rule.access, rule.param, users))
 }
 
 var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:@?[a-zA-Z0-9_-]+\s*?)+)$`)
@@ -659,6 +660,7 @@ func (gtl *Gitolite) rulesRepo(reponame string) []*Rule {
 	return res
 }
 
+// Comment groups empty or lines with #
 type Comment struct {
 	comments []string
 }
