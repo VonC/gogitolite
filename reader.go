@@ -328,7 +328,8 @@ func readRepo(c *content) (stateFn, error) {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate repo element name '%v' at line %v ('%v')", val, c.l, t)}
 		}
 	}
-	config := &Config{repos: []*Repo{}}
+	config := &Config{repos: []*Repo{}, cmt: currentComment}
+	currentComment = Comment{}
 	c.gtl.configs = append(c.gtl.configs, config)
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
@@ -497,6 +498,7 @@ type Config struct {
 	repos []*Repo
 	rules []*Rule
 	desc  string
+	cmt   Comment
 }
 
 func (cfg *Config) String() string {

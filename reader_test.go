@@ -387,5 +387,22 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 
 `)
 		})
+
+		Convey("A reader can get comments before a Config", func() {
+			r := strings.NewReader(
+				`#  a group  comment
+				@grpusers = user1 user2
+
+				# config comment
+				repo r1`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.getGroup("@grpusers").cmt.String(), ShouldEqual, `#  a group  comment
+`)
+			So(gtl.GetConfigs([]string{"r1"})[0].cmt.String(), ShouldEqual, `
+				# config comment
+`)
+		})
 	})
 }
