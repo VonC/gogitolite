@@ -511,6 +511,7 @@ type Rule struct {
 	access string
 	param  string
 	users  []*User
+	cmt    Comment
 }
 
 func (rule *Rule) String() string {
@@ -532,82 +533,90 @@ func readRepoRules(c *content) (stateFn, error) {
 	config := c.gtl.configs[len(c.gtl.configs)-1]
 	for keepReading := true; keepReading; {
 		res := readRepoRuleRx.FindStringSubmatchIndex(t)
+		readComment := false
 		//fmt.Println(res, ">'"+t+"'")
 		if res == nil {
-			if len(config.rules) == 0 {
-				return nil, ParseError{msg: fmt.Sprintf("At least one access rule expected at line %v ('%v')", c.l, t)}
+			res = readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
+			//fmt.Println(res, ">'"+t+"'")
+			if res == nil {
+				if len(config.rules) == 0 {
+					return nil, ParseError{msg: fmt.Sprintf("At least one access rule expected at line %v ('%v')", c.l, t)}
+				}
+				break
 			}
-			break
+			readComment = true
+			currentComment.addComment(t)
 		}
+		if !readComment {
+			rule := &Rule{cmt: currentComment}
+			currentComment = Comment{}
+			pre := strings.TrimSpace(t[res[2]:res[3]])
+			post := strings.TrimSpace(t[res[4]:res[5]])
 
-		rule := &Rule{}
-		pre := strings.TrimSpace(t[res[2]:res[3]])
-		post := strings.TrimSpace(t[res[4]:res[5]])
+			respre := repoRulePreRx.FindStringSubmatchIndex(pre)
+			//fmt.Printf("\nrespre='%v' for '%v'\n", respre, pre)
+			if respre == nil {
+				return nil, ParseError{msg: fmt.Sprintf("Incorrect access rule '%v' at line %v ('%v')", pre, c.l, t)}
+			}
+			rule.access = pre[respre[2]:respre[3]]
+			if respre[4] > -1 {
+				rule.param = pre[respre[4]:respre[5]]
+			}
 
-		respre := repoRulePreRx.FindStringSubmatchIndex(pre)
-		//fmt.Printf("\nrespre='%v' for '%v'\n", respre, pre)
-		if respre == nil {
-			return nil, ParseError{msg: fmt.Sprintf("Incorrect access rule '%v' at line %v ('%v')", pre, c.l, t)}
-		}
-		rule.access = pre[respre[2]:respre[3]]
-		if respre[4] > -1 {
-			rule.param = pre[respre[4]:respre[5]]
-		}
-
-		users := strings.Split(post, " ")
-		for _, username := range users {
-			if !strings.HasPrefix(username, "@") {
-				addUserFromName(rule, username, c.gtl)
-				addUserFromName(c.gtl, username, c.gtl)
-				if grps, ok := c.gtl.namesToGroups[username]; ok {
-					for _, grp := range grps {
-						if err := grp.markAsUserGroup(); err != nil {
-							return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+			users := strings.Split(post, " ")
+			for _, username := range users {
+				if !strings.HasPrefix(username, "@") {
+					addUserFromName(rule, username, c.gtl)
+					addUserFromName(c.gtl, username, c.gtl)
+					if grps, ok := c.gtl.namesToGroups[username]; ok {
+						for _, grp := range grps {
+							if err := grp.markAsUserGroup(); err != nil {
+								return nil, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+							}
 						}
 					}
+				} else {
+					var group *Group
+					for _, g := range c.gtl.groups {
+						if g.name == username {
+							group = g
+							break
+						}
+					}
+					if group == nil {
+						group = &Group{name: username, container: c.gtl}
+						group.markAsUserGroup()
+					}
+					if group.kind == repos {
+						return nil, ParseError{msg: fmt.Sprintf("user group '%v' named after a repo group at line %v ('%v')", username, c.l, t)}
+					}
+					if group.kind == undefined {
+						group.markAsUserGroup()
+					}
+					for _, username := range group.members {
+						addUserFromName(rule, username, c.gtl)
+						addUserFromName(c.gtl, username, c.gtl)
+					}
 				}
-			} else {
-				var group *Group
-				for _, g := range c.gtl.groups {
-					if g.name == username {
-						group = g
+			}
+
+			config.rules = append(config.rules, rule)
+			for _, repo := range config.repos {
+				if _, ok := c.gtl.reposToConfigs[repo.name]; !ok {
+					c.gtl.reposToConfigs[repo.name] = []*Config{}
+				}
+				seen := false
+				for _, aconfig := range c.gtl.reposToConfigs[repo.name] {
+					if aconfig == config {
+						seen = true
 						break
 					}
 				}
-				if group == nil {
-					group = &Group{name: username, container: c.gtl}
-					group.markAsUserGroup()
-				}
-				if group.kind == repos {
-					return nil, ParseError{msg: fmt.Sprintf("user group '%v' named after a repo group at line %v ('%v')", username, c.l, t)}
-				}
-				if group.kind == undefined {
-					group.markAsUserGroup()
-				}
-				for _, username := range group.members {
-					addUserFromName(rule, username, c.gtl)
-					addUserFromName(c.gtl, username, c.gtl)
+				if !seen {
+					c.gtl.reposToConfigs[repo.name] = append(c.gtl.reposToConfigs[repo.name], config)
 				}
 			}
 		}
-
-		config.rules = append(config.rules, rule)
-		for _, repo := range config.repos {
-			if _, ok := c.gtl.reposToConfigs[repo.name]; !ok {
-				c.gtl.reposToConfigs[repo.name] = []*Config{}
-			}
-			seen := false
-			for _, aconfig := range c.gtl.reposToConfigs[repo.name] {
-				if aconfig == config {
-					seen = true
-					break
-				}
-			}
-			if !seen {
-				c.gtl.reposToConfigs[repo.name] = append(c.gtl.reposToConfigs[repo.name], config)
-			}
-		}
-
 		if !c.s.Scan() {
 			keepReading = false
 			return nil, nil
