@@ -689,3 +689,38 @@ func (c *Comment) String() string {
 	}
 	return res
 }
+
+// Print prints a Gitolite with reformat.
+func (gtl *Gitolite) Print() string {
+	res := ""
+	for _, group := range gtl.groups {
+		res = res + group.Print()
+	}
+	for _, config := range gtl.GetConfigs([]string{"gitolite-admin"}) {
+		res = res + config.Print()
+	}
+	for _, config := range gtl.configs {
+		skip := false
+		for _, repo := range config.getRepos() {
+			if repo.name == "gitolite-admin" {
+				skip = true
+			}
+		}
+		if !skip {
+			res = res + config.Print()
+		}
+	}
+	return res
+}
+
+// Print prints a Group of repos/users with reformat.
+func (grp *Group) Print() string {
+	res := "group"
+	return res
+}
+
+// Print prints a Config with reformat.
+func (cfg *Config) Print() string {
+	res := "config"
+	return res
+}
