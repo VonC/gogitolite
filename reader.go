@@ -715,7 +715,7 @@ func (gtl *Gitolite) Print() string {
 
 // Print prints a Group of repos/users with reformat.
 func (grp *Group) Print() string {
-	res := "group"
+	res := "@" + grp.name
 	return res
 }
 
