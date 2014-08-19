@@ -715,7 +715,13 @@ func (gtl *Gitolite) Print() string {
 
 // Print prints a Group of repos/users with reformat.
 func (grp *Group) Print() string {
-	res := "@" + grp.name
+	res := grp.name + " ="
+	for _, member := range grp.members {
+		m := strings.TrimSpace(member)
+		if m != "" {
+			res = res + " " + m
+		}
+	}
 	return res
 }
 
