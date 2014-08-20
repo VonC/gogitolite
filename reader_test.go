@@ -432,7 +432,8 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 				@developers3  =   dilbert alice  wally3`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
-			So(gtl.Print(), ShouldEqual, "e")
+			So(gtl.Print(), ShouldEqual, `# comment
+@developers3 = dilbert alice wally3`)
 		})
 	})
 }
