@@ -679,7 +679,10 @@ type Comment struct {
 var currentComment Comment
 
 func (c *Comment) addComment(comment string) {
-	c.comments = append(c.comments, comment)
+	cmt := strings.TrimSpace(comment)
+	if cmt != "" {
+		c.comments = append(c.comments, cmt)
+	}
 }
 
 func (c *Comment) String() string {
