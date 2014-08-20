@@ -739,6 +739,28 @@ func (grp *Group) Print() string {
 
 // Print prints a Config with reformat.
 func (cfg *Config) Print() string {
-	res := "config"
+	res := cfg.cmt.Print()
+	res = res + "repo"
+	for _, repo := range cfg.repos {
+		res = res + " " + repo.name
+	}
+	res = res + "\n"
+	for _, rule := range cfg.rules {
+		res = res + rule.Print()
+	}
+	return res
+}
+
+func (rule *Rule) Print() string {
+	res := rule.cmt.Print()
+	res = res + rule.access
+	if rule.param != "" {
+		res = res + " " + rule.param
+	}
+	res = res + " ="
+	for _, user := range rule.users {
+		res = res + " " + user.name
+	}
+	res = res + "\n"
 	return res
 }
