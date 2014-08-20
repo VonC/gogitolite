@@ -453,5 +453,22 @@ RW+ = gitoliteadm
 `)
 		})
 
+		Convey("A Gitolite can print a configs including gitolite-admin config", func() {
+			r := strings.NewReader(
+				`  # ga comment
+			repo gitolite-admin
+			RW+ = admin
+			repo otherRepo
+			R  param  = user`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.Print(), ShouldEqual, `# ga comment
+repo gitolite-admin
+RW+ = admin
+repo otherRepo
+R param = user
+`)
+		})
 	})
 }
