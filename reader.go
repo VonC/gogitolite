@@ -539,7 +539,7 @@ func readRepoRules(c *content) (stateFn, error) {
 		res := repoRuleDescRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">0'"+t+"'")
 		if res != nil && len(res) > 0 {
-			if config.descCmt != nil {
+			if config.desc != "" {
 				return nil, ParseError{msg: fmt.Sprintf("No more than one desc per config, line %v ('%v')", c.l, t)}
 			}
 			config.descCmt = currentComment
