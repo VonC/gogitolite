@@ -370,6 +370,21 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 		})
 	})
 
+	Convey("An reader can get configs with description", t, func() {
+		test = ""
+
+		Convey("A Config can have a description", func() {
+			r := strings.NewReader(
+				`repo gitolite-admin
+				   desc = test  d  
+				   RW+ = user1`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.GetConfigs([]string{"gitolite-admin"})[0].desc, ShouldEqual, "test  d")
+		})
+	})
+
 	Convey("An reader can get comments and empty lines", t, func() {
 		test = "ignorega"
 
@@ -416,6 +431,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.getGroup("@grpusers").cmt.String(), ShouldEqual, `#  a group  comment
 `)
+			fmt.Println(gtl.Print())
 			So(gtl.GetConfigs([]string{"r1"})[0].rules[0].cmt.String(), ShouldEqual, `#   main admins
 `)
 		})
@@ -426,7 +442,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 		test = "ignorega"
 
 		Convey("A Gitolite can print a single group with content", func() {
-			r := strings.NewReader(` 
+			r := strings.NewReader(`
 				# comment
 
 				@developers3  =   dilbert alice  wally3`)

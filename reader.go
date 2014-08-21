@@ -495,10 +495,11 @@ type User struct {
 
 // Config for repos with access rules
 type Config struct {
-	repos []*Repo
-	rules []*Rule
-	desc  string
-	cmt   Comment
+	repos   []*Repo
+	rules   []*Rule
+	descCmt Comment
+	desc    string
+	cmt     Comment
 }
 
 func (cfg *Config) String() string {
@@ -525,6 +526,7 @@ func (rule *Rule) String() string {
 
 var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:@?[a-zA-Z0-9_-]+\s*?)+)$`)
 var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?(?:\s([a-zA-Z0-9_.-/]+))?$`)
+var repoRuleDescRx = regexp.MustCompile(`(?m)^desc\s*?=\s*?(\S.*?)$`)
 
 func readRepoRules(c *content) (stateFn, error) {
 	t := strings.TrimSpace(c.s.Text())
@@ -532,22 +534,32 @@ func readRepoRules(c *content) (stateFn, error) {
 	//rules := []*Rule{}
 	config := c.gtl.configs[len(c.gtl.configs)-1]
 	for keepReading := true; keepReading; {
-		res := readRepoRuleRx.FindStringSubmatchIndex(t)
 		readComment := false
-		//fmt.Println(res, ">'"+t+"'")
-		if res == nil {
-			res = readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
-			//fmt.Println(res, ">'"+t+"'")
+		readDesc := false
+		res := repoRuleDescRx.FindStringSubmatchIndex(t)
+		//fmt.Println(res, ">0'"+t+"'")
+		if res != nil && len(res) > 0 {
+			config.descCmt = currentComment
+			currentComment = Comment{}
+			config.desc = strings.TrimSpace(t[res[2]:res[3]])
+			readDesc = true
+		} else {
+			res = readRepoRuleRx.FindStringSubmatchIndex(t)
+			//fmt.Println(res, ">1'"+t+"'")
 			if res == nil {
-				if len(config.rules) == 0 {
-					return nil, ParseError{msg: fmt.Sprintf("At least one access rule expected at line %v ('%v')", c.l, t)}
+				res = readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
+				if res != nil && len(res) > 0 {
+					readComment = true
+					currentComment.addComment(t)
+				} else {
+					if len(config.rules) == 0 {
+						return nil, ParseError{msg: fmt.Sprintf("At least one access rule expected at line %v ('%v')", c.l, t)}
+					}
+					break
 				}
-				break
 			}
-			readComment = true
-			currentComment.addComment(t)
 		}
-		if !readComment {
+		if !readComment && !readDesc {
 			rule := &Rule{cmt: currentComment}
 			currentComment = Comment{}
 			pre := strings.TrimSpace(t[res[2]:res[3]])
