@@ -498,5 +498,34 @@ repo otherRepo
 R param = user
 `)
 		})
+
+		Convey("A Gitolite can print a configs with desc, incliding group", func() {
+			r := strings.NewReader(
+				`# group users
+				@users = u1 u2  
+				# ga comment
+			repo gitolite-admin
+			RW+ = admin
+			repo otherRepo
+			# rule comment
+			R  param  = user @users
+			# desc comment
+			desc = a desc`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.Print(), ShouldEqual, `# group users
+users = u1 u2  
+# ga comment
+repo gitolite-admin
+RW+ = admin
+repo otherRepo
+# desc comment
+desc = a desc
+# rule comment
+R  param  = user @users
+`)
+		})
+
 	})
 }
