@@ -36,7 +36,7 @@ type Group struct {
 	members   []string
 	kind      kind
 	container container
-	cmt       Comment
+	cmt       *Comment
 }
 
 func (grp *Group) String() string {
@@ -273,7 +273,7 @@ func readGroup(c *content) (stateFn, error) {
 	grpname := t[res[2]:res[3]]
 	grpmembers := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
 	grp := &Group{name: grpname, members: grpmembers, container: c.gtl, cmt: currentComment}
-	currentComment = Comment{}
+	currentComment = &Comment{}
 	for _, g := range c.gtl.groups {
 		if g.name == grpname {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate group name '%v' at line %v ('%v')", grpname, c.l, t)}
@@ -329,7 +329,7 @@ func readRepo(c *content) (stateFn, error) {
 		}
 	}
 	config := &Config{repos: []*Repo{}, cmt: currentComment}
-	currentComment = Comment{}
+	currentComment = &Comment{}
 	c.gtl.configs = append(c.gtl.configs, config)
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
@@ -499,7 +499,7 @@ type Config struct {
 	rules   []*Rule
 	descCmt *Comment
 	desc    string
-	cmt     Comment
+	cmt     *Comment
 }
 
 func (cfg *Config) String() string {
@@ -512,7 +512,7 @@ type Rule struct {
 	access string
 	param  string
 	users  []*User
-	cmt    Comment
+	cmt    *Comment
 }
 
 func (rule *Rule) String() string {
@@ -542,8 +542,8 @@ func readRepoRules(c *content) (stateFn, error) {
 			if config.descCmt != nil {
 				return nil, ParseError{msg: fmt.Sprintf("No more than one desc per config, line %v ('%v')", c.l, t)}
 			}
-			config.descCmt = &currentComment
-			currentComment = Comment{}
+			config.descCmt = currentComment
+			currentComment = &Comment{}
 			config.desc = strings.TrimSpace(t[res[2]:res[3]])
 			readDesc = true
 		} else {
@@ -564,7 +564,7 @@ func readRepoRules(c *content) (stateFn, error) {
 		}
 		if !readComment && !readDesc {
 			rule := &Rule{cmt: currentComment}
-			currentComment = Comment{}
+			currentComment = &Comment{}
 			pre := strings.TrimSpace(t[res[2]:res[3]])
 			post := strings.TrimSpace(t[res[4]:res[5]])
 
@@ -691,7 +691,7 @@ type Comment struct {
 	comments []string
 }
 
-var currentComment Comment
+var currentComment *Comment
 
 func (c *Comment) addComment(comment string) {
 	cmt := strings.TrimSpace(comment)
