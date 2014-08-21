@@ -497,7 +497,7 @@ type User struct {
 type Config struct {
 	repos   []*Repo
 	rules   []*Rule
-	descCmt Comment
+	descCmt *Comment
 	desc    string
 	cmt     Comment
 }
@@ -539,7 +539,10 @@ func readRepoRules(c *content) (stateFn, error) {
 		res := repoRuleDescRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">0'"+t+"'")
 		if res != nil && len(res) > 0 {
-			config.descCmt = currentComment
+			if config.descCmt != nil {
+				return nil, ParseError{msg: fmt.Sprintf("No more than one desc per config, line %v ('%v')", c.l, t)}
+			}
+			config.descCmt = &currentComment
 			currentComment = Comment{}
 			config.desc = strings.TrimSpace(t[res[2]:res[3]])
 			readDesc = true

@@ -383,6 +383,18 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.GetConfigs([]string{"gitolite-admin"})[0].desc, ShouldEqual, "test  d")
 		})
+		Convey("A Config can should have no more than one description", func() {
+			r := strings.NewReader(
+				`repo gitolite-admin
+				   desc = test  d  
+				   RW+ = user1
+				   desc = 2`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "Parse Error: No more than one desc per config, line 4 ('desc = 2')")
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.GetConfigs([]string{"gitolite-admin"})[0].desc, ShouldEqual, "test  d")
+		})
 	})
 
 	Convey("An reader can get comments and empty lines", t, func() {
@@ -431,7 +443,6 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.getGroup("@grpusers").cmt.String(), ShouldEqual, `#  a group  comment
 `)
-			fmt.Println(gtl.Print())
 			So(gtl.GetConfigs([]string{"r1"})[0].rules[0].cmt.String(), ShouldEqual, `#   main admins
 `)
 		})
