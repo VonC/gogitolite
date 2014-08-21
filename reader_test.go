@@ -221,7 +221,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(err, ShouldBeNil)
 			So(len(rules), ShouldEqual, 2)
 			So(rules[0].String(), ShouldEqual, "RW+ dev")
-			So(len(gtl.getUsers()), ShouldEqual, 2)
+			So(len(gtl.GetUsers()), ShouldEqual, 2)
 		})
 
 		Convey("undefined repo group", func() {
@@ -277,7 +277,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 4)
-			So(fmt.Sprintf("%v", gtl.getUsers()), ShouldEqual, "[user 'gitoliteadm' user 'alm1' user 'alm2' user 'projectowner']")
+			So(fmt.Sprintf("%v", gtl.GetUsers()), ShouldEqual, "[user 'gitoliteadm' user 'alm1' user 'alm2' user 'projectowner']")
 			almadmin := gtl.getGroup("@almadmins")
 			So(almadmin, ShouldNotBeNil)
 			So(fmt.Sprintf("%v", almadmin.members), ShouldEqual, "[alm1 alm2]")
@@ -364,7 +364,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 				   RW+ = @users`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldEqual, "First rule for gitolite-admin repo must have at least one user")
+			So(err.Error(), ShouldEqual, "First rule for gitolite-admin repo must have at least one user or group of users")
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
 		})

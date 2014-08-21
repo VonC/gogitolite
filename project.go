@@ -27,7 +27,7 @@ func (gtl *Gitolite) updateProjects() {
 		for _, rule := range rules {
 			//fmt.Printf("\nRule looked at: '%v' => '%v' '%v'\n", rule, rule.access, rule.param)
 			if rule.access == "RW" && rule.param == "" {
-				currentProject = &Project{users: rule.users}
+				currentProject = &Project{users: rule.GetUsers()}
 			} else if rule.access == "RW" && strings.HasPrefix(rule.param, prefix) {
 				projectname := rule.param[len(prefix):]
 				if currentProject == nil {
@@ -35,9 +35,9 @@ func (gtl *Gitolite) updateProjects() {
 				} else {
 					currentProject.name = projectname
 				}
-				if currentProject != nil && !currentProject.hasSameUsers(rule.getUsers()) {
+				if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
 					fmt.Printf("\nIgnore project name '%v': users differ on 'RW' (%v vs. %v)\n", projectname,
-						currentProject.users, rule.getUsers())
+						currentProject.users, rule.GetUsers())
 					currentProject = nil
 				}
 			} else if rule.access == "-" && rule.param == "VREF/NAME/" {
@@ -45,9 +45,9 @@ func (gtl *Gitolite) updateProjects() {
 					fmt.Printf("\nIgnore project with no name\n")
 					currentProject = nil
 				}
-				if currentProject != nil && !currentProject.hasSameUsers(rule.getUsers()) {
+				if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
 					fmt.Printf("\nIgnore project name '%v': users differ on '-' (%v vs. %v)\n", currentProject.name,
-						currentProject.users, rule.getUsers())
+						currentProject.users, rule.GetUsers())
 					currentProject = nil
 				}
 				if currentProject != nil {

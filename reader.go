@@ -126,8 +126,8 @@ func Read(r io.Reader) (*Gitolite, error) {
 			err = fmt.Errorf("First rule for gitolite-admin repo config must be 'RW+', empty param, instead of '%v'-'%v'", rule.access, rule.param)
 			return res, err
 		}
-		if len(rule.users) == 0 {
-			err = fmt.Errorf("First rule for gitolite-admin repo must have at least one user")
+		if len(rule.usersOrGroups) == 0 {
+			err = fmt.Errorf("First rule for gitolite-admin repo must have at least one user or group of users")
 			return res, err
 		}
 	}
@@ -382,7 +382,7 @@ type repoContainer interface {
 	addRepo(repo *Repo)
 }
 type userContainer interface {
-	getUsers() []*User
+	GetUsers() []*User
 	addUser(user *User)
 }
 
@@ -393,7 +393,7 @@ func (gtl *Gitolite) addRepo(repo *Repo) {
 	gtl.repos = append(gtl.repos, repo)
 }
 
-func (gtl *Gitolite) getUsers() []*User {
+func (gtl *Gitolite) GetUsers() []*User {
 	return gtl.users
 }
 func (gtl *Gitolite) addUser(user *User) {
@@ -408,10 +408,10 @@ func (cfg *Config) addRepo(repo *Repo) {
 }
 
 func (rule *Rule) getUsersOrGroups() []UserOrGroup {
-	return rule.users
+	return rule.usersOrGroups
 }
 func (rule *Rule) addUser(user *User) {
-	rule.users = append(rule.users, user)
+	rule.usersOrGroups = append(rule.usersOrGroups, user)
 }
 
 func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer) {
@@ -460,7 +460,7 @@ func (grp *Group) markAsRepoGroup() error {
 
 func addUserFromName(uc userContainer, username string, allUsersCtn userContainer) {
 	var user *User
-	for _, u := range allUsersCtn.getUsers() {
+	for _, u := range allUsersCtn.GetUsers() {
 		if u.name == username {
 			user = u
 		}
@@ -472,7 +472,7 @@ func addUserFromName(uc userContainer, username string, allUsersCtn userContaine
 		}
 	}
 	seen := false
-	for _, auser := range uc.getUsers() {
+	for _, auser := range uc.GetUsers() {
 		if auser.name == user.name {
 			seen = true
 			break
@@ -542,12 +542,19 @@ func (grp *Group) GetMembers() []string {
 	return grp.members
 }
 
+func (grp *Group) GetUsers() []*User {
+	if grp.kind == users {
+		return grp.users
+	}
+	return []*User{}
+}
+
 // Rule (of access to repo)
 type Rule struct {
-	access string
-	param  string
-	users  []UserOrGroup
-	cmt    *Comment
+	access        string
+	param         string
+	usersOrGroups []UserOrGroup
+	cmt           *Comment
 }
 
 func (rule *Rule) GetUsers() []*User {
@@ -568,9 +575,9 @@ func (rule *Rule) GetUsers() []*User {
 
 func (rule *Rule) String() string {
 	users := ""
-	for _, user := range rule.users {
-		users = " " + user.GetName()
-		members := user.GetMembers()
+	for _, userOrGroup := range rule.usersOrGroups {
+		users = " " + userOrGroup.GetName()
+		members := userOrGroup.GetMembers()
 		if len(members) > 0 {
 			users = users + " ("
 			first := true
@@ -844,8 +851,8 @@ func (rule *Rule) Print() string {
 		res = res + " " + rule.param
 	}
 	res = res + " ="
-	for _, user := range rule.users {
-		res = res + " " + user.name
+	for _, userOrGroup := range rule.usersOrGroups {
+		res = res + " " + userOrGroup.GetName()
 	}
 	res = res + "\n"
 	return res
