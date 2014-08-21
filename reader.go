@@ -749,6 +749,7 @@ func (grp *Group) Print() string {
 			res = res + " " + m
 		}
 	}
+	res = res + "\n"
 	return res
 }
 

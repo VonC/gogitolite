@@ -460,7 +460,8 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.Print(), ShouldEqual, `# comment
-@developers3 = dilbert alice wally3`)
+@developers3 = dilbert alice wally3
+`)
 		})
 
 		Convey("A Gitolite can print a single config with content", func() {
