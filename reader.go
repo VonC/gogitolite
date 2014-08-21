@@ -37,6 +37,7 @@ type Group struct {
 	kind      kind
 	container container
 	cmt       *Comment
+	users     []*User
 }
 
 func (grp *Group) String() string {
@@ -406,7 +407,7 @@ func (cfg *Config) addRepo(repo *Repo) {
 	cfg.repos = append(cfg.repos, repo)
 }
 
-func (rule *Rule) getUsers() []*User {
+func (rule *Rule) getUsersOrGroups() []UserOrGroup {
 	return rule.users
 }
 func (rule *Rule) addUser(user *User) {
@@ -507,18 +508,81 @@ func (cfg *Config) String() string {
 	return res
 }
 
+type UserOrGroup interface {
+	GetName() string
+	GetMembers() []string
+	User() *User
+	Group() *Group
+}
+
+func (usr *User) User() *User {
+	return usr
+}
+func (grp *Group) Group() *Group {
+	return grp
+}
+func (usr *User) Group() *Group {
+	return nil
+}
+func (grp *Group) User() *User {
+	return nil
+}
+
+func (usr *User) GetName() string {
+	return usr.name
+}
+func (usr *User) GetMembers() []string {
+	return []string{}
+}
+
+func (grp *Group) GetName() string {
+	return grp.name
+}
+func (grp *Group) GetMembers() []string {
+	return grp.members
+}
+
 // Rule (of access to repo)
 type Rule struct {
 	access string
 	param  string
-	users  []*User
+	users  []UserOrGroup
 	cmt    *Comment
+}
+
+func (rule *Rule) GetUsers() []*User {
+	res := []*User{}
+	for _, uog := range rule.getUsersOrGroups() {
+		if uog.User() != nil {
+			res = append(res, uog.User())
+		}
+		if uog.Group() != nil {
+			grp := uog.Group()
+			for _, usr := range grp.GetUsers() {
+				res = append(res, usr)
+			}
+		}
+	}
+	return res
 }
 
 func (rule *Rule) String() string {
 	users := ""
 	for _, user := range rule.users {
-		users = " " + user.name
+		users = " " + user.GetName()
+		members := user.GetMembers()
+		if len(members) > 0 {
+			users = users + " ("
+			first := true
+			for _, member := range members {
+				if !first {
+					users = users + ", "
+				}
+				users = users + member
+				first = false
+			}
+			users = users + ")"
+		}
 	}
 	users = strings.TrimSpace(users)
 	return strings.TrimSpace(fmt.Sprintf("%v %v %v", rule.access, rule.param, users))
