@@ -761,6 +761,12 @@ func (cfg *Config) Print() string {
 		res = res + " " + repo.name
 	}
 	res = res + "\n"
+	if cfg.desc != "" {
+		if cfg.descCmt != nil {
+			res = res + cfg.descCmt.Print()
+		}
+		res = res + "desc = " + cfg.desc + "\n"
+	}
 	for _, rule := range cfg.rules {
 		res = res + rule.Print()
 	}
