@@ -51,7 +51,7 @@ func (k kind) String() string {
 }
 
 func (grp *Group) String() string {
-	res := fmt.Sprintf("group '%v'%v: %+v", grp.name, grp.kind.String(), grp.members)
+	res := fmt.Sprintf("group '%v'%v: %+v", grp.name, grp.kind.String(), grp.GetMembers())
 	return res
 }
 
@@ -368,7 +368,7 @@ func readRepo(c *content) (stateFn, error) {
 			}
 			//fmt.Printf("\n%v\n", group)
 			group.markAsRepoGroup()
-			for _, rpname := range group.members {
+			for _, rpname := range group.GetMembers() {
 				addRepoFromName(c.gtl, rpname, c.gtl)
 				addRepoFromName(config, rpname, c.gtl)
 			}
@@ -468,7 +468,7 @@ func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer)
 
 func (gtl *Gitolite) addReposGroup(grp *Group) {
 	gtl.repoGroups = append(gtl.repoGroups, grp)
-	for _, reponame := range grp.members {
+	for _, reponame := range grp.GetMembers() {
 		addRepoFromName(gtl, reponame, gtl)
 	}
 }
@@ -724,7 +724,7 @@ func readRepoRules(c *content) (stateFn, error) {
 					if group.kind == undefined {
 						group.markAsUserGroup()
 					}
-					for _, username := range group.members {
+					for _, username := range group.GetMembers() {
 						addUserFromName(c.gtl, username, c.gtl)
 						rule.addGroup(group)
 					}
@@ -767,7 +767,7 @@ func (grp *Group) markAsUserGroup() error {
 		grp.kind = users
 		grp.container.addUsersGroup(grp)
 	}
-	for _, member := range grp.members {
+	for _, member := range grp.GetMembers() {
 		addUserFromName(grp, member, grp.container)
 	}
 	return nil
@@ -867,7 +867,7 @@ func (cmt *Comment) Print() string {
 func (grp *Group) Print() string {
 	res := grp.cmt.Print()
 	res = res + grp.name + " ="
-	for _, member := range grp.members {
+	for _, member := range grp.GetMembers() {
 		m := strings.TrimSpace(member)
 		if m != "" {
 			res = res + " " + m
