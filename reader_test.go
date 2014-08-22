@@ -68,6 +68,7 @@ func TestRead(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbGroup(), ShouldEqual, 1)
+			So(fmt.Sprintf("%v", gtl.getGroup("@developers2")), ShouldEqual, "group '@developers2'[undefined]: [dilbert alice wally2]")
 		})
 		Convey("An group name must be [a-zA-Z0-9_-]", func() {
 			r := strings.NewReader("  @develop;ers     =   dilbert alice wally")
