@@ -393,6 +393,7 @@ func (gtl *Gitolite) addRepo(repo *Repo) {
 	gtl.repos = append(gtl.repos, repo)
 }
 
+// GetUsers returns all users found in a gitolite config
 func (gtl *Gitolite) GetUsers() []*User {
 	return gtl.users
 }
@@ -508,6 +509,7 @@ func (cfg *Config) String() string {
 	return res
 }
 
+// UserOrGroup represents a User or a Group. Used by Rule.
 type UserOrGroup interface {
 	GetName() string
 	GetMembers() []string
@@ -515,33 +517,47 @@ type UserOrGroup interface {
 	Group() *Group
 }
 
+// User help a UserOrGroup to know it is a User
 func (usr *User) User() *User {
 	return usr
 }
+
+// Group help a UserOrGroup to know it is a Group
 func (grp *Group) Group() *Group {
 	return grp
 }
+
+// Group help a UserOrGroup to know it is *not* a Group
 func (usr *User) Group() *Group {
 	return nil
 }
+
+// User help a UserOrGroup to know it is *not* a User
 func (grp *Group) User() *User {
 	return nil
 }
 
+// GetName helps a UserOrGroup to access its name ('name' for User, or '@name' for group)
 func (usr *User) GetName() string {
 	return usr.name
 }
+
+// GetMembers helps a UserOrGroup to get all its users (itself for Users, its members for a group)
 func (usr *User) GetMembers() []string {
 	return []string{}
 }
 
+// GetName helps a UserOrGroup to access its name ('name' for User, or '@name' for group)
 func (grp *Group) GetName() string {
 	return grp.name
 }
+
+// GetMembers helps a UserOrGroup to get all its users (itself for Users, its members for a group)
 func (grp *Group) GetMembers() []string {
 	return grp.members
 }
 
+// GetUsers returns the users of a user group, or an empty list for a repo group
 func (grp *Group) GetUsers() []*User {
 	if grp.kind == users {
 		return grp.users
@@ -557,6 +573,7 @@ type Rule struct {
 	cmt           *Comment
 }
 
+// GetUsers returns the users of a rule (including the ones in a user group set for that rule)
 func (rule *Rule) GetUsers() []*User {
 	res := []*User{}
 	for _, uog := range rule.getUsersOrGroups() {
@@ -802,6 +819,7 @@ func (gtl *Gitolite) Print() string {
 	return res
 }
 
+// Print prints the comments (empty string if no comments)
 func (cmt *Comment) Print() string {
 	res := ""
 	for _, comment := range cmt.comments {
@@ -844,6 +862,7 @@ func (cfg *Config) Print() string {
 	return res
 }
 
+// Print prints the comments and access/params and user or groups of a rule
 func (rule *Rule) Print() string {
 	res := rule.cmt.Print()
 	res = res + rule.access
