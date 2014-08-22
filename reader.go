@@ -89,6 +89,8 @@ func (gtl *Gitolite) GetConfigs(reponames []string) []*Config {
 type container interface {
 	addReposGroup(grp *Group)
 	addUsersGroup(grp *Group)
+	addUser(user *User)
+	GetUsers() []*User
 }
 
 type kind int
@@ -606,7 +608,9 @@ func (rule *Rule) GetUsers() []*User {
 		}
 		if uog.Group() != nil {
 			grp := uog.Group()
+			//fmt.Println(grp)
 			for _, usr := range grp.GetUsers() {
+				//fmt.Println(usr)
 				res = append(res, usr)
 			}
 		}
@@ -763,7 +767,14 @@ func (grp *Group) markAsUserGroup() error {
 		grp.kind = users
 		grp.container.addUsersGroup(grp)
 	}
+	for _, member := range grp.members {
+		addUserFromName(grp, member, grp.container)
+	}
 	return nil
+}
+
+func (grp *Group) addUser(user *User) {
+	grp.users = append(grp.users, user)
 }
 
 // NbUsers returns the number of users (single or groups)

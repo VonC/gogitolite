@@ -295,7 +295,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			So(err, ShouldNotBeNil)
 			So(strings.Contains(err.Error(), "already used user group at line"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.NbUsers(), ShouldEqual, 1)
+			So(gtl.NbUsers(), ShouldEqual, 3)
 			So(gtl.NbGroupUsers(), ShouldEqual, 1)
 		})
 		Convey("A user name shouldn't be part of a repo group", func() {
@@ -537,6 +537,11 @@ R param = user @users
 					fmt.Printf("<<< '%v'\n", scannerRes.Text())
 				}
 			*/
+			config := gtl.GetConfigs([]string{"otherRepo"})[0]
+			rule := config.rules[0]
+			So(len(rule.usersOrGroups), ShouldEqual, 2)
+			So(fmt.Sprintf("%v", rule.usersOrGroups[1].String()), ShouldEqual, "group '@users'<users>: [u1 u2]")
+			So(len(rule.GetUsers()), ShouldEqual, 3)
 		})
 
 	})
