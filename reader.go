@@ -373,8 +373,8 @@ func readRepo(c *content) (stateFn, error) {
 func (r *Repo) String() string {
 	return fmt.Sprintf("repo '%v'", r.name)
 }
-func (u *User) String() string {
-	return fmt.Sprintf("user '%v'", u.name)
+func (usr *User) String() string {
+	return fmt.Sprintf("user '%v'", usr.name)
 }
 
 type repoContainer interface {
@@ -764,16 +764,16 @@ type Comment struct {
 
 var currentComment *Comment
 
-func (c *Comment) addComment(comment string) {
-	cmt := strings.TrimSpace(comment)
-	if cmt != "" {
-		c.comments = append(c.comments, cmt)
+func (cmt *Comment) addComment(comment string) {
+	comment = strings.TrimSpace(comment)
+	if comment != "" {
+		cmt.comments = append(cmt.comments, comment)
 	}
 }
 
-func (c *Comment) String() string {
+func (cmt *Comment) String() string {
 	res := ""
-	for _, comment := range c.comments {
+	for _, comment := range cmt.comments {
 		res = res + comment + "\n"
 	}
 	return res
