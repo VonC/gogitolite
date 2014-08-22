@@ -118,6 +118,9 @@ func TestRead(t *testing.T) {
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
+			grp := gtl.getGroup("@grp1")
+			So(grp, ShouldNotBeNil)
+			So(len(grp.GetUsers()), ShouldEqual, 0)
 		})
 	})
 
