@@ -40,7 +40,7 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbProjects(), ShouldEqual, 1)
-			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'(2): [module1 module2]]'")
+			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'<repos>: [module1 module2]]'")
 		})
 
 		Convey("Detects one project even if group undefined", func() {
@@ -61,7 +61,7 @@ func TestProject(t *testing.T) {
 			So(gtl.NbRepos(), ShouldEqual, 1)
 			So(gtl.NbProjects(), ShouldEqual, 1)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'(2): [module1 module2]]'")
+			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'<repos>: [module1 module2]]'")
 		})
 
 		Convey("No project if no RW rule before", func() {

@@ -40,8 +40,18 @@ type Group struct {
 	users     []*User
 }
 
+func (k kind) String() string {
+	if k == repos {
+		return "<repos>"
+	}
+	if k == users {
+		return "<users>"
+	}
+	return "[undefined]"
+}
+
 func (grp *Group) String() string {
-	res := fmt.Sprintf("group '%v'(%v): %+v", grp.name, grp.kind, grp.members)
+	res := fmt.Sprintf("group '%v'%v: %+v", grp.name, grp.kind.String(), grp.members)
 	return res
 }
 
@@ -528,6 +538,7 @@ type UserOrGroup interface {
 	GetMembers() []string
 	User() *User
 	Group() *Group
+	String() string
 }
 
 // User help a UserOrGroup to know it is a User

@@ -189,7 +189,7 @@ NbRepos: 3 [repo 'rep1' repo 'rep2' repo 'rep3']
 NbUsers: 2 [user 'user11' user 'user12']
 NbUserGroups: 2 [@usr1, @usr2]
 NbConfigs: 2 [config [repo 'rep1' repo 'rep2'] => [RW+ master user11], config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]]
-namesToGroups: 9 [@grp1 => [group '@grp1'(2): [rep1 rep2]], @grp2 => [group '@grp2'(2): [rep1 rep3]], @usr1 => [group '@usr1'(1): [user11]], @usr2 => [group '@usr2'(1): [user12]], rep1 => [group '@grp1'(2): [rep1 rep2] group '@grp2'(2): [rep1 rep3]], rep2 => [group '@grp1'(2): [rep1 rep2]], rep3 => [group '@grp2'(2): [rep1 rep3]], user11 => [group '@usr1'(1): [user11]], user12 => [group '@usr2'(1): [user12]]]
+namesToGroups: 9 [@grp1 => [group '@grp1'<repos>: [rep1 rep2]], @grp2 => [group '@grp2'<repos>: [rep1 rep3]], @usr1 => [group '@usr1'<users>: [user11]], @usr2 => [group '@usr2'<users>: [user12]], rep1 => [group '@grp1'<repos>: [rep1 rep2] group '@grp2'<repos>: [rep1 rep3]], rep2 => [group '@grp1'<repos>: [rep1 rep2]], rep3 => [group '@grp2'<repos>: [rep1 rep3]], user11 => [group '@usr1'<users>: [user11]], user12 => [group '@usr2'<users>: [user12]]]
 reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user11] config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]], rep2 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user11]], rep3 => [config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]]]
 `)
 		})
