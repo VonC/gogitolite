@@ -514,8 +514,8 @@ R param = user
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.Print(), ShouldEqual, `# group users
-users = u1 u2  
+			res := `# group users
+@users = u1 u2
 # ga comment
 repo gitolite-admin
 RW+ = admin
@@ -523,8 +523,20 @@ repo otherRepo
 # desc comment
 desc = a desc
 # rule comment
-R  param  = user @users
-`)
+R param = user @users
+`
+			So(gtl.Print(), ShouldEqual, res)
+			/*
+				gp := gtl.Print()
+				scanner := bufio.NewScanner(strings.NewReader(gp))
+				scannerRes := bufio.NewScanner(strings.NewReader(res))
+				fmt.Println("")
+				for scanner.Scan() {
+					fmt.Printf(">>> '%v'\n", scanner.Text())
+					scannerRes.Scan()
+					fmt.Printf("<<< '%v'\n", scannerRes.Text())
+				}
+			*/
 		})
 
 	})

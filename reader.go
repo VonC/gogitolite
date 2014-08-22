@@ -414,6 +414,19 @@ func (rule *Rule) getUsersOrGroups() []UserOrGroup {
 func (rule *Rule) addUser(user *User) {
 	rule.usersOrGroups = append(rule.usersOrGroups, user)
 }
+func (rule *Rule) addGroup(group *Group) {
+	notFound := true
+	for _, uog := range rule.getUsersOrGroups() {
+		rulegrp := uog.Group()
+		if rulegrp != nil && rulegrp.GetName() == group.GetName() {
+			notFound = false
+			break
+		}
+	}
+	if notFound {
+		rule.usersOrGroups = append(rule.usersOrGroups, group)
+	}
+}
 
 func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer) {
 	var repo *Repo
@@ -697,8 +710,8 @@ func readRepoRules(c *content) (stateFn, error) {
 						group.markAsUserGroup()
 					}
 					for _, username := range group.members {
-						addUserFromName(rule, username, c.gtl)
 						addUserFromName(c.gtl, username, c.gtl)
+						rule.addGroup(group)
 					}
 				}
 			}
