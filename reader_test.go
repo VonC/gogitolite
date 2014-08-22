@@ -168,7 +168,7 @@ func TestRead(t *testing.T) {
 			rules, err := gtl.Rules("arepo1")
 			So(err, ShouldBeNil)
 			So(len(rules), ShouldEqual, 1)
-			So(rules[0].String(), ShouldEqual, "RW+ master user1")
+			So(rules[0].String(), ShouldEqual, "RW+ master = user1")
 		})
 
 		Convey("Access rule can reference a group of repos", func() {
@@ -186,15 +186,15 @@ func TestRead(t *testing.T) {
 			rules, err := gtl.Rules("rep1")
 			So(err, ShouldBeNil)
 			So(len(rules), ShouldEqual, 2)
-			So(rules[0].String(), ShouldEqual, "RW+ master user11")
+			So(rules[0].String(), ShouldEqual, "RW+ master = user11")
 			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@grp1, @grp2, @usr1, @usr2]
 NbRepoGroups: 2 [@grp1, @grp2]
 NbRepos: 3 [repo 'rep1' repo 'rep2' repo 'rep3']
 NbUsers: 2 [user 'user11' user 'user12']
 NbUserGroups: 2 [@usr1, @usr2]
-NbConfigs: 2 [config [repo 'rep1' repo 'rep2'] => [RW+ master user11], config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]]
+NbConfigs: 2 [config [repo 'rep1' repo 'rep2'] => [RW+ master = user11], config [repo 'rep1' repo 'rep3'] => [RW+ dev = user12]]
 namesToGroups: 9 [@grp1 => [group '@grp1'<repos>: [rep1 rep2]], @grp2 => [group '@grp2'<repos>: [rep1 rep3]], @usr1 => [group '@usr1'<users>: [user11]], @usr2 => [group '@usr2'<users>: [user12]], rep1 => [group '@grp1'<repos>: [rep1 rep2] group '@grp2'<repos>: [rep1 rep3]], rep2 => [group '@grp1'<repos>: [rep1 rep2]], rep3 => [group '@grp2'<repos>: [rep1 rep3]], user11 => [group '@usr1'<users>: [user11]], user12 => [group '@usr2'<users>: [user12]]]
-reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user11] config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]], rep2 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user11]], rep3 => [config [repo 'rep1' repo 'rep3'] => [RW+ dev user12]]]
+reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = user11] config [repo 'rep1' repo 'rep3'] => [RW+ dev = user12]], rep2 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = user11]], rep3 => [config [repo 'rep1' repo 'rep3'] => [RW+ dev = user12]]]
 `)
 		})
 
@@ -209,7 +209,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master user
 			rules, err := gtl.Rules("rep1")
 			So(err, ShouldBeNil)
 			So(len(rules), ShouldEqual, 2)
-			So(rules[0].String(), ShouldEqual, "RW+ dev user21")
+			So(rules[0].String(), ShouldEqual, "RW+ dev = user21")
 		})
 
 		Convey("Access rules can reference a group of repos in param", func() {

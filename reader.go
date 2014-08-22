@@ -620,8 +620,15 @@ func (rule *Rule) GetUsers() []*User {
 
 func (rule *Rule) String() string {
 	users := ""
+	if len(rule.usersOrGroups) > 0 {
+		users = "="
+	}
+	first := true
 	for _, userOrGroup := range rule.usersOrGroups {
-		users = " " + userOrGroup.GetName()
+		if !first {
+			users = users + ","
+		}
+		users = users + " " + userOrGroup.GetName()
 		members := userOrGroup.GetMembers()
 		if len(members) > 0 {
 			users = users + " ("
@@ -635,6 +642,7 @@ func (rule *Rule) String() string {
 			}
 			users = users + ")"
 		}
+		first = false
 	}
 	users = strings.TrimSpace(users)
 	return strings.TrimSpace(fmt.Sprintf("%v %v %v", rule.access, rule.param, users))
