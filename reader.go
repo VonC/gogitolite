@@ -676,6 +676,46 @@ func readRepoRulesComment(t string) (bool, error) {
 	return true, nil
 }
 
+func (rule *Rule) readRepoRuleUsers(post string, c *content, t string) error {
+	users := strings.Split(post, " ")
+	for _, username := range users {
+		if !strings.HasPrefix(username, "@") {
+			addUserFromName(rule, username, c.gtl)
+			addUserFromName(c.gtl, username, c.gtl)
+			if grps, ok := c.gtl.namesToGroups[username]; ok {
+				for _, grp := range grps {
+					if err := grp.markAsUserGroup(); err != nil {
+						return ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
+					}
+				}
+			}
+		} else {
+			var group *Group
+			for _, g := range c.gtl.groups {
+				if g.name == username {
+					group = g
+					break
+				}
+			}
+			if group == nil {
+				group = &Group{name: username, container: c.gtl}
+				group.markAsUserGroup()
+			}
+			if group.kind == repos {
+				return ParseError{msg: fmt.Sprintf("user group '%v' named after a repo group at line %v ('%v')", username, c.l, t)}
+			}
+			if group.kind == undefined {
+				group.markAsUserGroup()
+			}
+			for _, username := range group.GetMembers() {
+				addUserFromName(c.gtl, username, c.gtl)
+				rule.addGroup(group)
+			}
+		}
+	}
+	return nil
+}
+
 func readRepoRule(c *content, config *Config, t string) (bool, error) {
 	res := readRepoRuleRx.FindStringSubmatchIndex(t)
 	if res == nil || len(res) == 0 {
@@ -695,44 +735,10 @@ func readRepoRule(c *content, config *Config, t string) (bool, error) {
 	if respre[4] > -1 {
 		rule.param = pre[respre[4]:respre[5]]
 	}
-
-	users := strings.Split(post, " ")
-	for _, username := range users {
-		if !strings.HasPrefix(username, "@") {
-			addUserFromName(rule, username, c.gtl)
-			addUserFromName(c.gtl, username, c.gtl)
-			if grps, ok := c.gtl.namesToGroups[username]; ok {
-				for _, grp := range grps {
-					if err := grp.markAsUserGroup(); err != nil {
-						return true, ParseError{msg: fmt.Sprintf("user name '%v' already used repo group at line %v ('%v')\n%v", username, c.l, t, err.Error())}
-					}
-				}
-			}
-		} else {
-			var group *Group
-			for _, g := range c.gtl.groups {
-				if g.name == username {
-					group = g
-					break
-				}
-			}
-			if group == nil {
-				group = &Group{name: username, container: c.gtl}
-				group.markAsUserGroup()
-			}
-			if group.kind == repos {
-				return true, ParseError{msg: fmt.Sprintf("user group '%v' named after a repo group at line %v ('%v')", username, c.l, t)}
-			}
-			if group.kind == undefined {
-				group.markAsUserGroup()
-			}
-			for _, username := range group.GetMembers() {
-				addUserFromName(c.gtl, username, c.gtl)
-				rule.addGroup(group)
-			}
-		}
+	err := rule.readRepoRuleUsers(post, c, t)
+	if err != nil {
+		return true, err
 	}
-
 	config.rules = append(config.rules, rule)
 	for _, repo := range config.repos {
 		if _, ok := c.gtl.reposToConfigs[repo.name]; !ok {
