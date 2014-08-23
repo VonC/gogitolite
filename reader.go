@@ -676,6 +676,31 @@ func readRepoRulesComment(t string) (bool, error) {
 	return true, nil
 }
 
+func (rule *Rule) readRepoRuleGroupUsers(username string, c *content, t string) error {
+	var group *Group
+	for _, g := range c.gtl.groups {
+		if g.name == username {
+			group = g
+			break
+		}
+	}
+	if group == nil {
+		group = &Group{name: username, container: c.gtl}
+		group.markAsUserGroup()
+	}
+	if group.kind == repos {
+		return ParseError{msg: fmt.Sprintf("user group '%v' named after a repo group at line %v ('%v')", username, c.l, t)}
+	}
+	if group.kind == undefined {
+		group.markAsUserGroup()
+	}
+	for _, username := range group.GetMembers() {
+		addUserFromName(c.gtl, username, c.gtl)
+		rule.addGroup(group)
+	}
+	return nil
+}
+
 func (rule *Rule) readRepoRuleUsers(post string, c *content, t string) error {
 	users := strings.Split(post, " ")
 	for _, username := range users {
@@ -690,26 +715,8 @@ func (rule *Rule) readRepoRuleUsers(post string, c *content, t string) error {
 				}
 			}
 		} else {
-			var group *Group
-			for _, g := range c.gtl.groups {
-				if g.name == username {
-					group = g
-					break
-				}
-			}
-			if group == nil {
-				group = &Group{name: username, container: c.gtl}
-				group.markAsUserGroup()
-			}
-			if group.kind == repos {
-				return ParseError{msg: fmt.Sprintf("user group '%v' named after a repo group at line %v ('%v')", username, c.l, t)}
-			}
-			if group.kind == undefined {
-				group.markAsUserGroup()
-			}
-			for _, username := range group.GetMembers() {
-				addUserFromName(c.gtl, username, c.gtl)
-				rule.addGroup(group)
+			if err := rule.readRepoRuleGroupUsers(username, c, t); err != nil {
+				return err
 			}
 		}
 	}
