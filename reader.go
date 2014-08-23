@@ -747,6 +747,11 @@ func readRepoRule(c *content, config *Config, t string) (bool, error) {
 		return true, err
 	}
 	config.rules = append(config.rules, rule)
+	updateReposToConfig(c, config)
+	return true, nil
+}
+
+func updateReposToConfig(c *content, config *Config) {
 	for _, repo := range config.repos {
 		if _, ok := c.gtl.reposToConfigs[repo.name]; !ok {
 			c.gtl.reposToConfigs[repo.name] = []*Config{}
@@ -762,7 +767,6 @@ func readRepoRule(c *content, config *Config, t string) (bool, error) {
 			c.gtl.reposToConfigs[repo.name] = append(c.gtl.reposToConfigs[repo.name], config)
 		}
 	}
-	return true, nil
 }
 
 func readRepoRules(c *content) (stateFn, error) {
