@@ -3,33 +3,42 @@ package gogitolite
 import (
 	"fmt"
 	"strings"
+
+	"github.com/VonC/gogitolite/gitolite"
 )
 
 // Project has a name and users
 type Project struct {
 	name  string
-	users []*User
+	users []*gitolite.User
+}
+
+// ProjectManager manages project for a gitolite instance
+type ProjectManager struct {
+	gtl      *gitolite.Gitolite
+	projects []*Project
 }
 
 // NbProjects returns the number of detected projects
-func (gtl *Gitolite) NbProjects() int {
-	gtl.updateProjects()
-	return len(gtl.projects)
+func (pm *ProjectManager) NbProjects() int {
+	pm.updateProjects()
+	return len(pm.projects)
 }
 
 var prefix = "VREF/NAME/conf/subs/"
 
-func (gtl *Gitolite) updateProjects() {
-	configs := gtl.reposToConfigs["gitolite-admin"]
+func (pm *ProjectManager) updateProjects() {
+	gtl := pm.gtl
+	configs := gtl.GetConfigsForRepo("gitolite-admin")
 	for _, config := range configs {
 		var currentProject *Project
-		rules := config.rules
+		rules := config.Rules()
 		for _, rule := range rules {
-			//fmt.Printf("\nRule looked at: '%v' => '%v' '%v'\n", rule, rule.access, rule.param)
-			if rule.access == "RW" && rule.param == "" {
+			//fmt.Printf("\nRule looked at: '%v' => '%v' '%v'\n", rule, rule.Access(), rule.Param())
+			if rule.Access() == "RW" && rule.Param() == "" {
 				currentProject = &Project{users: rule.GetUsers()}
-			} else if rule.access == "RW" && strings.HasPrefix(rule.param, prefix) {
-				projectname := rule.param[len(prefix):]
+			} else if rule.Access() == "RW" && strings.HasPrefix(rule.Param(), prefix) {
+				projectname := rule.Param()[len(prefix):]
 				if currentProject == nil {
 					fmt.Printf("\nIgnore project name '%v': no RW rule before\n", projectname)
 				} else {
@@ -40,7 +49,7 @@ func (gtl *Gitolite) updateProjects() {
 						currentProject.users, rule.GetUsers())
 					currentProject = nil
 				}
-			} else if rule.access == "-" && rule.param == "VREF/NAME/" {
+			} else if rule.Access() == "-" && rule.Param() == "VREF/NAME/" {
 				if currentProject != nil && currentProject.name == "" {
 					fmt.Printf("\nIgnore project with no name\n")
 					currentProject = nil
@@ -51,18 +60,18 @@ func (gtl *Gitolite) updateProjects() {
 					currentProject = nil
 				}
 				if currentProject != nil {
-					group := gtl.getGroup("@" + currentProject.name)
+					group := gtl.GetGroup("@" + currentProject.name)
 					if group == nil {
 						fmt.Printf("\nIgnore project name '%v': no repo group found\n", currentProject.name)
 						currentProject = nil
-					} else if group.kind == users {
+					} else if group.Kind == gitolite.Users {
 						fmt.Printf("\nIgnore project name '%v': user group found (instead of repo group)\n", currentProject.name)
 						currentProject = nil
-					} else if group.kind == undefined {
-						group.markAsRepoGroup()
+					} else if group.Kind == gitolite.Undefined {
+						group.MarkAsRepoGroup()
 					}
 					if currentProject != nil {
-						gtl.projects = append(gtl.projects, currentProject)
+						pm.projects = append(pm.projects, currentProject)
 					}
 				}
 				currentProject = nil
@@ -73,7 +82,7 @@ func (gtl *Gitolite) updateProjects() {
 	}
 }
 
-func (p *Project) hasSameUsers(users []*User) bool {
+func (p *Project) hasSameUsers(users []*gitolite.User) bool {
 	//fmt.Printf("\nusers '%v'\n", users)
 	if len(p.users) != len(users) {
 		return false
@@ -81,7 +90,7 @@ func (p *Project) hasSameUsers(users []*User) bool {
 	for _, pusers := range p.users {
 		seen := false
 		for _, user := range users {
-			if pusers.name == user.name {
+			if pusers.GetName() == user.GetName() {
 				seen = true
 				break
 			}
