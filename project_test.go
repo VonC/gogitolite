@@ -36,11 +36,12 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(gtl.NbProjects(), ShouldEqual, 1)
-			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'<repos>: [module1 module2]]'")
+			So(pm.NbProjects(), ShouldEqual, 1)
+			So(fmt.Sprintf("groups '%v'", gtl.Groups()), ShouldEqual, "groups '[group '@project'<repos>: [module1 module2]]'")
 		})
 
 		Convey("Detects one project even if group undefined", func() {
@@ -56,12 +57,13 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 1)
-			So(gtl.NbProjects(), ShouldEqual, 1)
+			So(pm.NbProjects(), ShouldEqual, 1)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(fmt.Sprintf("groups '%v'", gtl.groups), ShouldEqual, "groups '[group '@project'<repos>: [module1 module2]]'")
+			So(fmt.Sprintf("groups '%v'", gtl.Groups()), ShouldEqual, "groups '[group '@project'<repos>: [module1 module2]]'")
 		})
 
 		Convey("No project if no RW rule before", func() {
@@ -79,10 +81,11 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(gtl.NbProjects(), ShouldEqual, 0)
+			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
 		Convey("No project if none detected", func() {
@@ -97,10 +100,11 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(gtl.NbProjects(), ShouldEqual, 0)
+			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
 		Convey("No project if users changes in VREF/NAME/conf", func() {
@@ -118,11 +122,12 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 3)
-			So(gtl.NbProjects(), ShouldEqual, 0)
+			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
 		Convey("No project if users changes in VREF/NAME/", func() {
@@ -140,11 +145,12 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 3)
-			So(gtl.NbProjects(), ShouldEqual, 0)
+			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
 		Convey("No project if no repo group", func() {
@@ -160,10 +166,11 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 2)
-			So(gtl.NbProjects(), ShouldEqual, 0)
+			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
 		Convey("No project if user group", func() {
@@ -184,10 +191,11 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
+			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(gtl.NbProjects(), ShouldEqual, 0)
+			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
 	})
