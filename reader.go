@@ -121,19 +121,13 @@ func readGroup(c *content) (stateFn, error) {
 	//fmt.Println(res, "'"+c.s+"'", "'"+c.s[res[2]:res[3]]+"'", "'"+c.s[res[4]:res[5]]+"'")
 	grpname := t[res[2]:res[3]]
 	grpmembers := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
-	grp := gitolite.NewGroup(grpname, grpmembers, c.gtl, currentComment)
-	currentComment = &gitolite.Comment{}
-	for _, g := range c.gtl.Groups() {
-		if g.GetName() == grpname {
-			return nil, ParseError{msg: fmt.Sprintf("Duplicate group name '%v' at line %v ('%v')", grpname, c.l, t)}
-		}
-	}
 	// http://cats.groups.google.com.meowbify.com/forum/#!topic/golang-nuts/-pqkICuokio
 	//fmt.Printf("'%v'\n", grpmembers)
 
-	if err := c.gtl.AddUserGroup(grp, grpmembers); err != nil {
+	if err := c.gtl.AddUserGroup(grpname, grpmembers, currentComment); err != nil {
 		return nil, ParseError{msg: fmt.Sprintf("%v at line %v ('%v')", err.Error(), c.l, t)}
 	}
+	currentComment = &gitolite.Comment{}
 
 	// fmt.Println("'" + c.s + "'")
 	if !c.s.Scan() {

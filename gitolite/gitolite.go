@@ -18,6 +18,7 @@ type Gitolite struct {
 	reposToConfigs map[string][]*Config
 }
 
+// Creates an empty gitolite config
 func NewGitolite() *Gitolite {
 	res := &Gitolite{
 		namesToGroups:  make(map[string][]*Group),
@@ -34,11 +35,6 @@ type Group struct {
 	container Container
 	cmt       *Comment
 	users     []*User
-}
-
-func NewGroup(grpname string, grpmembers []string, container Container, comment *Comment) *Group {
-	res := &Group{name: grpname, members: grpmembers, container: container, cmt: comment}
-	return res
 }
 
 type Kind int
@@ -572,7 +568,13 @@ func (rule *Rule) HasAnyUserOrGroup() bool {
 }
 
 // AddUserGroup adds a user group to a gitolite config
-func (gtl *Gitolite) AddUserGroup(grp *Group, grpmembers []string) error {
+func (gtl *Gitolite) AddUserGroup(grpname string, grpmembers []string, currentComment *Comment) error {
+	grp := &Group{name: grpname, members: grpmembers, container: gtl, cmt: currentComment}
+	for _, g := range gtl.Groups() {
+		if g.GetName() == grpname {
+			return fmt.Errorf("Duplicate group name '%v'", grpname)
+		}
+	}
 	seen := map[string]bool{}
 	for _, val := range grpmembers {
 		if _, ok := seen[val]; !ok {
@@ -583,7 +585,6 @@ func (gtl *Gitolite) AddUserGroup(grp *Group, grpmembers []string) error {
 		gtl.namesToGroups[val] = append(gtl.namesToGroups[val], grp)
 	}
 	gtl.groups = append(gtl.groups, grp)
-	grpname := grp.GetName()
 	gtl.namesToGroups[grpname] = append(gtl.namesToGroups[grpname], grp)
 	return nil
 }
@@ -660,7 +661,7 @@ func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, username string) error {
 		}
 	}
 	if group == nil {
-		group = NewGroup(username, []string{}, gtl, nil)
+		group = &Group{name: username, container: gtl}
 		group.MarkAsUserGroup()
 	}
 	if group.Kind == Repos {
