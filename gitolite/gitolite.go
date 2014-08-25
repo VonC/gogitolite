@@ -155,7 +155,7 @@ func (grp *Group) GetUsers() []*User {
 // GetUsers returns the users of a rule (including the ones in a user group set for that rule)
 func (rule *Rule) GetUsers() []*User {
 	res := []*User{}
-	for _, uog := range rule.getUsersOrGroups() {
+	for _, uog := range rule.UsersOrGroups() {
 		if uog.User() != nil {
 			res = append(res, uog.User())
 		}
@@ -202,7 +202,8 @@ func (cfg *Config) addRepo(repo *Repo) {
 	cfg.repos = append(cfg.repos, repo)
 }
 
-func (rule *Rule) getUsersOrGroups() []UserOrGroup {
+// UsersOrGroups get all users or group associated with rule
+func (rule *Rule) UsersOrGroups() []UserOrGroup {
 	return rule.usersOrGroups
 }
 func (rule *Rule) addUser(user *User) {
@@ -408,7 +409,7 @@ func (gtl *Gitolite) NbRepos() int {
 
 func (rule *Rule) addGroup(group *Group) {
 	notFound := true
-	for _, uog := range rule.getUsersOrGroups() {
+	for _, uog := range rule.UsersOrGroups() {
 		rulegrp := uog.Group()
 		if rulegrp != nil && rulegrp.GetName() == group.GetName() {
 			notFound = false
@@ -588,7 +589,6 @@ func (gtl *Gitolite) AddUserGroup(grp *Group, grpmembers []string) error {
 }
 
 func (gtl *Gitolite) AddConfig(config *Config, rpmembers []string) error {
-	gtl.configs = append(gtl.configs, config)
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
 			addRepoFromName(config, rpname, gtl)
@@ -596,7 +596,7 @@ func (gtl *Gitolite) AddConfig(config *Config, rpmembers []string) error {
 			if grps, ok := gtl.namesToGroups[rpname]; ok {
 				for _, grp := range grps {
 					if err := grp.MarkAsRepoGroup(); err != nil {
-						return fmt.Errorf("repo name '%v' already used user group\n%v", rpname, err.Error())
+						return fmt.Errorf("repo name '%v' already used in a user group\n%v", rpname, err.Error())
 					}
 				}
 			}
@@ -619,6 +619,7 @@ func (gtl *Gitolite) AddConfig(config *Config, rpmembers []string) error {
 			}
 		}
 	}
+	gtl.configs = append(gtl.configs, config)
 	return nil
 }
 
@@ -638,11 +639,16 @@ func (gtl *Gitolite) AddUserToRule(rule *Rule, username string) error {
 	if grps, ok := gtl.namesToGroups[username]; ok {
 		for _, grp := range grps {
 			if err := grp.MarkAsUserGroup(); err != nil {
-				return fmt.Errorf("user name '%v' already used repo group\n%v", username, err.Error())
+				return fmt.Errorf("user name '%v' already used in a repo group\n%v", username, err.Error())
 			}
 		}
 	}
 	return nil
+}
+
+// Desc get description for a config, empty string if there is none.
+func (cfg *Config) Desc() string {
+	return cfg.desc
 }
 
 func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, username string) error {
@@ -773,4 +779,24 @@ func (rule *Rule) Print() string {
 	}
 	res = res + "\n"
 	return res
+}
+
+// NBConfigs returns the number of configs
+func (gtl *Gitolite) NbConfigs() int {
+	return len(gtl.configs)
+}
+
+// Comment returns comment associated with Group
+func (grp *Group) Comment() *Comment {
+	return grp.cmt
+}
+
+// Comment returns comment associated with Config
+func (cfg *Config) Comment() *Comment {
+	return cfg.cmt
+}
+
+// Comment returns comment associated with Rule
+func (rule *Rule) Comment() *Comment {
+	return rule.cmt
 }

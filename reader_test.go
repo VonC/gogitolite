@@ -68,7 +68,7 @@ func TestRead(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbGroup(), ShouldEqual, 1)
-			So(fmt.Sprintf("%v", gtl.getGroup("@developers2")), ShouldEqual, "group '@developers2'[undefined]: [dilbert alice wally2]")
+			So(fmt.Sprintf("%v", gtl.GetGroup("@developers2")), ShouldEqual, "group '@developers2'[undefined]: [dilbert alice wally2]")
 		})
 		Convey("An group name must be [a-zA-Z0-9_-]", func() {
 			r := strings.NewReader("  @develop;ers     =   dilbert alice wally")
@@ -118,7 +118,7 @@ func TestRead(t *testing.T) {
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
-			grp := gtl.getGroup("@grp1")
+			grp := gtl.GetGroup("@grp1")
 			So(grp, ShouldNotBeNil)
 			So(len(grp.GetUsers()), ShouldEqual, 0)
 		})
@@ -283,9 +283,9 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 4)
 			So(fmt.Sprintf("%v", gtl.GetUsers()), ShouldEqual, "[user 'gitoliteadm' user 'alm1' user 'alm2' user 'projectowner']")
-			almadmin := gtl.getGroup("@almadmins")
+			almadmin := gtl.GetGroup("@almadmins")
 			So(almadmin, ShouldNotBeNil)
-			So(fmt.Sprintf("%v", almadmin.members), ShouldEqual, "[alm1 alm2]")
+			So(fmt.Sprintf("%v", almadmin.String()), ShouldEqual, "group '@almadmins'<users>: [alm1 alm2]")
 		})
 	})
 
@@ -298,7 +298,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 					 repo user1`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
-			So(strings.Contains(err.Error(), "already used user group at line"), ShouldBeTrue)
+			So(strings.Contains(err.Error(), "already used in a user group"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 3)
 			So(gtl.NbGroupUsers(), ShouldEqual, 1)
@@ -310,7 +310,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 					   RW+ = repo2`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
-			So(strings.Contains(err.Error(), "already used repo group at line"), ShouldBeTrue)
+			So(strings.Contains(err.Error(), "already used in a repo group"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 1)
 		})
@@ -338,7 +338,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "There must be at least one rule for gitolite-admin repo config")
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+			So(gtl.NbConfigs(), ShouldEqual, 1)
 		})
 
 		Convey("A gitolite-admin must have one RW+ rule", func() {
@@ -349,7 +349,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldContainSubstring, "First rule for gitolite-admin repo config must be 'RW+', empty param")
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+			So(gtl.NbConfigs(), ShouldEqual, 1)
 		})
 
 		Convey("A gitolite-admin must have one RW+ rule with no param", func() {
@@ -360,7 +360,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldContainSubstring, "First rule for gitolite-admin repo config must be 'RW+', empty param")
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+			So(gtl.NbConfigs(), ShouldEqual, 1)
 		})
 
 		Convey("A gitolite-admin must have one RW+ rule with at least one user", func() {
@@ -371,7 +371,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "First rule for gitolite-admin repo must have at least one user or group of users")
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(len(gtl.GetConfigs(nil)), ShouldEqual, 0)
+			So(gtl.NbConfigs(), ShouldEqual, 1)
 		})
 	})
 
@@ -386,7 +386,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.GetConfigs([]string{"gitolite-admin"})[0].desc, ShouldEqual, "test  d")
+			So(gtl.GetConfigsForRepo("gitolite-admin")[0].Desc(), ShouldEqual, "test  d")
 		})
 		Convey("A Config can should have no more than one description", func() {
 			r := strings.NewReader(
@@ -398,7 +398,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "Parse Error: No more than one desc per config, line 4 ('desc = 2')")
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.GetConfigs([]string{"gitolite-admin"})[0].desc, ShouldEqual, "test  d")
+			So(gtl.GetConfigsForRepo("gitolite-admin")[0].Desc(), ShouldEqual, "test  d")
 		})
 	})
 
@@ -414,7 +414,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.getGroup("@grpusers").cmt.String(), ShouldEqual, `#  a   comment
+			So(gtl.GetGroup("@grpusers").Comment().String(), ShouldEqual, `#  a   comment
 `)
 		})
 
@@ -428,9 +428,9 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.getGroup("@grpusers").cmt.String(), ShouldEqual, `#  a group  comment
+			So(gtl.GetGroup("@grpusers").Comment().String(), ShouldEqual, `#  a group  comment
 `)
-			So(gtl.GetConfigs([]string{"r1"})[0].cmt.String(), ShouldEqual, `# config comment
+			So(gtl.GetConfigsForRepo("r1")[0].Comment().String(), ShouldEqual, `# config comment
 `)
 		})
 
@@ -446,9 +446,9 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.getGroup("@grpusers").cmt.String(), ShouldEqual, `#  a group  comment
+			So(gtl.GetGroup("@grpusers").Comment().String(), ShouldEqual, `#  a group  comment
 `)
-			So(gtl.GetConfigs([]string{"r1"})[0].rules[0].cmt.String(), ShouldEqual, `#   main admins
+			So(gtl.GetConfigsForRepo("r1")[0].Rules()[0].Comment().String(), ShouldEqual, `#   main admins
 `)
 		})
 
@@ -542,10 +542,10 @@ R param = user @users
 					fmt.Printf("<<< '%v'\n", scannerRes.Text())
 				}
 			*/
-			config := gtl.GetConfigs([]string{"otherRepo"})[0]
-			rule := config.rules[0]
-			So(len(rule.usersOrGroups), ShouldEqual, 2)
-			So(fmt.Sprintf("%v", rule.usersOrGroups[1].String()), ShouldEqual, "group '@users'<users>: [u1 u2]")
+			config := gtl.GetConfigsForRepo("otherRepo")[0]
+			rule := config.Rules()[0]
+			So(len(rule.UsersOrGroups()), ShouldEqual, 2)
+			So(fmt.Sprintf("%v", rule.UsersOrGroups()[1].String()), ShouldEqual, "group '@users'<users>: [u1 u2]")
 			So(len(rule.GetUsers()), ShouldEqual, 3)
 		})
 
