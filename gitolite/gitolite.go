@@ -31,19 +31,29 @@ func NewGitolite() *Gitolite {
 type Group struct {
 	name      string
 	members   []string
-	Kind      Kind
+	kind      kind
 	container Container
 	cmt       *Comment
 	users     []*User
 }
 
-type Kind int
+type kind int
 
 const (
-	Undefined = iota
-	Users
-	Repos
+	undefined = iota
+	users
+	repos
 )
+
+// IsUsers checks if the current group has been marked for users group
+func (grp *Group) IsUsers() bool {
+	return grp.kind == users
+}
+
+// IsUndefined checks if the current group hasn't been marked yet
+func (grp *Group) IsUndefined() bool {
+	return grp.kind == undefined
+}
 
 // Container contains group (of repos or users) and users
 type Container interface {
@@ -142,7 +152,7 @@ func (grp *Group) GetMembers() []string {
 
 // GetUsers returns the users of a user group, or an empty list for a repo group
 func (grp *Group) GetUsers() []*User {
-	if grp.Kind == Users {
+	if grp.kind == users {
 		return grp.users
 	}
 	return []*User{}
@@ -206,18 +216,18 @@ func (rule *Rule) addUser(user *User) {
 	rule.usersOrGroups = append(rule.usersOrGroups, user)
 }
 
-func (k Kind) String() string {
-	if k == Repos {
+func (k kind) String() string {
+	if k == repos {
 		return "<repos>"
 	}
-	if k == Users {
+	if k == users {
 		return "<users>"
 	}
 	return "[undefined]"
 }
 
 func (grp *Group) String() string {
-	res := fmt.Sprintf("group '%v'%v: %+v", grp.name, grp.Kind.String(), grp.GetMembers())
+	res := fmt.Sprintf("group '%v'%v: %+v", grp.name, grp.kind.String(), grp.GetMembers())
 	return res
 }
 
@@ -426,11 +436,11 @@ func (gtl *Gitolite) addReposGroup(grp *Group) {
 
 // MarkAsRepoGroup makes sure a group is a repo group
 func (grp *Group) MarkAsRepoGroup() error {
-	if grp.Kind == Users {
+	if grp.kind == users {
 		return fmt.Errorf("group '%v' is a users group, not a repo one", grp.name)
 	}
-	if grp.Kind == Undefined {
-		grp.Kind = Repos
+	if grp.kind == undefined {
+		grp.kind = repos
 		grp.container.addReposGroup(grp)
 	}
 	return nil
@@ -490,11 +500,11 @@ func AddUserFromName(uc userContainer, username string, allUsersCtn userContaine
 
 func (grp *Group) MarkAsUserGroup() error {
 	//fmt.Printf("\nmarkAsUserGroup '%v'", grp)
-	if grp.Kind == Repos {
+	if grp.kind == repos {
 		return fmt.Errorf("group '%v' is a repos group, not a user one", grp.name)
 	}
-	if grp.Kind == Undefined {
-		grp.Kind = Users
+	if grp.kind == undefined {
+		grp.kind = users
 		grp.container.addUsersGroup(grp)
 	}
 	for _, member := range grp.GetMembers() {
@@ -664,10 +674,10 @@ func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, username string) error {
 		group = &Group{name: username, container: gtl}
 		group.MarkAsUserGroup()
 	}
-	if group.Kind == Repos {
+	if group.kind == repos {
 		return fmt.Errorf("user group '%v' named after a repo group", username)
 	}
-	if group.Kind == Undefined {
+	if group.kind == undefined {
 		group.MarkAsUserGroup()
 	}
 	for _, username := range group.GetMembers() {

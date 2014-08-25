@@ -64,10 +64,10 @@ func (pm *ProjectManager) updateProjects() {
 					if group == nil {
 						fmt.Printf("\nIgnore project name '%v': no repo group found\n", currentProject.name)
 						currentProject = nil
-					} else if group.Kind == gitolite.Users {
+					} else if group.IsUsers() {
 						fmt.Printf("\nIgnore project name '%v': user group found (instead of repo group)\n", currentProject.name)
 						currentProject = nil
-					} else if group.Kind == gitolite.Undefined {
+					} else if group.IsUndefined() {
 						group.MarkAsRepoGroup()
 					}
 					if currentProject != nil {
