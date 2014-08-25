@@ -18,7 +18,7 @@ type Gitolite struct {
 	reposToConfigs map[string][]*Config
 }
 
-// Creates an empty gitolite config
+// NewGitolite creates an empty gitolite config
 func NewGitolite() *Gitolite {
 	res := &Gitolite{
 		namesToGroups:  make(map[string][]*Group),
