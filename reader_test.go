@@ -544,8 +544,7 @@ R param = user @users
 			*/
 			config := gtl.GetConfigsForRepo("otherRepo")[0]
 			rule := config.Rules()[0]
-			So(len(rule.UsersOrGroups()), ShouldEqual, 2)
-			So(fmt.Sprintf("%v", rule.UsersOrGroups()[1].String()), ShouldEqual, "group '@users'<users>: [u1 u2]")
+			So(fmt.Sprintf("%v", rule.String()), ShouldEqual, "R param = user, @users (u1, u2)")
 			So(len(rule.GetUsers()), ShouldEqual, 3)
 		})
 
