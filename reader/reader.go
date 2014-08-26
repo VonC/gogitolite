@@ -1,4 +1,4 @@
-package gogitolite
+package reader
 
 import (
 	"bufio"
@@ -20,7 +20,7 @@ type content struct {
 type stateFn func(*content) (stateFn, error)
 
 var test = ""
-var currentComment *gitolite.Comment
+var currentComment *gitolite.Comment = &gitolite.Comment{}
 
 // Read a gitolite config file
 func Read(r io.Reader) (*gitolite.Gitolite, error) {

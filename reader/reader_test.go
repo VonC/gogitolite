@@ -1,4 +1,4 @@
-package gogitolite
+package reader
 
 import (
 	"fmt"

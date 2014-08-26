@@ -1,10 +1,11 @@
-package gogitolite
+package project
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/VonC/gogitolite/reader"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -35,7 +36,7 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -56,7 +57,7 @@ func TestProject(t *testing.T) {
 
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -80,7 +81,7 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -99,7 +100,7 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -121,7 +122,7 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -144,7 +145,7 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -165,7 +166,7 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -190,7 +191,7 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, err := Read(r)
+			gtl, err := reader.Read(r)
 			pm := &ProjectManager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)

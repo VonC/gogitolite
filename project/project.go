@@ -1,4 +1,4 @@
-package gogitolite
+package project
 
 import (
 	"fmt"
