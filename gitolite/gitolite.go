@@ -668,20 +668,22 @@ func (cfg *Config) Desc() string {
 	return cfg.desc
 }
 
-func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, username string) error {
+// AddUserGroupToRule adds users group to rule. If the group doesn't exist, creates it.
+// If the group name is already used as a repos group, error.
+func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, usergrpname string) error {
 	var group *Group
 	for _, g := range gtl.Groups() {
-		if g.GetName() == username {
+		if g.GetName() == usergrpname {
 			group = g
 			break
 		}
 	}
 	if group == nil {
-		group = &Group{name: username, container: gtl}
+		group = &Group{name: usergrpname, container: gtl}
 		group.markAsUserGroup()
 	}
 	if group.kind == repos {
-		return fmt.Errorf("user group '%v' named after a repo group", username)
+		return fmt.Errorf("user group '%v' named after a repo group", usergrpname)
 	}
 	if group.kind == undefined {
 		group.markAsUserGroup()
