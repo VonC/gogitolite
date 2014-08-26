@@ -156,10 +156,10 @@ func readRepo(c *content) (stateFn, error) {
 		}
 	}
 	var config *gitolite.Config
-	if cfg, err := c.gtl.AddConfig(rpmembers, currentComment); err != nil {
-		return nil, ParseError{msg: fmt.Sprintf("%v\nAt line %v ('%v')", err.Error(), c.l, t)}
-	} else {
+	if cfg, err := c.gtl.AddConfig(rpmembers, currentComment); err == nil {
 		config = cfg
+	} else {
+		return nil, ParseError{msg: fmt.Sprintf("%v\nAt line %v ('%v')", err.Error(), c.l, t)}
 	}
 	currentComment = &gitolite.Comment{}
 
