@@ -650,6 +650,7 @@ func (cfg *Config) SetDesc(desc string, comment *Comment) error {
 	return nil
 }
 
+// AddUserToRule adds user to rule unless user name already used in a repo group
 func (gtl *Gitolite) AddUserToRule(rule *Rule, username string) error {
 	addUserFromName(rule, username, gtl)
 	addUserFromName(gtl, username, gtl)
@@ -700,6 +701,7 @@ func NewRule(access, param string, comment *Comment) *Rule {
 	return res
 }
 
+// AddRuleToConfig adds rule to config and update repo to config map
 func (gtl *Gitolite) AddRuleToConfig(rule *Rule, config *Config) {
 	config.rules = append(config.rules, rule)
 	for _, repo := range config.repos {
@@ -800,7 +802,7 @@ func (rule *Rule) Print() string {
 	return res
 }
 
-// NBConfigs returns the number of configs
+// NbConfigs returns the number of configs
 func (gtl *Gitolite) NbConfigs() int {
 	return len(gtl.configs)
 }
