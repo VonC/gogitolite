@@ -87,12 +87,6 @@ type Config struct {
 	cmt     *Comment
 }
 
-// NewConfig builds a Config
-func NewConfig(comment *Comment) *Config {
-	res := &Config{repos: []*Repo{}, cmt: comment}
-	return res
-}
-
 // Rule (of access to repo)
 type Rule struct {
 	access        string
@@ -599,7 +593,10 @@ func (gtl *Gitolite) AddUserGroup(grpname string, grpmembers []string, currentCo
 	return nil
 }
 
-func (gtl *Gitolite) AddConfig(config *Config, rpmembers []string) error {
+// AddConfig adds a new config and returns it,
+// unless a repo name is used as user group, or is an undefined group name
+func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, error) {
+	config := &Config{repos: []*Repo{}, cmt: comment}
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
 			addRepoFromName(config, rpname, gtl)
@@ -607,7 +604,7 @@ func (gtl *Gitolite) AddConfig(config *Config, rpmembers []string) error {
 			if grps, ok := gtl.namesToGroups[rpname]; ok {
 				for _, grp := range grps {
 					if err := grp.MarkAsRepoGroup(); err != nil {
-						return fmt.Errorf("repo name '%v' already used in a user group\n%v", rpname, err.Error())
+						return nil, fmt.Errorf("repo name '%v' already used in a user group\n%v", rpname, err.Error())
 					}
 				}
 			}
@@ -620,7 +617,7 @@ func (gtl *Gitolite) AddConfig(config *Config, rpmembers []string) error {
 				}
 			}
 			if group == nil {
-				return fmt.Errorf("repo group name '%v' undefined", rpname)
+				return nil, fmt.Errorf("repo group name '%v' undefined", rpname)
 			}
 			//fmt.Printf("\n%v\n", group)
 			group.MarkAsRepoGroup()
@@ -631,7 +628,7 @@ func (gtl *Gitolite) AddConfig(config *Config, rpmembers []string) error {
 		}
 	}
 	gtl.configs = append(gtl.configs, config)
-	return nil
+	return config, nil
 }
 
 // SetDesc set description for a config, unless there is already one.

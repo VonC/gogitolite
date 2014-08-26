@@ -155,11 +155,13 @@ func readRepo(c *content) (stateFn, error) {
 			return nil, ParseError{msg: fmt.Sprintf("Duplicate repo element name '%v' at line %v ('%v')", val, c.l, t)}
 		}
 	}
-	config := gitolite.NewConfig(currentComment)
-	currentComment = &gitolite.Comment{}
-	if err := c.gtl.AddConfig(config, rpmembers); err != nil {
+	var config *gitolite.Config
+	if cfg, err := c.gtl.AddConfig(rpmembers, currentComment); err != nil {
 		return nil, ParseError{msg: fmt.Sprintf("%v\nAt line %v ('%v')", err.Error(), c.l, t)}
+	} else {
+		config = cfg
 	}
+	currentComment = &gitolite.Comment{}
 
 	if !c.s.Scan() {
 		return nil, nil
