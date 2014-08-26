@@ -501,7 +501,7 @@ func AddUserFromName(uc userContainer, username string, allUsersCtn userContaine
 
 }
 
-func (grp *Group) MarkAsUserGroup() error {
+func (grp *Group) markAsUserGroup() error {
 	//fmt.Printf("\nmarkAsUserGroup '%v'", grp)
 	if grp.kind == repos {
 		return fmt.Errorf("group '%v' is a repos group, not a user one", grp.name)
@@ -655,7 +655,7 @@ func (gtl *Gitolite) AddUserToRule(rule *Rule, username string) error {
 	AddUserFromName(gtl, username, gtl)
 	if grps, ok := gtl.namesToGroups[username]; ok {
 		for _, grp := range grps {
-			if err := grp.MarkAsUserGroup(); err != nil {
+			if err := grp.markAsUserGroup(); err != nil {
 				return fmt.Errorf("user name '%v' already used in a repo group\n%v", username, err.Error())
 			}
 		}
@@ -678,13 +678,13 @@ func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, username string) error {
 	}
 	if group == nil {
 		group = &Group{name: username, container: gtl}
-		group.MarkAsUserGroup()
+		group.markAsUserGroup()
 	}
 	if group.kind == repos {
 		return fmt.Errorf("user group '%v' named after a repo group", username)
 	}
 	if group.kind == undefined {
-		group.MarkAsUserGroup()
+		group.markAsUserGroup()
 	}
 	for _, username := range group.GetMembers() {
 		AddUserFromName(gtl, username, gtl)
