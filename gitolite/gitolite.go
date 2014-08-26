@@ -91,12 +91,12 @@ type Config struct {
 type Rule struct {
 	access        string
 	param         string
-	usersOrGroups []UserOrGroup
+	usersOrGroups []userOrGroup
 	cmt           *Comment
 }
 
 // UserOrGroup represents a User or a Group. Used by Rule.
-type UserOrGroup interface {
+type userOrGroup interface {
 	GetName() string
 	GetMembers() []string
 	User() *User
@@ -155,7 +155,7 @@ func (grp *Group) GetUsers() []*User {
 // GetUsers returns the users of a rule (including the ones in a user group set for that rule)
 func (rule *Rule) GetUsers() []*User {
 	res := []*User{}
-	for _, uog := range rule.UsersOrGroups() {
+	for _, uog := range rule.usersOrGroups {
 		if uog.User() != nil {
 			res = append(res, uog.User())
 		}
@@ -202,10 +202,6 @@ func (cfg *Config) addRepo(repo *Repo) {
 	cfg.repos = append(cfg.repos, repo)
 }
 
-// UsersOrGroups get all users or group associated with rule
-func (rule *Rule) UsersOrGroups() []UserOrGroup {
-	return rule.usersOrGroups
-}
 func (rule *Rule) addUser(user *User) {
 	rule.usersOrGroups = append(rule.usersOrGroups, user)
 }
@@ -409,7 +405,7 @@ func (gtl *Gitolite) NbRepos() int {
 
 func (rule *Rule) addGroup(group *Group) {
 	notFound := true
-	for _, uog := range rule.UsersOrGroups() {
+	for _, uog := range rule.usersOrGroups {
 		rulegrp := uog.Group()
 		if rulegrp != nil && rulegrp.GetName() == group.GetName() {
 			notFound = false
