@@ -475,7 +475,7 @@ func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer)
 
 // AddUserFromName add a user to a user container.
 // If the user name doesn't match a user, creates the user
-func AddUserFromName(uc userContainer, username string, allUsersCtn userContainer) {
+func addUserFromName(uc userContainer, username string, allUsersCtn userContainer) {
 	var user *User
 	for _, u := range allUsersCtn.GetUsers() {
 		if u.name == username {
@@ -511,7 +511,7 @@ func (grp *Group) markAsUserGroup() error {
 		grp.container.addUsersGroup(grp)
 	}
 	for _, member := range grp.GetMembers() {
-		AddUserFromName(grp, member, grp.container)
+		addUserFromName(grp, member, grp.container)
 	}
 	return nil
 }
@@ -651,8 +651,8 @@ func (cfg *Config) SetDesc(desc string, comment *Comment) error {
 }
 
 func (gtl *Gitolite) AddUserToRule(rule *Rule, username string) error {
-	AddUserFromName(rule, username, gtl)
-	AddUserFromName(gtl, username, gtl)
+	addUserFromName(rule, username, gtl)
+	addUserFromName(gtl, username, gtl)
 	if grps, ok := gtl.namesToGroups[username]; ok {
 		for _, grp := range grps {
 			if err := grp.markAsUserGroup(); err != nil {
@@ -687,7 +687,7 @@ func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, username string) error {
 		group.markAsUserGroup()
 	}
 	for _, username := range group.GetMembers() {
-		AddUserFromName(gtl, username, gtl)
+		addUserFromName(gtl, username, gtl)
 		rule.addGroup(group)
 	}
 	return nil
