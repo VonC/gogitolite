@@ -216,6 +216,7 @@ func (k kind) String() string {
 	return "[undefined]"
 }
 
+// String displays group internals data (name, type and members)
 func (grp *Group) String() string {
 	res := fmt.Sprintf("group '%v'%v: %+v", grp.name, grp.kind.String(), grp.GetMembers())
 	return res
@@ -225,6 +226,8 @@ func (grp *Group) String() string {
 func (gtl *Gitolite) Groups() []*Group {
 	return gtl.groups
 }
+
+// GetGroup get group for a given group name
 func (gtl *Gitolite) GetGroup(groupname string) *Group {
 	for _, group := range gtl.groups {
 		if group.name == groupname {
@@ -234,12 +237,12 @@ func (gtl *Gitolite) GetGroup(groupname string) *Group {
 	return nil
 }
 
-// GetConfigs return config for a given repo
+// GetConfigsForRepo return config for a given repo name
 func (gtl *Gitolite) GetConfigsForRepo(reponame string) []*Config {
 	return gtl.GetConfigsForRepos([]string{reponame})
 }
 
-// GetConfigs return config for a given list of repos
+// GetConfigsForRepos return config for a given list of repos
 func (gtl *Gitolite) GetConfigsForRepos(reponames []string) []*Config {
 	res := []*Config{}
 	if len(reponames) == 0 {
@@ -261,6 +264,7 @@ func (gtl *Gitolite) GetConfigsForRepos(reponames []string) []*Config {
 	return res
 }
 
+// String exposes comment lines
 func (cmt *Comment) String() string {
 	res := ""
 	for _, comment := range cmt.comments {
@@ -274,11 +278,13 @@ func (gtl *Gitolite) NbGroupRepos() int {
 	return len(gtl.repoGroups)
 }
 
+// String exposes Config internals (each repos and rules)
 func (cfg *Config) String() string {
 	res := fmt.Sprintf("config %+v => %+v", cfg.repos, cfg.rules)
 	return res
 }
 
+// String exposes Rule internals (each users)
 func (rule *Rule) String() string {
 	users := ""
 	if len(rule.usersOrGroups) > 0 {
@@ -309,6 +315,7 @@ func (rule *Rule) String() string {
 	return strings.TrimSpace(fmt.Sprintf("%v %v %v", rule.access, rule.param, users))
 }
 
+// String exposes Gitolite internals (including maps like namesToGroups and reposToConfigs)
 func (gtl *Gitolite) String() string {
 	res := fmt.Sprintf("NbGroups: %v [", len(gtl.groups))
 	for i, group := range gtl.groups {
@@ -381,9 +388,13 @@ func (gtl *Gitolite) String() string {
 
 	return res
 }
+
+// String exposes Repo internals (its name)
 func (r *Repo) String() string {
 	return fmt.Sprintf("repo '%v'", r.name)
 }
+
+// String exposes User internals (its name)
 func (usr *User) String() string {
 	return fmt.Sprintf("user '%v'", usr.name)
 }
@@ -462,6 +473,8 @@ func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer)
 
 }
 
+// AddUserFromName add a user to a user container.
+// If the user name doesn't match a user, creates the user
 func AddUserFromName(uc userContainer, username string, allUsersCtn userContainer) {
 	var user *User
 	for _, u := range allUsersCtn.GetUsers() {
