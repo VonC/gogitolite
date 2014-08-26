@@ -696,6 +696,7 @@ func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, usergrpname string) error {
 	return nil
 }
 
+// NewRule creates a new Rule with access, param and comment
 func NewRule(access, param string, comment *Comment) *Rule {
 	res := &Rule{access: access, param: param, cmt: comment}
 	return res
