@@ -33,16 +33,24 @@ func TestProject(t *testing.T) {
 
 		Convey("Users or Repos Group", func() {
 			gtl := NewGitolite()
-			grp := &Group{}
+			grp := &Group{name: "grp1"}
 			grp.container = gtl
-			grp.markAsUserGroup()
+			var err error
+			err = grp.markAsUserGroup()
+			So(err, ShouldBeNil)
 			So(grp.IsUndefined(), ShouldBeFalse)
 			So(grp.IsUsers(), ShouldBeTrue)
-			grp = &Group{}
+			err = grp.MarkAsRepoGroup()
+			So(err.Error(), ShouldEqual, "group 'grp1' is a users group, not a repo one")
+
+			grp = &Group{name: "grp2"}
 			grp.container = gtl
-			grp.MarkAsRepoGroup()
+			err = grp.MarkAsRepoGroup()
+			So(err, ShouldBeNil)
 			So(grp.IsUndefined(), ShouldBeFalse)
 			So(grp.IsUsers(), ShouldBeFalse)
+			err = grp.markAsUserGroup()
+			So(err.Error(), ShouldEqual, "group 'grp2' is a repos group, not a user one")
 		})
 
 	})
