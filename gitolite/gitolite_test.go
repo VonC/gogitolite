@@ -30,5 +30,20 @@ func TestProject(t *testing.T) {
 			grp := &Group{}
 			So(grp.IsUndefined(), ShouldBeTrue)
 		})
+
+		Convey("Users or Repos Group", func() {
+			gtl := NewGitolite()
+			grp := &Group{}
+			grp.container = gtl
+			grp.markAsUserGroup()
+			So(grp.IsUndefined(), ShouldBeFalse)
+			So(grp.IsUsers(), ShouldBeTrue)
+			grp = &Group{}
+			grp.container = gtl
+			grp.MarkAsRepoGroup()
+			So(grp.IsUndefined(), ShouldBeFalse)
+			So(grp.IsUsers(), ShouldBeFalse)
+		})
+
 	})
 }
