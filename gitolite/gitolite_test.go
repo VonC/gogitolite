@@ -63,5 +63,18 @@ func TestProject(t *testing.T) {
 			So(gtl.NbUsers(), ShouldEqual, 1)
 		})
 
+		Convey("Repos can be added", func() {
+			gtl := NewGitolite()
+			grp := &Group{}
+			grp.members = append(grp.members, "repo1")
+			grp.container = gtl
+			var err error
+			err = grp.MarkAsRepoGroup()
+			So(err, ShouldBeNil)
+			So(gtl.NbRepos(), ShouldEqual, 1)
+			So(gtl.NbUsers(), ShouldEqual, 0)
+			So(len(grp.GetUsers()), ShouldEqual, 0)
+		})
+
 	})
 }
