@@ -44,6 +44,8 @@ func TestProject(t *testing.T) {
 			err = grp.MarkAsRepoGroup()
 			So(err.Error(), ShouldEqual, "group 'grp1' is a users group, not a repo one")
 			So(grp.GetName(), ShouldEqual, "grp1")
+			So(grp.User(), ShouldBeNil)
+			So(grp.Group(), ShouldEqual, grp)
 
 			grp = &Group{name: "grp2"}
 			grp.container = gtl
@@ -69,6 +71,8 @@ func TestProject(t *testing.T) {
 			So(usr, ShouldNotBeNil)
 			So(usr.GetName(), ShouldEqual, "user1")
 			So(fmt.Sprintf("%v", usr.GetMembers()), ShouldEqual, "[]")
+			So(usr.User(), ShouldEqual, usr)
+			So(usr.Group(), ShouldBeNil)
 		})
 
 		Convey("Repos can be added", func() {
