@@ -1,6 +1,7 @@
 package gitolite
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -42,6 +43,7 @@ func TestProject(t *testing.T) {
 			So(grp.IsUsers(), ShouldBeTrue)
 			err = grp.MarkAsRepoGroup()
 			So(err.Error(), ShouldEqual, "group 'grp1' is a users group, not a repo one")
+			So(grp.GetName(), ShouldEqual, "grp1")
 
 			grp = &Group{name: "grp2"}
 			grp.container = gtl
@@ -51,6 +53,7 @@ func TestProject(t *testing.T) {
 			So(grp.IsUsers(), ShouldBeFalse)
 			err = grp.markAsUserGroup()
 			So(err.Error(), ShouldEqual, "group 'grp2' is a repos group, not a user one")
+			So(grp.GetName(), ShouldEqual, "grp2")
 		})
 		Convey("Users can be added", func() {
 			gtl := NewGitolite()
@@ -61,6 +64,11 @@ func TestProject(t *testing.T) {
 			err = grp.markAsUserGroup()
 			So(err, ShouldBeNil)
 			So(gtl.NbUsers(), ShouldEqual, 1)
+			So(fmt.Sprintf("%v", grp.GetMembers()), ShouldEqual, "[user1]")
+			usr := grp.GetUsers()[0]
+			So(usr, ShouldNotBeNil)
+			So(usr.GetName(), ShouldEqual, "user1")
+			So(fmt.Sprintf("%v", usr.GetMembers()), ShouldEqual, "[]")
 		})
 
 		Convey("Repos can be added", func() {
@@ -74,6 +82,7 @@ func TestProject(t *testing.T) {
 			So(gtl.NbRepos(), ShouldEqual, 1)
 			So(gtl.NbUsers(), ShouldEqual, 0)
 			So(len(grp.GetUsers()), ShouldEqual, 0)
+			So(fmt.Sprintf("%v", grp.GetMembers()), ShouldEqual, "[repo1]")
 		})
 
 	})
