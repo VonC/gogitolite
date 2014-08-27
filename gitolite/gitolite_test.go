@@ -52,6 +52,16 @@ func TestProject(t *testing.T) {
 			err = grp.markAsUserGroup()
 			So(err.Error(), ShouldEqual, "group 'grp2' is a repos group, not a user one")
 		})
+		Convey("Users can be added", func() {
+			gtl := NewGitolite()
+			grp := &Group{}
+			grp.members = append(grp.members, "user1")
+			grp.container = gtl
+			var err error
+			err = grp.markAsUserGroup()
+			So(err, ShouldBeNil)
+			So(gtl.NbUsers(), ShouldEqual, 1)
+		})
 
 	})
 }
