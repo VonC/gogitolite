@@ -222,11 +222,6 @@ func (grp *Group) String() string {
 	return res
 }
 
-// Groups get the groups of a gitolite config
-func (gtl *Gitolite) Groups() []*Group {
-	return gtl.groups
-}
-
 // GetGroup get group for a given group name
 func (gtl *Gitolite) GetGroup(groupname string) *Group {
 	for _, group := range gtl.groups {
@@ -585,7 +580,7 @@ func (rule *Rule) HasAnyUserOrGroup() bool {
 // AddUserGroup adds a user group to a gitolite config
 func (gtl *Gitolite) AddUserGroup(grpname string, grpmembers []string, currentComment *Comment) error {
 	grp := &Group{name: grpname, members: grpmembers, container: gtl, cmt: currentComment}
-	for _, g := range gtl.Groups() {
+	for _, g := range gtl.groups {
 		if g.GetName() == grpname {
 			return fmt.Errorf("Duplicate group name '%v'", grpname)
 		}
@@ -675,7 +670,7 @@ func (cfg *Config) Desc() string {
 // If the group name is already used as a repos group, error.
 func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, usergrpname string) error {
 	var group *Group
-	for _, g := range gtl.Groups() {
+	for _, g := range gtl.groups {
 		if g.GetName() == usergrpname {
 			group = g
 			break
