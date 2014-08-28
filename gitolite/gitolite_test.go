@@ -120,6 +120,11 @@ func TestProject(t *testing.T) {
 			So(rule.Access(), ShouldEqual, "RW")
 			So(rule.Param(), ShouldEqual, "test")
 			So(rule.Comment().comments[0], ShouldEqual, "rule comment")
+
+			usr := &User{"u1"}
+			rule.addUser(usr)
+			So(len(rule.usersOrGroups), ShouldEqual, 1)
+			So(len(rule.GetUsers()), ShouldEqual, 1)
 		})
 	})
 }
