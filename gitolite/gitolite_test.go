@@ -62,6 +62,10 @@ func TestProject(t *testing.T) {
 			So(gtl.NbGroup(), ShouldEqual, 2)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
 			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+
+			So(gtl.GetGroup("grp1"), ShouldNotBeNil)
+			So(gtl.GetGroup("grp2"), ShouldEqual, grp)
+			So(gtl.GetGroup("grp3"), ShouldBeNil)
 		})
 		Convey("Users can be added", func() {
 			gtl := NewGitolite()
