@@ -433,6 +433,7 @@ func (gtl *Gitolite) addReposGroup(grp *Group) {
 	for _, reponame := range grp.GetMembers() {
 		addRepoFromName(gtl, reponame, gtl)
 	}
+	gtl.groups = append(gtl.groups, grp)
 }
 
 // MarkAsRepoGroup makes sure a group is a repo group
@@ -532,6 +533,7 @@ func (gtl *Gitolite) NbGroupUsers() int {
 
 func (gtl *Gitolite) addUsersGroup(grp *Group) {
 	gtl.userGroups = append(gtl.userGroups, grp)
+	gtl.groups = append(gtl.groups, grp)
 }
 
 // Rules get all  rules for a given repo

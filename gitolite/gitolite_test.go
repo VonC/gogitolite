@@ -46,6 +46,7 @@ func TestProject(t *testing.T) {
 			So(grp.GetName(), ShouldEqual, "grp1")
 			So(grp.User(), ShouldBeNil)
 			So(grp.Group(), ShouldEqual, grp)
+			So(gtl.NbGroup(), ShouldEqual, 1)
 
 			grp = &Group{name: "grp2"}
 			grp.container = gtl
@@ -56,6 +57,7 @@ func TestProject(t *testing.T) {
 			err = grp.markAsUserGroup()
 			So(err.Error(), ShouldEqual, "group 'grp2' is a repos group, not a user one")
 			So(grp.GetName(), ShouldEqual, "grp2")
+			So(gtl.NbGroup(), ShouldEqual, 2)
 		})
 		Convey("Users can be added", func() {
 			gtl := NewGitolite()
@@ -73,6 +75,7 @@ func TestProject(t *testing.T) {
 			So(fmt.Sprintf("%v", usr.GetMembers()), ShouldEqual, "[]")
 			So(usr.User(), ShouldEqual, usr)
 			So(usr.Group(), ShouldBeNil)
+			So(gtl.NbGroup(), ShouldEqual, 1)
 		})
 
 		Convey("Repos can be added", func() {
@@ -87,6 +90,7 @@ func TestProject(t *testing.T) {
 			So(gtl.NbUsers(), ShouldEqual, 0)
 			So(len(grp.GetUsers()), ShouldEqual, 0)
 			So(fmt.Sprintf("%v", grp.GetMembers()), ShouldEqual, "[repo1]")
+			So(gtl.NbGroup(), ShouldEqual, 1)
 		})
 
 		Convey("Comments can be added", func() {
