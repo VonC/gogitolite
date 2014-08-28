@@ -116,6 +116,11 @@ func TestProject(t *testing.T) {
 			So(len(cmt.comments), ShouldEqual, 3)
 			So(cmt.comments[1], ShouldEqual, "test1")
 			So(cmt.comments[2], ShouldEqual, "# test2")
+
+			So(cmt.String(), ShouldEqual, `test
+test1
+# test2
+`)
 		})
 
 		Convey("Rules can be added", func() {
