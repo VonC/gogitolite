@@ -135,8 +135,9 @@ test1
 			So(len(rule.usersOrGroups), ShouldEqual, 1)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
 
-			grp := &Group{}
-			grp.members = append(grp.members, "user1")
+			grp := &Group{name: "grp1"}
+			usr = &User{"u21"}
+			grp.addUser(usr)
 
 			rule.addGroup(grp)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
@@ -145,6 +146,11 @@ test1
 			grp.container = gtl
 			grp.markAsUserGroup()
 			So(len(rule.GetUsers()), ShouldEqual, 2)
+
+			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21)`)
+			usr = &User{"u22"}
+			grp.addUser(usr)
+			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21, u22)`)
 		})
 	})
 }

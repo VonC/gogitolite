@@ -514,6 +514,15 @@ func (grp *Group) markAsUserGroup() error {
 
 func (grp *Group) addUser(user *User) {
 	grp.users = append(grp.users, user)
+	seen := false
+	for _, member := range grp.members {
+		if member == user.name {
+			seen = true
+		}
+	}
+	if !seen {
+		grp.members = append(grp.members, user.name)
+	}
 }
 
 // NbUsers returns the number of users (single or groups)
