@@ -102,5 +102,12 @@ func TestProject(t *testing.T) {
 			So(cmt.comments[2], ShouldEqual, "# test2")
 		})
 
+		Convey("Rules can be added", func() {
+			cmt := &Comment{[]string{"rule comment"}}
+			rule := NewRule("RW", "test", cmt)
+			So(rule.Access(), ShouldEqual, "RW")
+			So(rule.Param(), ShouldEqual, "test")
+			So(rule.Comment().comments[0], ShouldEqual, "rule comment")
+		})
 	})
 }
