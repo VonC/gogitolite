@@ -30,6 +30,7 @@ func TestProject(t *testing.T) {
 		Convey("Undefined group", func() {
 			grp := &Group{}
 			So(grp.IsUndefined(), ShouldBeTrue)
+			So(grp.kind.String(), ShouldEqual, "[undefined]")
 		})
 
 		Convey("Users or Repos Group", func() {
@@ -41,6 +42,7 @@ func TestProject(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(grp.IsUndefined(), ShouldBeFalse)
 			So(grp.IsUsers(), ShouldBeTrue)
+			So(grp.kind.String(), ShouldEqual, "<users>")
 			err = grp.MarkAsRepoGroup()
 			So(err.Error(), ShouldEqual, "group 'grp1' is a users group, not a repo one")
 			So(grp.GetName(), ShouldEqual, "grp1")
@@ -56,6 +58,7 @@ func TestProject(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(grp.IsUndefined(), ShouldBeFalse)
 			So(grp.IsUsers(), ShouldBeFalse)
+			So(grp.kind.String(), ShouldEqual, "<repos>")
 			err = grp.markAsUserGroup()
 			So(err.Error(), ShouldEqual, "group 'grp2' is a repos group, not a user one")
 			So(grp.GetName(), ShouldEqual, "grp2")
