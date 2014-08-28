@@ -106,6 +106,10 @@ func TestProject(t *testing.T) {
 			So(gtl.NbGroup(), ShouldEqual, 1)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
 			So(gtl.NbGroupUsers(), ShouldEqual, 0)
+
+			repo := gtl.repos[0]
+			So(repo, ShouldNotBeNil)
+			So(repo.String(), ShouldEqual, `repo 'repo1'`)
 		})
 
 		Convey("Comments can be added", func() {
