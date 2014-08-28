@@ -89,5 +89,18 @@ func TestProject(t *testing.T) {
 			So(fmt.Sprintf("%v", grp.GetMembers()), ShouldEqual, "[repo1]")
 		})
 
+		Convey("Comments can be added", func() {
+			cmt := &Comment{}
+			So(len(cmt.comments), ShouldEqual, 0)
+			cmt.AddComment("test")
+			So(len(cmt.comments), ShouldEqual, 1)
+			So(cmt.comments[0], ShouldEqual, "test")
+			cmt.AddComment("  test1")
+			cmt.AddComment("   # test2  ")
+			So(len(cmt.comments), ShouldEqual, 3)
+			So(cmt.comments[1], ShouldEqual, "test1")
+			So(cmt.comments[2], ShouldEqual, "# test2")
+		})
+
 	})
 }
