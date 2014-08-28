@@ -93,7 +93,7 @@ func TestProject(t *testing.T) {
 
 		Convey("Repos can be added", func() {
 			gtl := NewGitolite()
-			grp := &Group{}
+			grp := &Group{name: "grp1"}
 			grp.members = append(grp.members, "repo1")
 			grp.container = gtl
 			var err error
@@ -106,6 +106,10 @@ func TestProject(t *testing.T) {
 			So(gtl.NbGroup(), ShouldEqual, 1)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
 			So(gtl.NbGroupUsers(), ShouldEqual, 0)
+
+			addRepoFromName(grp, "repo1", gtl)
+			So(gtl.NbGroupRepos(), ShouldEqual, 1)
+			So(len(grp.getRepos()), ShouldEqual, 1)
 
 			repo := gtl.repos[0]
 			So(repo, ShouldNotBeNil)

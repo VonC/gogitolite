@@ -35,6 +35,7 @@ type Group struct {
 	container Container
 	cmt       *Comment
 	users     []*User
+	repos     []*Repo
 }
 
 type kind int
@@ -185,6 +186,12 @@ func (gtl *Gitolite) getRepos() []*Repo {
 }
 func (gtl *Gitolite) addRepo(repo *Repo) {
 	gtl.repos = append(gtl.repos, repo)
+}
+func (grp *Group) addRepo(repo *Repo) {
+	grp.repos = append(grp.repos, repo)
+}
+func (grp *Group) getRepos() []*Repo {
+	return grp.repos
 }
 
 // GetUsers returns all users found in a gitolite config
