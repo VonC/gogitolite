@@ -89,6 +89,9 @@ func TestProject(t *testing.T) {
 			So(gtl.NbGroup(), ShouldEqual, 1)
 			So(gtl.NbGroupRepos(), ShouldEqual, 0)
 			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+
+			addUserFromName(grp, "user1", gtl)
+			So(len(grp.GetUsers()), ShouldEqual, 1)
 		})
 
 		Convey("Repos can be added", func() {
