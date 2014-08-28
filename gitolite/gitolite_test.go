@@ -110,6 +110,9 @@ func TestProject(t *testing.T) {
 			addRepoFromName(grp, "repo1", gtl)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
 			So(len(grp.getRepos()), ShouldEqual, 1)
+			addRepoFromName(grp, "repo2", gtl)
+			addRepoFromName(grp, "repo2", gtl)
+			So(len(grp.getRepos()), ShouldEqual, 2)
 
 			repo := gtl.repos[0]
 			So(repo, ShouldNotBeNil)
