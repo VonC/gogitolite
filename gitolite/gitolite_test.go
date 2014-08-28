@@ -148,6 +148,8 @@ test1
 
 			rule.addGroup(grp)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
+			rule.addGroup(grp)
+			So(len(rule.GetUsers()), ShouldEqual, 1)
 
 			gtl := NewGitolite()
 			grp.container = gtl
