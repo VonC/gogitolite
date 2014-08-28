@@ -125,6 +125,17 @@ func TestProject(t *testing.T) {
 			rule.addUser(usr)
 			So(len(rule.usersOrGroups), ShouldEqual, 1)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
+
+			grp := &Group{}
+			grp.members = append(grp.members, "user1")
+
+			rule.addGroup(grp)
+			So(len(rule.GetUsers()), ShouldEqual, 1)
+
+			gtl := NewGitolite()
+			grp.container = gtl
+			grp.markAsUserGroup()
+			So(len(rule.GetUsers()), ShouldEqual, 2)
 		})
 	})
 }
