@@ -146,11 +146,13 @@ test1
 			So(rule.Access(), ShouldEqual, "RW")
 			So(rule.Param(), ShouldEqual, "test")
 			So(rule.Comment().comments[0], ShouldEqual, "rule comment")
+			So(rule.HasAnyUserOrGroup(), ShouldBeFalse)
 
 			usr := &User{"u1"}
 			rule.addUser(usr)
 			So(len(rule.usersOrGroups), ShouldEqual, 1)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
+			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 
 			grp := &Group{name: "grp1"}
 			usr = &User{"u21"}
@@ -160,6 +162,7 @@ test1
 			So(len(rule.GetUsers()), ShouldEqual, 1)
 			rule.addGroup(grp)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
+			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 
 			gtl := NewGitolite()
 			grp.container = gtl
