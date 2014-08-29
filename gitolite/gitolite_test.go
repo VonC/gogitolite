@@ -72,7 +72,7 @@ func TestProject(t *testing.T) {
 		})
 		Convey("Users can be added", func() {
 			gtl := NewGitolite()
-			grp := &Group{}
+			grp := &Group{name: "grp1"}
 			grp.members = append(grp.members, "user1")
 			grp.container = gtl
 			var err error
@@ -92,6 +92,20 @@ func TestProject(t *testing.T) {
 
 			addUserFromName(grp, "user1", gtl)
 			So(len(grp.GetUsers()), ShouldEqual, 1)
+
+			err = gtl.AddUserGroup("grp1", []string{"u1", "u2"}, &Comment{[]string{"duplicate group"}})
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "Duplicate group name 'grp1'")
+			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+
+			err = gtl.AddUserGroup("grp2", []string{"u1", "u2", "u1"}, &Comment{[]string{"duplicate user"}})
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "Duplicate group element name 'u1'")
+			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+
+			err = gtl.AddUserGroup("grp2", []string{"u1", "u2"}, &Comment{[]string{"legit user group"}})
+			So(err, ShouldBeNil)
+			So(gtl.NbGroupUsers(), ShouldEqual, 2)
 		})
 
 		Convey("Repos can be added", func() {
