@@ -610,8 +610,9 @@ func (gtl *Gitolite) AddUserGroup(grpname string, grpmembers []string, currentCo
 		}
 		gtl.namesToGroups[val] = append(gtl.namesToGroups[val], grp)
 	}
-	gtl.groups = append(gtl.groups, grp)
+	gtl.addUsersGroup(grp)
 	gtl.namesToGroups[grpname] = append(gtl.namesToGroups[grpname], grp)
+	grp.kind = users
 	return nil
 }
 
