@@ -196,6 +196,8 @@ test1
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21, u22), u3`)
 			// u1 was never added to glt, only to rule
 			So(gtl.NbUsers(), ShouldEqual, 3)
+			// Rule was never properly added to gitolite or any conf
+			So(fmt.Sprintf("%v", gtl.namesToGroups), ShouldEqual, "[]")
 		})
 	})
 }
