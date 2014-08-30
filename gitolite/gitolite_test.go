@@ -173,6 +173,7 @@ test1
 			grp.addUser(usr)
 
 			rule.addGroup(grp)
+			// grp is still undefined: its user doesn't count yet
 			So(len(rule.GetUsers()), ShouldEqual, 1)
 			rule.addGroup(grp)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
@@ -181,12 +182,20 @@ test1
 			gtl := NewGitolite()
 			grp.container = gtl
 			grp.markAsUserGroup()
+			// grp is defined as user group: its user does count
 			So(len(rule.GetUsers()), ShouldEqual, 2)
+			So(gtl.NbUsers(), ShouldEqual, 1)
 
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21)`)
 			usr = &User{"u22"}
 			grp.addUser(usr)
+			gtl.addUser(usr)
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21, u22)`)
+
+			gtl.AddUserToRule(rule, "u3")
+			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21, u22), u3`)
+			// u1 was never added to glt, only to rule
+			So(gtl.NbUsers(), ShouldEqual, 3)
 		})
 	})
 }

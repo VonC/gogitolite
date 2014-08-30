@@ -159,6 +159,7 @@ func (rule *Rule) GetUsers() []*User {
 	for _, uog := range rule.usersOrGroups {
 		if uog.User() != nil {
 			res = append(res, uog.User())
+			//fmt.Println(uog.User())
 		}
 		if uog.Group() != nil {
 			grp := uog.Group()
