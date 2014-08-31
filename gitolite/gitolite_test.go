@@ -197,7 +197,15 @@ test1
 			// u1 was never added to glt, only to rule
 			So(gtl.NbUsers(), ShouldEqual, 3)
 			// Rule was never properly added to gitolite or any conf
-			So(fmt.Sprintf("%v", gtl.namesToGroups), ShouldEqual, "[]")
+			So(fmt.Sprintf("%v", gtl.namesToGroups), ShouldEqual, "map[]")
+
+			reposgrp := &Group{name: "repogrp", container: gtl, members: []string{"repo1", "u4", "repo2"}}
+			// gtl.addReposGroup(reposgrp)
+			reposgrp.MarkAsRepoGroup()
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			err := gtl.AddUserToRule(rule, "u4")
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldStartWith, "user name 'u4' already used in a repo group")
 		})
 	})
 }

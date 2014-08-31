@@ -435,6 +435,7 @@ func (gtl *Gitolite) addReposGroup(grp *Group) {
 	gtl.repoGroups = append(gtl.repoGroups, grp)
 	for _, reponame := range grp.GetMembers() {
 		addRepoFromName(gtl, reponame, gtl)
+		gtl.namesToGroups[reponame] = append(gtl.namesToGroups[reponame], grp)
 	}
 	gtl.groups = append(gtl.groups, grp)
 }
