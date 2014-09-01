@@ -290,6 +290,20 @@ group '@usrgrp1' is a users group, not a repo one`)
 			So(len(cfg2.Rules()), ShouldEqual, 1)
 			// So(fmt.Sprintf("%v", gtl.reposToConfigs), ShouldEqual, "z")
 
+			So(gtl.Print(), ShouldEqual, `@repogrp1 = repo11 repo12
+# usrgrp1 comment
+@usrgrp1 = user11 user12
+@repogrp1 = repo11 repo12
+# cfg1 comment
+repo repo1 repo2
+# cfg2 comment
+repo repo11 repo12
+# cfg2 desc comment
+desc = cfg2 desc
+# rule comment
+RW test = @usrgrp1
+`)
+
 		})
 	})
 }

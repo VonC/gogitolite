@@ -769,8 +769,10 @@ func (gtl *Gitolite) Print() string {
 // Print prints the comments (empty string if no comments)
 func (cmt *Comment) Print() string {
 	res := ""
-	for _, comment := range cmt.comments {
-		res = res + comment + "\n"
+	if cmt != nil {
+		for _, comment := range cmt.comments {
+			res = res + "# " + comment + "\n"
+		}
 	}
 	return res
 }
