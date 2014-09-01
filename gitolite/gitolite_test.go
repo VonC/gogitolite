@@ -317,6 +317,10 @@ namesToGroups: 6 [@usrgrp1 => [group '@usrgrp1'<users>: [user11 user12]], @usrgr
 reposToConfigs: 2 [repo11 => [config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]], repo12 => [config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]]]
 `)
 
+			r, err := gtl.Rules("repo12")
+			So(err, ShouldBeNil)
+			So(len(r), ShouldEqual, 1)
+
 		})
 	})
 }
