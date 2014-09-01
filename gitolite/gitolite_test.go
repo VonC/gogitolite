@@ -276,6 +276,20 @@ group '@usrgrp1' is a users group, not a repo one`)
 			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}})
 			So(err.Error(), ShouldEqual, "No more than one desc per config")
 
+			So(len(gtl.reposToConfigs["repo11"]), ShouldEqual, 0)
+			cmt := &Comment{[]string{"rule comment"}}
+			rule := NewRule("RW", "test", cmt)
+			grp := gtl.GetGroup("@usrgrp1")
+			rule.addGroup(grp)
+			gtl.AddRuleToConfig(rule, cfg2)
+			So(len(gtl.reposToConfigs["repo11"]), ShouldEqual, 1)
+			// So(fmt.Sprintf("%v", gtl.reposToConfigs), ShouldEqual, "z")
+			So(len(cfg2.Rules()), ShouldEqual, 1)
+			gtl.AddRuleToConfig(rule, cfg2)
+			So(len(gtl.reposToConfigs["repo11"]), ShouldEqual, 1)
+			So(len(cfg2.Rules()), ShouldEqual, 1)
+			// So(fmt.Sprintf("%v", gtl.reposToConfigs), ShouldEqual, "z")
+
 		})
 	})
 }

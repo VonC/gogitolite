@@ -717,7 +717,15 @@ func NewRule(access, param string, comment *Comment) *Rule {
 
 // AddRuleToConfig adds rule to config and update repo to config map
 func (gtl *Gitolite) AddRuleToConfig(rule *Rule, config *Config) {
-	config.rules = append(config.rules, rule)
+	seen := false
+	for _, arule := range config.rules {
+		if arule == rule {
+			seen = true
+		}
+	}
+	if !seen {
+		config.rules = append(config.rules, rule)
+	}
 	for _, repo := range config.repos {
 		if _, ok := gtl.reposToConfigs[repo.name]; !ok {
 			gtl.reposToConfigs[repo.name] = []*Config{}
