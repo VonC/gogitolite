@@ -235,6 +235,11 @@ test1
 			So(gtl.NbConfigs(), ShouldEqual, 1)
 			So(fmt.Sprintf("%v", gtl.GetConfigsForRepo("repo1")), ShouldEqual, "[config [repo 'repo1' repo 'repo2'] => []]")
 			So(len(gtl.GetConfigsForRepos([]string{})), ShouldEqual, 0)
+			So(gtl.NbRepos(), ShouldEqual, 2)
+
+			cfg := gtl.GetConfigsForRepo("repo1")[0]
+			So(len(cfg.getRepos()), ShouldEqual, 2)
+			So(len(cfg.Rules()), ShouldEqual, 0)
 		})
 	})
 }
