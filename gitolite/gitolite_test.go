@@ -247,6 +247,7 @@ test1
 
 			//reposusr := &Group{name: "@usrgrp1", container: gtl, members: []string{"user11", "user12"}}
 			gtl.AddUserGroup("@usrgrp1", []string{"user11", "user12"}, &Comment{[]string{"usrgrp1 comment"}})
+			gtl.AddUserGroup("@usrgrp2", []string{}, &Comment{[]string{"usrgrp2 comment"}})
 			So(gtl.NbUsers(), ShouldEqual, 2)
 
 			cfg2, err := gtl.AddConfig([]string{"@usrgrp1"}, &Comment{[]string{"cfg2 comment"}})
@@ -293,6 +294,8 @@ group '@usrgrp1' is a users group, not a repo one`)
 			So(gtl.Print(), ShouldEqual, `@repogrp1 = repo11 repo12
 # usrgrp1 comment
 @usrgrp1 = user11 user12
+# usrgrp2 comment
+@usrgrp2 =
 @repogrp1 = repo11 repo12
 # cfg1 comment
 repo repo1 repo2
@@ -302,6 +305,16 @@ repo repo11 repo12
 desc = cfg2 desc
 # rule comment
 RW test = @usrgrp1
+`)
+
+			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@repogrp1, @usrgrp1, @usrgrp2, @repogrp1]
+NbRepoGroups: 2 [@repogrp1, @repogrp1]
+NbRepos: 5 [repo 'repo1' repo 'repo2' repo 'repo11' repo 'repo12' repo 'user11']
+NbUsers: 2 [user 'user11' user 'user12']
+NbUserGroups: 2 [@usrgrp1, @usrgrp2]
+NbConfigs: 2 [config [repo 'repo1' repo 'repo2'] => [], config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]]
+namesToGroups: 6 [@usrgrp1 => [group '@usrgrp1'<users>: [user11 user12]], @usrgrp2 => [group '@usrgrp2'<users>: []], repo11 => [group '@repogrp1'<repos>: [repo11 repo12] group '@repogrp1'<repos>: [repo11 repo12]], repo12 => [group '@repogrp1'<repos>: [repo11 repo12] group '@repogrp1'<repos>: [repo11 repo12]], user11 => [group '@usrgrp1'<users>: [user11 user12]], user12 => [group '@usrgrp1'<users>: [user11 user12]]]
+reposToConfigs: 2 [repo11 => [config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]], repo12 => [config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]]]
 `)
 
 		})
