@@ -230,6 +230,11 @@ test1
 		Convey("Configs can be added", func() {
 			gtl := NewGitolite()
 			So(gtl.NbConfigs(), ShouldEqual, 0)
+
+			gtl.AddConfig([]string{"repo1", "repo2"}, &Comment{[]string{"cfg1 comment"}})
+			So(gtl.NbConfigs(), ShouldEqual, 1)
+			So(fmt.Sprintf("%v", gtl.GetConfigsForRepo("repo1")), ShouldEqual, "[config [repo 'repo1' repo 'repo2'] => []]")
+			So(len(gtl.GetConfigsForRepos([]string{})), ShouldEqual, 0)
 		})
 	})
 }
