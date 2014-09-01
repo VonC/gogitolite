@@ -226,5 +226,10 @@ test1
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "user group 'repogrp' named after a repo group")
 		})
+
+		Convey("Configs can be added", func() {
+			gtl := NewGitolite()
+			So(gtl.NbConfigs(), ShouldEqual, 0)
+		})
 	})
 }
