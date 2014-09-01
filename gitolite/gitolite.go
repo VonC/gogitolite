@@ -612,7 +612,8 @@ func (gtl *Gitolite) AddUserGroup(grpname string, grpmembers []string, currentCo
 		}
 		gtl.namesToGroups[val] = append(gtl.namesToGroups[val], grp)
 	}
-	gtl.addUsersGroup(grp)
+	//fmt.Println("gtl.addUsersGroup " + grp.String())
+	grp.markAsUserGroup()
 	gtl.namesToGroups[grpname] = append(gtl.namesToGroups[grpname], grp)
 	grp.kind = users
 	return nil
@@ -697,18 +698,12 @@ func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, usergrpname string) error {
 	}
 	if group == nil {
 		group = &Group{name: usergrpname, container: gtl}
-		group.markAsUserGroup()
 	}
 	if group.kind == repos {
 		return fmt.Errorf("user group '%v' named after a repo group", usergrpname)
 	}
-	if group.kind == undefined {
-		group.markAsUserGroup()
-	}
-	for _, username := range group.GetMembers() {
-		addUserFromName(gtl, username, gtl)
-		rule.addGroup(group)
-	}
+	group.markAsUserGroup()
+	rule.addGroup(group)
 	return nil
 }
 

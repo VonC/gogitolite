@@ -206,6 +206,23 @@ test1
 			err := gtl.AddUserToRule(rule, "u4")
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldStartWith, "user name 'u4' already used in a repo group")
+
+			err = gtl.AddUserGroup("grp4", []string{"u41", "u42"}, &Comment{[]string{"legit user group4"}})
+			So(err, ShouldBeNil)
+			So(gtl.NbGroupUsers(), ShouldEqual, 2)
+			So(gtl.NbUsers(), ShouldEqual, 6)
+			// So(fmt.Sprintf("%v", gtl.users), ShouldEqual, "e")
+			err = gtl.AddUserGroupToRule(rule, "grp4")
+			So(err, ShouldBeNil)
+			So(gtl.NbGroupUsers(), ShouldEqual, 2)
+			So(gtl.NbUsers(), ShouldEqual, 6)
+
+			err = gtl.AddUserGroupToRule(rule, "grp5")
+			So(err, ShouldBeNil)
+
+			err = gtl.AddUserGroupToRule(rule, "repogrp")
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "user group 'repogrp' named after a repo group")
 		})
 	})
 }
