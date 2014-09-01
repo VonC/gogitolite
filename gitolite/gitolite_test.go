@@ -270,6 +270,12 @@ group '@usrgrp1' is a users group, not a repo one`)
 			So(cfg2.Comment().String(), ShouldEqual, `cfg2 comment
 `)
 
+			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}})
+			So(err, ShouldBeNil)
+			So(cfg2.Desc(), ShouldEqual, "cfg2 desc")
+			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}})
+			So(err.Error(), ShouldEqual, "No more than one desc per config")
+
 		})
 	})
 }
