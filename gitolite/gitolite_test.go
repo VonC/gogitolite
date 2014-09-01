@@ -259,6 +259,11 @@ test1
 			So(err.Error(), ShouldEqual, "repo group name '@repounknown' undefined")
 			So(cfg2, ShouldBeNil)
 
+			cfg2, err = gtl.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2 comment"}})
+			So(err, ShouldBeNil)
+			So(cfg2.Comment().String(), ShouldEqual, `cfg2 comment
+`)
+
 		})
 	})
 }
