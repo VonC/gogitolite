@@ -245,8 +245,8 @@ test1
 			gtl.addReposGroup(reposgrp)
 			So(gtl.NbRepos(), ShouldEqual, 4)
 
-			reposusr := &Group{name: "@usrgrp1", container: gtl, members: []string{"user11", "user12"}}
-			reposusr.markAsUserGroup()
+			//reposusr := &Group{name: "@usrgrp1", container: gtl, members: []string{"user11", "user12"}}
+			gtl.AddUserGroup("@usrgrp1", []string{"user11", "user12"}, &Comment{[]string{"usrgrp1 comment"}})
 			So(gtl.NbUsers(), ShouldEqual, 2)
 
 			cfg2, err := gtl.AddConfig([]string{"@usrgrp1"}, &Comment{[]string{"cfg2 comment"}})
@@ -257,6 +257,12 @@ test1
 			cfg2, err = gtl.AddConfig([]string{"@repounknown"}, &Comment{[]string{"cfg2 comment"}})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "repo group name '@repounknown' undefined")
+			So(cfg2, ShouldBeNil)
+
+			cfg2, err = gtl.AddConfig([]string{"user11"}, &Comment{[]string{"cfg2 comment"}})
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, `repo name 'user11' already used in a user group
+group '@usrgrp1' is a users group, not a repo one`)
 			So(cfg2, ShouldBeNil)
 
 			cfg2, err = gtl.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2 comment"}})
