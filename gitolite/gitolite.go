@@ -646,7 +646,9 @@ func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, e
 				return nil, fmt.Errorf("repo group name '%v' undefined", rpname)
 			}
 			//fmt.Printf("\n%v\n", group)
-			group.MarkAsRepoGroup()
+			if err := group.MarkAsRepoGroup(); err != nil {
+				return nil, err
+			}
 			for _, rpname := range group.GetMembers() {
 				addRepoFromName(gtl, rpname, gtl)
 				addRepoFromName(config, rpname, gtl)

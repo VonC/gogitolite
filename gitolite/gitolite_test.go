@@ -240,6 +240,25 @@ test1
 			cfg := gtl.GetConfigsForRepo("repo1")[0]
 			So(len(cfg.getRepos()), ShouldEqual, 2)
 			So(len(cfg.Rules()), ShouldEqual, 0)
+
+			reposgrp := &Group{name: "@repogrp1", container: gtl, members: []string{"repo11", "repo12"}}
+			gtl.addReposGroup(reposgrp)
+			So(gtl.NbRepos(), ShouldEqual, 4)
+
+			reposusr := &Group{name: "@usrgrp1", container: gtl, members: []string{"user11", "user12"}}
+			reposusr.markAsUserGroup()
+			So(gtl.NbUsers(), ShouldEqual, 2)
+
+			cfg2, err := gtl.AddConfig([]string{"@usrgrp1"}, &Comment{[]string{"cfg2 comment"}})
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "group '@usrgrp1' is a users group, not a repo one")
+			So(cfg2, ShouldBeNil)
+
+			cfg2, err = gtl.AddConfig([]string{"@repounknown"}, &Comment{[]string{"cfg2 comment"}})
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "repo group name '@repounknown' undefined")
+			So(cfg2, ShouldBeNil)
+
 		})
 	})
 }
