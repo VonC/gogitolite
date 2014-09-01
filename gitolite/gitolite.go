@@ -625,8 +625,6 @@ func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, e
 	config := &Config{repos: []*Repo{}, cmt: comment}
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
-			addRepoFromName(config, rpname, gtl)
-			addRepoFromName(gtl, rpname, gtl)
 			if grps, ok := gtl.namesToGroups[rpname]; ok {
 				for _, grp := range grps {
 					if err := grp.MarkAsRepoGroup(); err != nil {
@@ -634,6 +632,8 @@ func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, e
 					}
 				}
 			}
+			addRepoFromName(config, rpname, gtl)
+			addRepoFromName(gtl, rpname, gtl)
 		} else {
 			var group *Group
 			for _, g := range gtl.groups {

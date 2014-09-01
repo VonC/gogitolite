@@ -249,11 +249,13 @@ test1
 			gtl.AddUserGroup("@usrgrp1", []string{"user11", "user12"}, &Comment{[]string{"usrgrp1 comment"}})
 			gtl.AddUserGroup("@usrgrp2", []string{}, &Comment{[]string{"usrgrp2 comment"}})
 			So(gtl.NbUsers(), ShouldEqual, 2)
+			So(gtl.NbRepos(), ShouldEqual, 4)
 
 			cfg2, err := gtl.AddConfig([]string{"@usrgrp1"}, &Comment{[]string{"cfg2 comment"}})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "group '@usrgrp1' is a users group, not a repo one")
 			So(cfg2, ShouldBeNil)
+			So(gtl.NbRepos(), ShouldEqual, 4)
 
 			cfg2, err = gtl.AddConfig([]string{"@repounknown"}, &Comment{[]string{"cfg2 comment"}})
 			So(err, ShouldNotBeNil)
@@ -265,6 +267,7 @@ test1
 			So(err.Error(), ShouldEqual, `repo name 'user11' already used in a user group
 group '@usrgrp1' is a users group, not a repo one`)
 			So(cfg2, ShouldBeNil)
+			So(gtl.NbRepos(), ShouldEqual, 4)
 
 			cfg2, err = gtl.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2 comment"}})
 			So(err, ShouldBeNil)
@@ -309,7 +312,7 @@ RW test = @usrgrp1
 
 			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@repogrp1, @usrgrp1, @usrgrp2, @repogrp1]
 NbRepoGroups: 2 [@repogrp1, @repogrp1]
-NbRepos: 5 [repo 'repo1' repo 'repo2' repo 'repo11' repo 'repo12' repo 'user11']
+NbRepos: 4 [repo 'repo1' repo 'repo2' repo 'repo11' repo 'repo12']
 NbUsers: 2 [user 'user11' user 'user12']
 NbUserGroups: 2 [@usrgrp1, @usrgrp2]
 NbConfigs: 2 [config [repo 'repo1' repo 'repo2'] => [], config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]]
