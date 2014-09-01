@@ -168,9 +168,11 @@ test1
 			So(len(rule.GetUsers()), ShouldEqual, 1)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 
-			grp := &Group{name: "grp1"}
+			grp := &Group{name: "grp1", cmt: &Comment{[]string{"grp1 comment"}}}
 			usr = &User{"u21"}
 			grp.addUser(usr)
+			So(grp.Comment().String(), ShouldEqual, `grp1 comment
+`)
 
 			rule.addGroup(grp)
 			// grp is still undefined: its user doesn't count yet
