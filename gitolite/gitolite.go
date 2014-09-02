@@ -431,13 +431,41 @@ func (rule *Rule) addGroup(group *Group) {
 	}
 }
 
+func (gtl *Gitolite) addGroup(grp *Group) {
+	seen := false
+	for _, group := range gtl.groups {
+		if grp == group {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		gtl.groups = append(gtl.groups, grp)
+	}
+}
+
+func (gtl *Gitolite) addNamesToGroups(name string, grp *Group) {
+	groups := gtl.namesToGroups[name]
+	seen := false
+	for _, group := range groups {
+		if grp == group {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		groups = append(groups, grp)
+	}
+	gtl.namesToGroups[name] = groups
+}
+
 func (gtl *Gitolite) addReposGroup(grp *Group) {
 	gtl.repoGroups = append(gtl.repoGroups, grp)
 	for _, reponame := range grp.GetMembers() {
 		addRepoFromName(gtl, reponame, gtl)
-		gtl.namesToGroups[reponame] = append(gtl.namesToGroups[reponame], grp)
+		gtl.addNamesToGroups(reponame, grp)
 	}
-	gtl.groups = append(gtl.groups, grp)
+	gtl.addGroup(grp)
 }
 
 // MarkAsRepoGroup makes sure a group is a repo group
@@ -546,16 +574,7 @@ func (gtl *Gitolite) NbGroupUsers() int {
 
 func (gtl *Gitolite) addUsersGroup(grp *Group) {
 	gtl.userGroups = append(gtl.userGroups, grp)
-	seen := false
-	for _, group := range gtl.groups {
-		if grp == group {
-			seen = true
-			break
-		}
-	}
-	if !seen {
-		gtl.groups = append(gtl.groups, grp)
-	}
+	gtl.addGroup(grp)
 }
 
 // Rules get all  rules for a given repo
@@ -619,11 +638,11 @@ func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, cur
 		} else {
 			return fmt.Errorf("Duplicate group element name '%v'", val)
 		}
-		gtl.namesToGroups[val] = append(gtl.namesToGroups[val], grp)
+		gtl.addNamesToGroups(val, grp)
 	}
-	gtl.namesToGroups[grpname] = append(gtl.namesToGroups[grpname], grp)
+	gtl.addNamesToGroups(grpname, grp)
 	//fmt.Printf("\ngtl.AddUserOrRepoGroup %v, %v\n", grp.String(), gtl.namesToGroups)
-	gtl.groups = append(gtl.groups, grp)
+	gtl.addGroup(grp)
 	//grp.markAsUserGroup()
 	//grp.kind = users
 	return nil
