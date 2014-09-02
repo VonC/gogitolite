@@ -124,7 +124,7 @@ func readGroup(c *content) (stateFn, error) {
 	// http://cats.groups.google.com.meowbify.com/forum/#!topic/golang-nuts/-pqkICuokio
 	//fmt.Printf("'%v'\n", grpmembers)
 
-	if err := c.gtl.AddUserGroup(grpname, grpmembers, currentComment); err != nil {
+	if err := c.gtl.AddUserOrRepoGroup(grpname, grpmembers, currentComment); err != nil {
 		return nil, ParseError{msg: fmt.Sprintf("%v at line %v ('%v')", err.Error(), c.l, t)}
 	}
 	currentComment = &gitolite.Comment{}

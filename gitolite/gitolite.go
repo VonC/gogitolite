@@ -546,7 +546,6 @@ func (gtl *Gitolite) NbGroupUsers() int {
 
 func (gtl *Gitolite) addUsersGroup(grp *Group) {
 	gtl.userGroups = append(gtl.userGroups, grp)
-	gtl.groups = append(gtl.groups, grp)
 }
 
 // Rules get all  rules for a given repo
@@ -595,8 +594,8 @@ func (rule *Rule) HasAnyUserOrGroup() bool {
 	return len(rule.usersOrGroups) > 0
 }
 
-// AddUserGroup adds a user group to a gitolite config
-func (gtl *Gitolite) AddUserGroup(grpname string, grpmembers []string, currentComment *Comment) error {
+// AddUserOrRepoGroup adds a user or repo group to a gitolite config
+func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, currentComment *Comment) error {
 	grp := &Group{name: grpname, members: grpmembers, container: gtl, cmt: currentComment}
 	for _, g := range gtl.groups {
 		if g.GetName() == grpname {
@@ -612,10 +611,11 @@ func (gtl *Gitolite) AddUserGroup(grpname string, grpmembers []string, currentCo
 		}
 		gtl.namesToGroups[val] = append(gtl.namesToGroups[val], grp)
 	}
-	//fmt.Println("gtl.addUsersGroup " + grp.String())
-	grp.markAsUserGroup()
 	gtl.namesToGroups[grpname] = append(gtl.namesToGroups[grpname], grp)
-	grp.kind = users
+	//fmt.Printf("\ngtl.AddUserOrRepoGroup %v, %v\n", grp.String(), gtl.namesToGroups)
+	gtl.groups = append(gtl.groups, grp)
+	//grp.markAsUserGroup()
+	//grp.kind = users
 	return nil
 }
 
