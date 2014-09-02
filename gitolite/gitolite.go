@@ -546,6 +546,16 @@ func (gtl *Gitolite) NbGroupUsers() int {
 
 func (gtl *Gitolite) addUsersGroup(grp *Group) {
 	gtl.userGroups = append(gtl.userGroups, grp)
+	seen := false
+	for _, group := range gtl.groups {
+		if grp == group {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		gtl.groups = append(gtl.groups, grp)
+	}
 }
 
 // Rules get all  rules for a given repo
