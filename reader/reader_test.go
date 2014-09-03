@@ -114,7 +114,7 @@ func TestRead(t *testing.T) {
 		Convey("Repo names can be part of a group", func() {
 			r := strings.NewReader(
 				`@grp1 = rep1 rep2
-					 repo  rep1 rep2 rep3`)
+							 repo  rep1 rep2 rep3`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.NbGroupRepos(), ShouldEqual, 1)
@@ -128,7 +128,7 @@ func TestRead(t *testing.T) {
 		Convey("single rule", func() {
 			r := strings.NewReader(
 				`repo arepo1
-					   RW+ = user1`)
+								RW+ = user1`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -138,7 +138,7 @@ func TestRead(t *testing.T) {
 		Convey("at least one rule is expected", func() {
 			r := strings.NewReader(
 				`repo arepo1
-					   ,,,`)
+								,,,`)
 			_, err := Read(r)
 			So(strings.Contains(err.Error(), ": At least one access rule expected"), ShouldBeTrue)
 		})
@@ -146,7 +146,7 @@ func TestRead(t *testing.T) {
 		Convey("Access rule must be well formed: RW+- only", func() {
 			r := strings.NewReader(
 				`repo arepo1
-					   RW+a = user1`)
+								RW+a = user1`)
 			_, err := Read(r)
 			So(strings.Contains(err.Error(), ": Incorrect access rule"), ShouldBeTrue)
 		})
@@ -154,7 +154,7 @@ func TestRead(t *testing.T) {
 		Convey("Access rule must be well formed: data alphanum only", func() {
 			r := strings.NewReader(
 				`repo arepo1
-					   RW+ a,b = user1`)
+								RW+ a,b = user1`)
 			_, err := Read(r)
 			So(strings.Contains(err.Error(), ": Incorrect access rule"), ShouldBeTrue)
 		})
@@ -162,7 +162,7 @@ func TestRead(t *testing.T) {
 		Convey("Access rule can have a param", func() {
 			r := strings.NewReader(
 				`repo arepo1
-					   RW+ master = user1`)
+								RW+ master = user1`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			rules, err := gtl.Rules("arepo1")
@@ -170,17 +170,16 @@ func TestRead(t *testing.T) {
 			So(len(rules), ShouldEqual, 1)
 			So(rules[0].String(), ShouldEqual, "RW+ master = user1")
 		})
-
 		Convey("Access rule can reference a group of repos", func() {
 			r := strings.NewReader(
 				`@grp1 = rep1 rep2
-				@grp2 = rep1 rep3
-				@usr1 = user11
-				@usr2 = user12
-				repo @grp1
-				   RW+ master = user11
-				repo @grp2
-				   RW+ dev = user12`)
+						@grp2 = rep1 rep3
+						@usr1 = user11
+						@usr2 = user12
+						repo @grp1
+							RW+ master = user11
+						repo @grp2
+							RW+ dev = user12`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			rules, err := gtl.Rules("rep1")
