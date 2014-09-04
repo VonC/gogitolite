@@ -366,13 +366,16 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A gitolite-admin must have one RW+ rule with at least one user", func() {
 			r := strings.NewReader(
 				`repo gitolite-admin
-				   RW+ = @users`)
+							RW+ = @users`)
 			gtl, err := Read(r)
-			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldEqual, "First rule for gitolite-admin repo must have at least one user or group of users")
+			// fmt.Println(gtl.String())
+			// Now the group is mark as user group
+			So(err, ShouldBeNil)
+			//So(err.Error(), ShouldEqual, "First rule for gitolite-admin repo must have at least one user or group of users")
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbConfigs(), ShouldEqual, 1)
 		})
+
 	})
 
 	Convey("An reader can get configs with description", t, func() {
