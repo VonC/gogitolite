@@ -231,7 +231,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("undefined repo group", func() {
 			r := strings.NewReader(
 				`repo @grp1
-					   RW+ = user1`)
+								RW+ = user1`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
 			So(strings.Contains(err.Error(), ": repo group name"), ShouldBeTrue)
@@ -241,8 +241,8 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("undefined repo used in group", func() {
 			r := strings.NewReader(
 				`@grp1 = rep1
-				repo @grp1 rep2
-					   RW+ = user1`)
+						repo @grp1 rep2
+								RW+ = user1`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -252,8 +252,8 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("Invalid user group named after repo group", func() {
 			r := strings.NewReader(
 				`@grp1 = rep1
-				repo @grp1 rep2
-					   RW+ = user1 @grp1`)
+						repo @grp1 rep2
+								RW+ = user1 @grp1`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
 			So(strings.Contains(err.Error(), ": user group"), ShouldBeTrue)
@@ -263,18 +263,18 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 
 		Convey("Users are detected", func() {
 			var gitoliteconf = `
-		@project = module1 module2
-		@almadmins = alm1 alm2
+				@project = module1 module2
+				@almadmins = alm1 alm2
 
-		repo gitolite-admin
-	      RW+     =   gitoliteadm @almadmins
-	      RW                                = projectowner
-	      RW VREF/NAME/conf/subs/project    = projectowner
-	      -  VREF/NAME/                     = projectowner
+				repo gitolite-admin
+				   RW+     =   gitoliteadm @almadmins
+				   RW                                = projectowner
+				   RW VREF/NAME/conf/subs/project    = projectowner
+				   -  VREF/NAME/                     = projectowner
 
-	    repo module1
-	      RW+ = projectowner @almadmins
-`
+				 repo module1
+				   RW+ = projectowner @almadmins
+		`
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
@@ -286,15 +286,16 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(almadmin, ShouldNotBeNil)
 			So(fmt.Sprintf("%v", almadmin.String()), ShouldEqual, "group '@almadmins'<users>: [alm1 alm2]")
 		})
+
 	})
 
 	Convey("An reader can read repo and users", t, func() {
 		Convey("A repo name shouldn't be part of a users group", func() {
 			r := strings.NewReader(
 				`@ausergrp = user1 user2 user3
-					 repo arepo1
-					   RW+ = user1
-					 repo user1`)
+							 repo arepo1
+								RW+ = user1
+							 repo user1`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
 			So(strings.Contains(err.Error(), "already used in a user group"), ShouldBeTrue)
@@ -305,8 +306,8 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A user name shouldn't be part of a repo group", func() {
 			r := strings.NewReader(
 				`@arepogrp = repo1 repo2 repo3
-					 repo repo1
-					   RW+ = repo2`)
+							 repo repo1
+								RW+ = repo2`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
 			So(strings.Contains(err.Error(), "already used in a repo group"), ShouldBeTrue)
@@ -343,7 +344,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A gitolite-admin must have one RW+ rule", func() {
 			r := strings.NewReader(
 				`repo gitolite-admin
-				   RW = user1`)
+							RW = user1`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldContainSubstring, "First rule for gitolite-admin repo config must be 'RW+', empty param")
@@ -354,7 +355,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A gitolite-admin must have one RW+ rule with no param", func() {
 			r := strings.NewReader(
 				`repo gitolite-admin
-				   RW+ param= user2`)
+							RW+ param= user2`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldContainSubstring, "First rule for gitolite-admin repo config must be 'RW+', empty param")
