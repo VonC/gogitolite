@@ -52,10 +52,12 @@ func Read(r io.Reader) (*gitolite.Gitolite, error) {
 			err = fmt.Errorf("First rule for gitolite-admin repo config must be 'RW+', empty param, instead of '%v'-'%v'", rule.Access(), rule.Param())
 			return res, err
 		}
-		if !rule.HasAnyUserOrGroup() {
-			err = fmt.Errorf("First rule for gitolite-admin repo must have at least one user or group of users")
-			return res, err
-		}
+		/*
+			if !rule.HasAnyUserOrGroup() {
+				err = fmt.Errorf("First rule for gitolite-admin repo must have at least one user or group of users")
+				return res, err
+			}
+		*/
 	}
 	//fmt.Printf("\nGitolite res='%v'\n", res)
 	return res, err
