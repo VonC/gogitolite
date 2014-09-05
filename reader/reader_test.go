@@ -384,8 +384,8 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A Config can have a description", func() {
 			r := strings.NewReader(
 				`repo gitolite-admin
-				   desc = test  d  
-				   RW+ = user1`)
+							desc = test  d
+							RW+ = user1`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -394,9 +394,9 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A Config can should have no more than one description", func() {
 			r := strings.NewReader(
 				`repo gitolite-admin
-				   desc = test  d  
-				   RW+ = user1
-				   desc = 2`)
+							desc = test  d
+							RW+ = user1
+							desc = 2`)
 			gtl, err := Read(r)
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "Parse Error: No more than one desc per config, line 4 ('desc = 2')")
