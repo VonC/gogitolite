@@ -462,9 +462,9 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 
 		Convey("A Gitolite can print a single group with content", func() {
 			r := strings.NewReader(`
-				# comment
+						# comment
 
-				@developers3  =   dilbert alice  wally3`)
+						@developers3  =   dilbert alice  wally3`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.Print(), ShouldEqual, `# comment
@@ -475,19 +475,20 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A Gitolite can print a single config with content", func() {
 			r := strings.NewReader(
 				`
-				  # config comment
-				repo r1
-				 #   main admins
-				RW+     =   gitoliteadm @almadmins`)
+						  # config comment
+						repo r1
+						 #   main admins
+						RW+     =   gitoliteadm @almadmins`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.Print(), ShouldEqual, `# config comment
 repo r1
 #   main admins
-RW+ = gitoliteadm
+RW+ = gitoliteadm @almadmins
 `)
 		})
+	})
 
 		Convey("A Gitolite can print a configs including gitolite-admin config", func() {
 			r := strings.NewReader(
