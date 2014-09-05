@@ -728,7 +728,10 @@ func (gtl *Gitolite) AddUserGroupToRule(rule *Rule, usergrpname string) error {
 	for _, g := range gtl.groups {
 		if g.GetName() == usergrpname {
 			group = g
-			break
+			if g.kind != repos || g.name != "@all" {
+				break
+			}
+			group = nil
 		}
 	}
 	if group == nil {

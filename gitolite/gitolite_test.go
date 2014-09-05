@@ -228,6 +228,11 @@ test1
 			err = gtl.AddUserGroupToRule(rule, "grp5")
 			So(err, ShouldBeNil)
 
+			grp = &Group{name: "@all", container: gtl}
+			grp.MarkAsRepoGroup()
+			err = gtl.AddUserGroupToRule(rule, "@all")
+			So(err, ShouldBeNil)
+
 			err = gtl.AddUserGroupToRule(rule, "repogrp")
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "user group 'repogrp' named after a repo group")
