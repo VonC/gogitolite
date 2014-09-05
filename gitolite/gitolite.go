@@ -812,14 +812,16 @@ func (cmt *Comment) Print() string {
 // Print prints a Group of repos/users with reformat.
 func (grp *Group) Print() string {
 	res := grp.cmt.Print()
-	res = res + grp.name + " ="
-	for _, member := range grp.GetMembers() {
-		m := strings.TrimSpace(member)
-		if m != "" {
-			res = res + " " + m
+	if len(grp.members) > 0 || res != "" {
+		res = res + grp.name + " ="
+		for _, member := range grp.GetMembers() {
+			m := strings.TrimSpace(member)
+			if m != "" {
+				res = res + " " + m
+			}
 		}
+		res = res + "\n"
 	}
-	res = res + "\n"
 	return res
 }
 
