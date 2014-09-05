@@ -411,9 +411,9 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A reader can get comments before a Group", func() {
 			r := strings.NewReader(
 				`
-				  #  a   comment
+						  #  a   comment
 
-				@grpusers = user1 user2`)
+						@grpusers = user1 user2`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -424,10 +424,10 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A reader can get comments before a Config", func() {
 			r := strings.NewReader(
 				`#  a group  comment
-				@grpusers = user1 user2
+						@grpusers = user1 user2
 
-				# config comment
-				repo r1`)
+						# config comment
+						repo r1`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -440,12 +440,12 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 		Convey("A reader can get comments before a Rule", func() {
 			r := strings.NewReader(
 				`#  a group  comment
-				@grpusers = user1 user2
+						@grpusers = user1 user2
 
-				# config comment
-				repo r1
-				 #   main admins
-				RW+     =   gitoliteadm @almadmins`)
+						# config comment
+						repo r1
+						 #   main admins
+						RW+     =   gitoliteadm @almadmins`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
