@@ -800,7 +800,10 @@ func (cmt *Comment) Print() string {
 	res := ""
 	if cmt != nil {
 		for _, comment := range cmt.comments {
-			res = res + "# " + comment + "\n"
+			if !strings.HasPrefix(comment, "#") {
+				res = res + "# "
+			}
+			res = res + comment + "\n"
 		}
 	}
 	return res
