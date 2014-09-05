@@ -488,15 +488,14 @@ repo r1
 RW+ = gitoliteadm @almadmins
 `)
 		})
-	})
 
 		Convey("A Gitolite can print a configs including gitolite-admin config", func() {
 			r := strings.NewReader(
 				`  # ga comment
-			repo gitolite-admin
-			RW+ = admin
-			repo otherRepo
-			R  param  = user`)
+					repo gitolite-admin
+					RW+ = admin
+					repo otherRepo
+					R  param  = user`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -511,15 +510,15 @@ R param = user
 		Convey("A Gitolite can print a configs with desc, incliding group", func() {
 			r := strings.NewReader(
 				`# group users
-				@users = u1 u2  
-				# ga comment
-			repo gitolite-admin
-			RW+ = admin
-			repo otherRepo
-			# rule comment
-			R  param  = user @users
-			# desc comment
-			desc = a desc`)
+						@users = u1 u2
+						# ga comment
+					repo gitolite-admin
+					RW+ = admin
+					repo otherRepo
+					# rule comment
+					R  param  = user @users
+					# desc comment
+					desc = a desc`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -535,17 +534,6 @@ desc = a desc
 R param = user @users
 `
 			So(gtl.Print(), ShouldEqual, res)
-			/*
-				gp := gtl.Print()
-				scanner := bufio.NewScanner(strings.NewReader(gp))
-				scannerRes := bufio.NewScanner(strings.NewReader(res))
-				fmt.Println("")
-				for scanner.Scan() {
-					fmt.Printf(">>> '%v'\n", scanner.Text())
-					scannerRes.Scan()
-					fmt.Printf("<<< '%v'\n", scannerRes.Text())
-				}
-			*/
 			config := gtl.GetConfigsForRepo("otherRepo")[0]
 			rule := config.Rules()[0]
 			So(fmt.Sprintf("%v", rule.String()), ShouldEqual, "R param = user, @users (u1, u2)")
@@ -553,4 +541,5 @@ R param = user @users
 		})
 
 	})
+
 }
