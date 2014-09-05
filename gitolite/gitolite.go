@@ -672,7 +672,11 @@ func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, e
 				}
 			}
 			if group == nil {
-				return nil, fmt.Errorf("repo group name '%v' undefined", rpname)
+				if rpname == "@all" {
+					group = &Group{name: "@all", container: gtl}
+				} else {
+					return nil, fmt.Errorf("repo group name '%v' undefined", rpname)
+				}
 			}
 			//fmt.Printf("\n%v\n", group)
 			if err := group.MarkAsRepoGroup(); err != nil {

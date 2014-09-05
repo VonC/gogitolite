@@ -237,13 +237,22 @@ test1
 			gtl := NewGitolite()
 			So(gtl.NbConfigs(), ShouldEqual, 0)
 
+			cfg, err := gtl.AddConfig([]string{"@grprepo"}, &Comment{[]string{"@grprepo comment"}})
+			So(cfg, ShouldBeNil)
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "repo group name '@grprepo' undefined")
+
+			cfg, err = gtl.AddConfig([]string{"@all"}, &Comment{[]string{"@grprepo comment"}})
+			So(cfg, ShouldNotBeNil)
+			So(err, ShouldBeNil)
+
 			gtl.AddConfig([]string{"repo1", "repo2"}, &Comment{[]string{"cfg1 comment"}})
-			So(gtl.NbConfigs(), ShouldEqual, 1)
+			So(gtl.NbConfigs(), ShouldEqual, 2)
 			So(fmt.Sprintf("%v", gtl.GetConfigsForRepo("repo1")), ShouldEqual, "[config [repo 'repo1' repo 'repo2'] => []]")
 			So(len(gtl.GetConfigsForRepos([]string{})), ShouldEqual, 0)
 			So(gtl.NbRepos(), ShouldEqual, 2)
 
-			cfg := gtl.GetConfigsForRepo("repo1")[0]
+			cfg = gtl.GetConfigsForRepo("repo1")[0]
 			So(len(cfg.getRepos()), ShouldEqual, 2)
 			So(len(cfg.Rules()), ShouldEqual, 0)
 
@@ -255,7 +264,7 @@ test1
 			gtl.AddUserOrRepoGroup("@usrgrp1", []string{"user11", "user12"}, &Comment{[]string{"usrgrp1 comment"}})
 			gtl.AddUserOrRepoGroup("@usrgrp2", []string{}, &Comment{[]string{"usrgrp2 comment"}})
 			grp := gtl.GetGroup("@usrgrp1")
-			err := grp.markAsUserGroup()
+			err = grp.markAsUserGroup()
 			So(err, ShouldBeNil)
 			grp = gtl.GetGroup("@usrgrp2")
 			err = grp.markAsUserGroup()
@@ -317,6 +326,8 @@ group '@usrgrp1' is a users group, not a repo one`)
 @usrgrp2 =
 # ga comment
 repo gitolite-admin
+# @grprepo comment
+repo
 # cfg1 comment
 repo repo1 repo2
 # cfg2 comment
@@ -327,12 +338,12 @@ desc = cfg2 desc
 RW test = @usrgrp1
 `)
 
-			So(gtl.String(), ShouldEqual, `NbGroups: 3 [@repogrp1, @usrgrp1, @usrgrp2]
-NbRepoGroups: 2 [@repogrp1, @repogrp1]
+			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@all, @repogrp1, @usrgrp1, @usrgrp2]
+NbRepoGroups: 3 [@all, @repogrp1, @repogrp1]
 NbRepos: 5 [repo 'repo1' repo 'repo2' repo 'repo11' repo 'repo12' repo 'gitolite-admin']
 NbUsers: 2 [user 'user11' user 'user12']
 NbUserGroups: 2 [@usrgrp1, @usrgrp2]
-NbConfigs: 3 [config [repo 'repo1' repo 'repo2'] => [], config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)], config [repo 'gitolite-admin'] => []]
+NbConfigs: 4 [config [] => [], config [repo 'repo1' repo 'repo2'] => [], config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)], config [repo 'gitolite-admin'] => []]
 namesToGroups: 6 [@usrgrp1 => [group '@usrgrp1'<users>: [user11 user12]], @usrgrp2 => [group '@usrgrp2'<users>: []], repo11 => [group '@repogrp1'<repos>: [repo11 repo12]], repo12 => [group '@repogrp1'<repos>: [repo11 repo12]], user11 => [group '@usrgrp1'<users>: [user11 user12]], user12 => [group '@usrgrp1'<users>: [user11 user12]]]
 reposToConfigs: 2 [repo11 => [config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]], repo12 => [config [repo 'repo11' repo 'repo12'] => [RW test = @usrgrp1 (user11, user12)]]]
 `)
