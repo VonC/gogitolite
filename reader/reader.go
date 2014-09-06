@@ -73,6 +73,7 @@ func (pe ParseError) Error() string {
 }
 
 var readEmptyOrCommentLinesRx = regexp.MustCompile(`(?m)^\s*?$|^\s*?#(.*?)$`)
+var readSubconfLinesRx = regexp.MustCompile(`(?m)^\s*?subconf\s+"subs/\*\.conf"\s*?$`)
 
 func readEmptyOrCommentLines(c *content) (stateFn, error) {
 	t := c.s.Text()
@@ -80,7 +81,10 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 		res := readEmptyOrCommentLinesRx.FindStringSubmatchIndex(t)
 		//fmt.Println(res, ">'"+t+"'")
 		if res == nil {
-			return readRepoOrGroup, nil
+			res := readSubconfLinesRx.FindStringSubmatchIndex(t)
+			if res == nil {
+				return readRepoOrGroup, nil
+			}
 		}
 		if !c.s.Scan() {
 			keepReading = false
