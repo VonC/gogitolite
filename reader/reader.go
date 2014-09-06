@@ -111,7 +111,7 @@ func readRepoOrGroup(c *content) (stateFn, error) {
 	return readRepo, nil
 }
 
-var readGroupRx = regexp.MustCompile(`(?m)^\s*?(@[a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9_-]+\s*?)+)$`)
+var readGroupRx = regexp.MustCompile(`(?m)^\s*?(@[a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9\._-]+\s*?)+)$`)
 
 func readGroup(c *content) (stateFn, error) {
 	t := strings.TrimSpace(c.s.Text())
