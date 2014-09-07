@@ -133,6 +133,7 @@ func TestProject(t *testing.T) {
 			addRepoFromName(grp, "repo2", gtl)
 			addRepoFromName(grp, "repo2", gtl)
 			So(len(grp.GetRepos()), ShouldEqual, 2)
+			So(grp.GetRepos()[0].GetName(), ShouldEqual, "repo1")
 
 			repo := gtl.repos[0]
 			So(repo, ShouldNotBeNil)

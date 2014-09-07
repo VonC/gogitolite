@@ -135,6 +135,11 @@ func (usr *User) GetName() string {
 	return usr.name
 }
 
+// GetName returns the name of a repo
+func (repo *Repo) GetName() string {
+	return repo.name
+}
+
 // GetMembers helps a UserOrGroup to get all its users (itself for Users, its members for a group)
 func (usr *User) GetMembers() []string {
 	return []string{}
