@@ -179,7 +179,7 @@ func (rule *Rule) GetUsers() []*User {
 }
 
 type repoContainer interface {
-	getRepos() []*Repo
+	GetRepos() []*Repo
 	addRepo(repo *Repo)
 }
 type userContainer interface {
@@ -187,7 +187,7 @@ type userContainer interface {
 	addUser(user *User)
 }
 
-func (gtl *Gitolite) getRepos() []*Repo {
+func (gtl *Gitolite) GetRepos() []*Repo {
 	return gtl.repos
 }
 func (gtl *Gitolite) addRepo(repo *Repo) {
@@ -196,7 +196,7 @@ func (gtl *Gitolite) addRepo(repo *Repo) {
 func (grp *Group) addRepo(repo *Repo) {
 	grp.repos = append(grp.repos, repo)
 }
-func (grp *Group) getRepos() []*Repo {
+func (grp *Group) GetRepos() []*Repo {
 	return grp.repos
 }
 
@@ -208,7 +208,7 @@ func (gtl *Gitolite) addUser(user *User) {
 	gtl.users = append(gtl.users, user)
 }
 
-func (cfg *Config) getRepos() []*Repo {
+func (cfg *Config) GetRepos() []*Repo {
 	return cfg.repos
 }
 func (cfg *Config) addRepo(repo *Repo) {
@@ -487,7 +487,7 @@ func (grp *Group) MarkAsRepoGroup() error {
 
 func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer) {
 	var repo *Repo
-	for _, r := range allReposCtn.getRepos() {
+	for _, r := range allReposCtn.GetRepos() {
 		if r.name == rpname {
 			repo = r
 		}
@@ -499,7 +499,7 @@ func addRepoFromName(rc repoContainer, rpname string, allReposCtn repoContainer)
 		}
 	}
 	seen := false
-	for _, arepo := range rc.getRepos() {
+	for _, arepo := range rc.GetRepos() {
 		if arepo.name == repo.name {
 			seen = true
 			break
@@ -795,7 +795,7 @@ func (gtl *Gitolite) Print() string {
 	}
 	for _, config := range gtl.configs {
 		skip := false
-		for _, repo := range config.getRepos() {
+		for _, repo := range config.GetRepos() {
 			if repo.name == "gitolite-admin" {
 				skip = true
 			}
