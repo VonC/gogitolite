@@ -282,6 +282,7 @@ test1
 			So(err.Error(), ShouldEqual, "group '@usrgrp1' is a users group, not a repo one")
 			So(cfg2, ShouldBeNil)
 			So(gtl.NbRepos(), ShouldEqual, 4)
+			So(len(gtl.Configs()), ShouldEqual, 2)
 
 			cfg2, err = gtl.AddConfig([]string{"@repounknown"}, &Comment{[]string{"cfg2 comment"}})
 			So(err, ShouldNotBeNil)

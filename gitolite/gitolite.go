@@ -27,6 +27,11 @@ func NewGitolite() *Gitolite {
 	return res
 }
 
+// Configs gets gitolite configs
+func (gtl *Gitolite) Configs() []*Config {
+	return gtl.configs
+}
+
 // Group (of repo or resources, ie people)
 type Group struct {
 	name      string
