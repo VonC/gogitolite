@@ -22,16 +22,23 @@ func main() {
 		fmt.Printf("Read file '%v'\n", filename)
 		f, err := os.Open(filename)
 		if err != nil {
-			fmt.Printf("%v\n", err.Error())
+			fmt.Printf("ERR %v\n", err.Error())
 			os.Exit(1)
 		}
 		defer f.Close()
 		fr := bufio.NewReader(f)
 		gtl, err := reader.Read(fr)
 		if err != nil {
-			fmt.Printf("%v\n", err.Error())
+			fmt.Printf("ERR %v\n", err.Error())
 			os.Exit(1)
 		}
-		gtl.Print()
+		// fmt.Println(gtl.String())
+		for _, config := range gtl.Configs() {
+			for _, rule := range config.Rules() {
+				if rule.Access() != "-" {
+					fmt.Println(config.GetRepos(), "=>", rule.GetUsers())
+				}
+			}
+		}
 	}
 }
