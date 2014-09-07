@@ -13,21 +13,21 @@ type Project struct {
 	users []*gitolite.User
 }
 
-// ProjectManager manages project for a gitolite instance
-type ProjectManager struct {
+// Manager manages project for a gitolite instance
+type Manager struct {
 	gtl      *gitolite.Gitolite
 	projects []*Project
 }
 
 // NbProjects returns the number of detected projects
-func (pm *ProjectManager) NbProjects() int {
+func (pm *Manager) NbProjects() int {
 	pm.updateProjects()
 	return len(pm.projects)
 }
 
 var prefix = "VREF/NAME/conf/subs/"
 
-func (pm *ProjectManager) updateProjects() {
+func (pm *Manager) updateProjects() {
 	gtl := pm.gtl
 	configs := gtl.GetConfigsForRepo("gitolite-admin")
 	for _, config := range configs {

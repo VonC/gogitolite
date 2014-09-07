@@ -37,7 +37,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
@@ -58,7 +58,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 1)
@@ -82,7 +82,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
@@ -101,7 +101,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
@@ -123,7 +123,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
@@ -146,7 +146,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
@@ -167,7 +167,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 2)
@@ -192,7 +192,7 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &ProjectManager{gtl: gtl}
+			pm := &Manager{gtl: gtl}
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)

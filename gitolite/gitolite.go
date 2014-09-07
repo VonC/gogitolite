@@ -136,8 +136,8 @@ func (usr *User) GetName() string {
 }
 
 // GetName returns the name of a repo
-func (repo *Repo) GetName() string {
-	return repo.name
+func (r *Repo) GetName() string {
+	return r.name
 }
 
 // GetMembers helps a UserOrGroup to get all its users (itself for Users, its members for a group)
@@ -192,6 +192,7 @@ type userContainer interface {
 	addUser(user *User)
 }
 
+// GetRepos returns the repos found in a gitolite conf
 func (gtl *Gitolite) GetRepos() []*Repo {
 	return gtl.repos
 }
@@ -201,6 +202,8 @@ func (gtl *Gitolite) addRepo(repo *Repo) {
 func (grp *Group) addRepo(repo *Repo) {
 	grp.repos = append(grp.repos, repo)
 }
+
+// GetRepos returns the repos listed in a repos group
 func (grp *Group) GetRepos() []*Repo {
 	return grp.repos
 }
@@ -213,6 +216,7 @@ func (gtl *Gitolite) addUser(user *User) {
 	gtl.users = append(gtl.users, user)
 }
 
+// GetRepos returns the repos listed in config
 func (cfg *Config) GetRepos() []*Repo {
 	return cfg.repos
 }

@@ -69,7 +69,7 @@ func main() {
 
 func print(usersToRepos map[string][]*gitolite.Repo) {
 	names := make([]string, 0, len(usersToRepos))
-	for username, _ := range usersToRepos {
+	for username := range usersToRepos {
 		names = append(names, username)
 	}
 	sort.Strings(names)
