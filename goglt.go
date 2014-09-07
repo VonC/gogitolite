@@ -5,7 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 
+	"github.com/VonC/gogitolite/gitolite"
 	"github.com/VonC/gogitolite/reader"
 )
 
@@ -18,6 +21,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	var usersToRepos = make(map[string][]*gitolite.Repo)
 	for _, filename := range filenames {
 		fmt.Printf("Read file '%v'\n", filename)
 		f, err := os.Open(filename)
@@ -35,10 +39,55 @@ func main() {
 		// fmt.Println(gtl.String())
 		for _, config := range gtl.Configs() {
 			for _, rule := range config.Rules() {
-				if rule.Access() != "-" {
-					fmt.Println(config.GetRepos(), "=>", rule.GetUsers())
+				if strings.Contains(rule.Access(), "R") {
+					for _, user := range rule.GetUsers() {
+						var repos []*gitolite.Repo
+						var ok bool
+						if repos, ok = usersToRepos[user.GetName()]; !ok {
+							repos = []*gitolite.Repo{}
+						}
+						for _, cfgrepo := range config.GetRepos() {
+							seen := false
+							for _, repo := range repos {
+								if repo.GetName() == cfgrepo.GetName() {
+									seen = true
+									break
+								}
+							}
+							if !seen {
+								repos = append(repos, cfgrepo)
+							}
+						}
+						usersToRepos[user.GetName()] = repos
+					}
 				}
 			}
 		}
 	}
+	print(usersToRepos)
+}
+
+func print(usersToRepos map[string][]*gitolite.Repo) {
+	names := make([]string, 0, len(usersToRepos))
+	for username, _ := range usersToRepos {
+		names = append(names, username)
+	}
+	sort.Strings(names)
+	for _, username := range names {
+		repos := usersToRepos[username]
+		for _, repo := range repos {
+			typeuser := "user"
+			if strings.HasPrefix(username, "proj") {
+				typeuser = "system"
+			}
+			if strings.HasPrefix(username, "HB") {
+				typeuser = "system"
+			}
+			if strings.Contains(username, "dmin") {
+				typeuser = "system"
+			}
+			fmt.Printf("%v,,%v,%v\n", username, repo.GetName(), typeuser)
+		}
+	}
+
 }
