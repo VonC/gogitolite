@@ -237,6 +237,17 @@ test1
 			err = gtl.AddUserGroupToRule(rule, "repogrp")
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "user group 'repogrp' named after a repo group")
+
+			// define a user group *after* being used in a rule
+			err = gtl.AddUserGroupToRule(rule, "@grpusers")
+			So(err, ShouldBeNil)
+			So(gtl.NbGroupUsers(), ShouldEqual, 5)
+			So(gtl.NbUsers(), ShouldEqual, 6)
+
+			err = gtl.AddUserOrRepoGroup("@grpusers", []string{"u41", "u42"}, &Comment{[]string{"legit user @grpusers"}})
+			So(err, ShouldBeNil)
+			grp = gtl.GetGroup("grp4")
+			So(len(grp.GetUsers()), ShouldEqual, 2)
 		})
 
 		Convey("Configs can be added", func() {

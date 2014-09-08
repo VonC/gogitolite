@@ -642,7 +642,11 @@ func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, cur
 	grp := &Group{name: grpname, members: grpmembers, container: gtl, cmt: currentComment}
 	for _, g := range gtl.groups {
 		if g.GetName() == grpname {
-			return fmt.Errorf("Duplicate group name '%v'", grpname)
+			if len(g.members) > 0 {
+				return fmt.Errorf("Duplicate group name '%v'", grpname)
+			}
+			g.cmt = grp.cmt
+			grp = g
 		}
 	}
 	seen := map[string]bool{}
