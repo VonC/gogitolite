@@ -2,6 +2,7 @@ package gitolite
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -16,6 +17,7 @@ type Gitolite struct {
 	userGroups     []*Group
 	configs        []*Config
 	reposToConfigs map[string][]*Config
+	subconfs       []*regexp.Regexp
 }
 
 // NewGitolite creates an empty gitolite config
@@ -41,6 +43,33 @@ type Group struct {
 	cmt       *Comment
 	users     []*User
 	repos     []*Repo
+}
+
+// AddSubconf adds a new subconf regexp to the gitolite configuration
+// Duplicate is ignored
+// If regexp doesn't compile (by replacing * with '.*'), return the error
+func (gtl *Gitolite) AddSubconf(subconf string) error {
+	subconf = strings.Replace(subconf, "*", ".*", -1)
+	r, err := regexp.Compile(subconf)
+	if err != nil {
+		return err
+	}
+	seen := false
+	for _, sc := range gtl.subconfs {
+		if sc.String() == r.String() {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		gtl.subconfs = append(gtl.subconfs, r)
+	}
+	return nil
+}
+
+// Subconfs returns the subconf regexps read in the gitolite.conf
+func (gtl *Gitolite) Subconfs() []*regexp.Regexp {
+	return gtl.subconfs
 }
 
 type kind int

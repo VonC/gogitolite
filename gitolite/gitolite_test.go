@@ -372,5 +372,25 @@ reposToConfigs: 2 [repo11 => [config [repo 'repo11' repo 'repo12'] => [RW test =
 			So(len(r), ShouldEqual, 1)
 
 		})
+
+		Convey("Subconfs can be added", func() {
+			gtl := NewGitolite()
+			err := gtl.AddSubconf("(invalid conf")
+			So(err, ShouldNotBeNil)
+
+			err = gtl.AddSubconf("subs/*.conf")
+			So(err, ShouldBeNil)
+			So(len(gtl.Subconfs()), ShouldEqual, 1)
+
+			err = gtl.AddSubconf("subs/*.conf")
+			So(err, ShouldBeNil)
+			So(len(gtl.Subconfs()), ShouldEqual, 1)
+
+			err = gtl.AddSubconf("subs2/*.conf")
+			So(err, ShouldBeNil)
+			So(len(gtl.Subconfs()), ShouldEqual, 2)
+
+		})
 	})
+
 }
