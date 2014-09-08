@@ -193,6 +193,7 @@ test1
 			So(gtl.NbUsers(), ShouldEqual, 1)
 
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21)`)
+			So(rule.IsNakedRW(), ShouldBeFalse)
 			usr = &User{"u22"}
 			grp.addUser(usr)
 			gtl.addUser(usr)

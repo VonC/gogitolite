@@ -374,6 +374,11 @@ func (gtl *Gitolite) String() string {
 	return res
 }
 
+// IsNakedRW check if rule as RW without any param
+func (rule *Rule) IsNakedRW() bool {
+	return rule.Access() == "RW" && rule.Param() == ""
+}
+
 func (gtl *Gitolite) stringMaps() string {
 	res := fmt.Sprintf("namesToGroups: %v [", len(gtl.namesToGroups))
 	names := make([]string, 0, len(gtl.namesToGroups))

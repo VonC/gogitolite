@@ -33,22 +33,13 @@ func (pm *Manager) updateProjects() {
 	for _, config := range configs {
 		var currentProject *Project
 		rules := config.Rules()
+		var isrw bool
 		for _, rule := range rules {
 			//fmt.Printf("\nRule looked at: '%v' => '%v' '%v'\n", rule, rule.Access(), rule.Param())
-			if rule.Access() == "RW" && rule.Param() == "" {
+			if rule.IsNakedRW() {
 				currentProject = &Project{users: rule.GetUsers()}
-			} else if rule.Access() == "RW" && strings.HasPrefix(rule.Param(), prefix) {
-				projectname := rule.Param()[len(prefix):]
-				if currentProject == nil {
-					fmt.Printf("\nIgnore project name '%v': no RW rule before\n", projectname)
-				} else {
-					currentProject.name = projectname
-				}
-				if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
-					fmt.Printf("\nIgnore project name '%v': users differ on 'RW' (%v vs. %v)\n", projectname,
-						currentProject.users, rule.GetUsers())
-					currentProject = nil
-				}
+			} else if isrw, currentProject = pm.currentProjectRW(rule, currentProject); isrw {
+				isrw = true
 			} else if rule.Access() == "-" && rule.Param() == "VREF/NAME/" {
 				if currentProject != nil && currentProject.name == "" {
 					fmt.Printf("\nIgnore project with no name\n")
@@ -60,6 +51,24 @@ func (pm *Manager) updateProjects() {
 			}
 		}
 	}
+}
+
+func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project) (bool, *Project) {
+	var isrw = false
+	if isrw = rule.Access() == "RW" && strings.HasPrefix(rule.Param(), prefix); isrw {
+		projectname := rule.Param()[len(prefix):]
+		if currentProject == nil {
+			fmt.Printf("\nIgnore project name '%v': no RW rule before\n", projectname)
+		} else {
+			currentProject.name = projectname
+		}
+		if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
+			fmt.Printf("\nIgnore project name '%v': users differ on 'RW' (%v vs. %v)\n", projectname,
+				currentProject.users, rule.GetUsers())
+			currentProject = nil
+		}
+	}
+	return isrw, currentProject
 }
 
 func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolite.Rule, gtl *gitolite.Gitolite) *Project {
