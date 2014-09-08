@@ -682,32 +682,40 @@ func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, e
 			addRepoFromName(config, rpname, gtl)
 			addRepoFromName(gtl, rpname, gtl)
 		} else {
-			var group *Group
-			for _, g := range gtl.groups {
-				if g.name == rpname {
-					group = g
-					break
-				}
-			}
-			if group == nil {
-				if rpname == "@all" {
-					group = &Group{name: "@all", container: gtl}
-				} else {
-					return nil, fmt.Errorf("repo group name '%v' undefined", rpname)
-				}
-			}
-			//fmt.Printf("\n%v\n", group)
-			if err := group.MarkAsRepoGroup(); err != nil {
+			err := gtl.addGroupRepoToConfig(config, rpname)
+			if err != nil {
 				return nil, err
-			}
-			for _, rpname := range group.GetMembers() {
-				addRepoFromName(gtl, rpname, gtl)
-				addRepoFromName(config, rpname, gtl)
 			}
 		}
 	}
 	gtl.configs = append(gtl.configs, config)
 	return config, nil
+}
+
+func (gtl *Gitolite) addGroupRepoToConfig(config *Config, rpname string) error {
+	var group *Group
+	for _, g := range gtl.groups {
+		if g.name == rpname {
+			group = g
+			break
+		}
+	}
+	if group == nil {
+		if rpname == "@all" {
+			group = &Group{name: "@all", container: gtl}
+		} else {
+			return fmt.Errorf("repo group name '%v' undefined", rpname)
+		}
+	}
+	//fmt.Printf("\n%v\n", group)
+	if err := group.MarkAsRepoGroup(); err != nil {
+		return err
+	}
+	for _, rpname := range group.GetMembers() {
+		addRepoFromName(gtl, rpname, gtl)
+		addRepoFromName(config, rpname, gtl)
+	}
+	return nil
 }
 
 // SetDesc set description for a config, unless there is already one.
