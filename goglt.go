@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -24,9 +25,10 @@ func main() {
 	var usersToRepos = make(map[string][]*gitolite.Repo)
 	for _, filename := range filenames {
 		fmt.Printf("Read file '%v'\n", filename)
-		process(filename, usersToRepos)
+		f := process(filename, usersToRepos)
+		processSubconfs(f, usersToRepos)
 	}
-	print(usersToRepos)
+	// print(usersToRepos)
 }
 
 func getGtl(filename string) (*os.File, *gitolite.Gitolite) {
@@ -79,6 +81,17 @@ func process(filename string, usersToRepos map[string][]*gitolite.Repo) *os.File
 		}
 	}
 	return f
+}
+
+func visit(path string, f os.FileInfo, err error) error {
+	fmt.Printf("Visited: %s\n", path)
+	return nil
+}
+
+func processSubconfs(f *os.File, usersToRepos map[string][]*gitolite.Repo) {
+	root := filepath.Dir(f.Name())
+	fmt.Println(root)
+	filepath.Walk(root, visit)
 }
 
 func print(usersToRepos map[string][]*gitolite.Repo) {
