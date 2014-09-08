@@ -542,4 +542,42 @@ R param = user @users
 
 	})
 
+	Convey("A Gitolite can read subconfs", t, func() {
+		test = "ignorega"
+
+		Convey("A Gitolite detect invalid subconf line", func() {
+			r := strings.NewReader(`
+						# comment
+						subconf subs/*.conf
+`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(strings.HasPrefix(err.Error(), "Parse Error: Invalid subconf at line"), ShouldBeTrue)
+			So(len(gtl.Subconfs()), ShouldEqual, 0)
+		})
+
+		Convey("A Gitolite detect invalid subconf line~regexp", func() {
+			r := strings.NewReader(`
+						# comment
+						subconf "subs/(*.conf"
+`)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(strings.HasPrefix(err.Error(), "Parse Error: Invalid subconf regexp"), ShouldBeTrue)
+			So(len(gtl.Subconfs()), ShouldEqual, 0)
+		})
+
+		Convey("A Gitolite detect invalid subconf line", func() {
+			r := strings.NewReader(`
+						# comment
+						subconf "subs/*.conf"
+						subconf "subs2/*.conf"
+						subconf "subs/*.conf"
+`)
+			gtl, _ := Read(r)
+			So(len(gtl.Subconfs()), ShouldEqual, 2)
+		})
+
+	})
+
 }

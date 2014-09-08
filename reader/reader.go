@@ -78,7 +78,7 @@ func (pe ParseError) Error() string {
 }
 
 var readEmptyOrCommentLinesRx = regexp.MustCompile(`(?m)^\s*?$|^\s*?#(.*?)$`)
-var readSubconfLinesRx = regexp.MustCompile(`(?m)^\s*?subconf\s+"subs/\*\.conf"\s*?$`)
+var readSubconfLinesRx = regexp.MustCompile(`(?m)^\s*?subconf\s+"(.*.conf)"\s*?$`)
 
 func readEmptyOrCommentLines(c *content) (stateFn, error) {
 	t := c.s.Text()
@@ -88,7 +88,14 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 		if res == nil {
 			res := readSubconfLinesRx.FindStringSubmatchIndex(t)
 			if res == nil {
+				if strings.HasPrefix(strings.TrimSpace(t), "subconf") {
+					return nil, ParseError{msg: fmt.Sprintf("Invalid subconf at line %v ('%v')", c.l, t)}
+				}
 				return readRepoOrGroup, nil
+			}
+			err := c.gtl.AddSubconf(t[res[2]:res[3]])
+			if err != nil {
+				return nil, ParseError{msg: fmt.Sprintf("Invalid subconf regexp:\n%v at line %v ('%v')", err.Error(), c.l, t)}
 			}
 		}
 		if !c.s.Scan() {
