@@ -38,29 +38,34 @@ func Read(r io.Reader) (*gitolite.Gitolite, error) {
 	}
 	if err == nil && test != "ignorega" {
 		configs := res.GetConfigsForRepo("gitolite-admin")
-		if len(configs) != 1 {
-			err = fmt.Errorf("There must be one and only gitolite-admin repo config")
-			return res, err
-		}
-		config := configs[0]
-		if len(config.Rules()) == 0 {
-			err = fmt.Errorf("There must be at least one rule for gitolite-admin repo config")
-			return res, err
-		}
-		rule := config.Rules()[0]
-		if rule.Access() != "RW+" || rule.Param() != "" {
-			err = fmt.Errorf("First rule for gitolite-admin repo config must be 'RW+', empty param, instead of '%v'-'%v'", rule.Access(), rule.Param())
-			return res, err
-		}
+		err = checkConfigRead(configs)
 		/*
 			if !rule.HasAnyUserOrGroup() {
 				err = fmt.Errorf("First rule for gitolite-admin repo must have at least one user or group of users")
-				return res, err
 			}
 		*/
 	}
 	//fmt.Printf("\nGitolite res='%v'\n", res)
 	return res, err
+}
+
+func checkConfigRead(configs []*gitolite.Config) error {
+	var err error
+	if len(configs) != 1 {
+		err = fmt.Errorf("There must be one and only gitolite-admin repo config")
+		return err
+	}
+	config := configs[0]
+	if len(config.Rules()) == 0 {
+		err = fmt.Errorf("There must be at least one rule for gitolite-admin repo config")
+		return err
+	}
+	rule := config.Rules()[0]
+	if rule.Access() != "RW+" || rule.Param() != "" {
+		err = fmt.Errorf("First rule for gitolite-admin repo config must be 'RW+', empty param, instead of '%v'-'%v'", rule.Access(), rule.Param())
+		return err
+	}
+	return nil
 }
 
 // ParseError indicates gitolite.conf parsing error
