@@ -54,32 +54,37 @@ func (pm *Manager) updateProjects() {
 					fmt.Printf("\nIgnore project with no name\n")
 					currentProject = nil
 				}
-				if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
-					fmt.Printf("\nIgnore project name '%v': users differ on '-' (%v vs. %v)\n", currentProject.name,
-						currentProject.users, rule.GetUsers())
-					currentProject = nil
-				}
-				if currentProject != nil {
-					group := gtl.GetGroup("@" + currentProject.name)
-					if group == nil {
-						fmt.Printf("\nIgnore project name '%v': no repo group found\n", currentProject.name)
-						currentProject = nil
-					} else if group.IsUsers() {
-						fmt.Printf("\nIgnore project name '%v': user group found (instead of repo group)\n", currentProject.name)
-						currentProject = nil
-					} else if group.IsUndefined() {
-						group.MarkAsRepoGroup()
-					}
-					if currentProject != nil {
-						pm.projects = append(pm.projects, currentProject)
-					}
-				}
-				currentProject = nil
+				currentProject = pm.currentProjectVREFName(currentProject, rule, gtl)
 			} else {
 				currentProject = nil
 			}
 		}
 	}
+}
+
+func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolite.Rule, gtl *gitolite.Gitolite) *Project {
+	if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
+		fmt.Printf("\nIgnore project name '%v': users differ on '-' (%v vs. %v)\n", currentProject.name,
+			currentProject.users, rule.GetUsers())
+		currentProject = nil
+	}
+	if currentProject != nil {
+		group := gtl.GetGroup("@" + currentProject.name)
+		if group == nil {
+			fmt.Printf("\nIgnore project name '%v': no repo group found\n", currentProject.name)
+			currentProject = nil
+		} else if group.IsUsers() {
+			fmt.Printf("\nIgnore project name '%v': user group found (instead of repo group)\n", currentProject.name)
+			currentProject = nil
+		} else if group.IsUndefined() {
+			group.MarkAsRepoGroup()
+		}
+		if currentProject != nil {
+			pm.projects = append(pm.projects, currentProject)
+		}
+	}
+	currentProject = nil
+	return currentProject
 }
 
 func (p *Project) hasSameUsers(users []*gitolite.User) bool {
