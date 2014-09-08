@@ -370,7 +370,12 @@ func (gtl *Gitolite) String() string {
 		res = res + config.String()
 	}
 	res = res + "]\n"
-	res = res + fmt.Sprintf("namesToGroups: %v [", len(gtl.namesToGroups))
+	res = res + gtl.stringMaps()
+	return res
+}
+
+func (gtl *Gitolite) stringMaps() string {
+	res := fmt.Sprintf("namesToGroups: %v [", len(gtl.namesToGroups))
 	names := make([]string, 0, len(gtl.namesToGroups))
 	for i := range gtl.namesToGroups {
 		names = append(names, i)
@@ -402,7 +407,6 @@ func (gtl *Gitolite) String() string {
 		res = res + fmt.Sprintf("%v => %+v", reponame, config)
 	}
 	res = res + "]\n"
-
 	return res
 }
 
