@@ -21,7 +21,7 @@ func TestProject(t *testing.T) {
 	Convey("Test Gitolite", t, func() {
 
 		Convey("Empty gitolite", func() {
-			gtl := NewGitolite()
+			gtl := NewGitolite(nil)
 			So(gtl.IsEmpty(), ShouldBeTrue)
 		})
 	})
@@ -34,7 +34,7 @@ func TestProject(t *testing.T) {
 		})
 
 		Convey("Users or Repos Group", func() {
-			gtl := NewGitolite()
+			gtl := NewGitolite(nil)
 			grp := &Group{name: "grp1"}
 			grp.container = gtl
 			var err error
@@ -71,7 +71,7 @@ func TestProject(t *testing.T) {
 			So(gtl.GetGroup("grp3"), ShouldBeNil)
 		})
 		Convey("Users can be added", func() {
-			gtl := NewGitolite()
+			gtl := NewGitolite(nil)
 			grp := &Group{name: "grp1"}
 			grp.members = append(grp.members, "user1")
 			grp.container = gtl
@@ -112,7 +112,7 @@ func TestProject(t *testing.T) {
 		})
 
 		Convey("Repos can be added", func() {
-			gtl := NewGitolite()
+			gtl := NewGitolite(nil)
 			grp := &Group{name: "grp1"}
 			grp.members = append(grp.members, "repo1")
 			grp.container = gtl
@@ -185,7 +185,7 @@ test1
 			So(len(rule.GetUsers()), ShouldEqual, 1)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 
-			gtl := NewGitolite()
+			gtl := NewGitolite(nil)
 			grp.container = gtl
 			grp.markAsUserGroup()
 			// grp is defined as user group: its user does count
@@ -252,7 +252,7 @@ test1
 		})
 
 		Convey("Configs can be added", func() {
-			gtl := NewGitolite()
+			gtl := NewGitolite(nil)
 			So(gtl.NbConfigs(), ShouldEqual, 0)
 
 			cfg, err := gtl.AddConfig([]string{"@grprepo"}, &Comment{[]string{"@grprepo comment"}})
@@ -374,7 +374,7 @@ reposToConfigs: 2 [repo11 => [config [repo 'repo11' repo 'repo12'] => [RW test =
 		})
 
 		Convey("Subconfs can be added", func() {
-			gtl := NewGitolite()
+			gtl := NewGitolite(nil)
 			err := gtl.AddSubconf("(invalid conf")
 			So(err, ShouldNotBeNil)
 
