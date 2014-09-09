@@ -122,13 +122,13 @@ func (rdr *rdr) print() {
 		repos := rdr.usersToRepos[username]
 		for _, repo := range repos {
 			typeuser := "user"
-			if strings.HasPrefix(username, "proj") {
+			if strings.HasPrefix(username, "@") {
 				typeuser = "system"
-			}
-			if strings.HasPrefix(username, "HB") {
+			} else if strings.HasPrefix(username, "proj") {
 				typeuser = "system"
-			}
-			if strings.Contains(username, "dmin") {
+			} else if strings.HasPrefix(username, "HB") {
+				typeuser = "system"
+			} else if strings.Contains(username, "dmin") {
 				typeuser = "system"
 			}
 			fmt.Printf("%v,,%v,%v\n", username, repo.GetName(), typeuser)
