@@ -13,6 +13,12 @@ import (
 	"github.com/VonC/gogitolite/reader"
 )
 
+type rdr struct {
+	usersToRepos map[string][]*gitolite.Repo
+	gtl          *gitolite.Gitolite
+	f            *os.File
+}
+
 func main() {
 
 	flag.Parse()
@@ -22,16 +28,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	var usersToRepos = make(map[string][]*gitolite.Repo)
+	rdr := &rdr{usersToRepos: make(map[string][]*gitolite.Repo)}
 	for _, filename := range filenames {
 		fmt.Printf("Read file '%v'\n", filename)
-		f := process(filename, usersToRepos)
-		processSubconfs(f, usersToRepos)
+		rdr.f, rdr.gtl = rdr.process(filename)
+		rdr.processSubconfs()
 	}
 	// print(usersToRepos)
 }
 
-func getGtl(filename string) (*os.File, *gitolite.Gitolite) {
+func getGtl(filename string, gtl *gitolite.Gitolite) (*os.File, *gitolite.Gitolite) {
 	f, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err.Error())
@@ -47,10 +53,10 @@ func getGtl(filename string) (*os.File, *gitolite.Gitolite) {
 	return f, gtl
 }
 
-func updateUsersToRepos(user *gitolite.User, config *gitolite.Config, usersToRepos map[string][]*gitolite.Repo) {
+func (rdr *rdr) updateUsersToRepos(user *gitolite.User, config *gitolite.Config) {
 	var repos []*gitolite.Repo
 	var ok bool
-	if repos, ok = usersToRepos[user.GetName()]; !ok {
+	if repos, ok = rdr.usersToRepos[user.GetName()]; !ok {
 		repos = []*gitolite.Repo{}
 	}
 	for _, cfgrepo := range config.GetRepos() {
@@ -65,43 +71,51 @@ func updateUsersToRepos(user *gitolite.User, config *gitolite.Config, usersToRep
 			repos = append(repos, cfgrepo)
 		}
 	}
-	usersToRepos[user.GetName()] = repos
+	rdr.usersToRepos[user.GetName()] = repos
 }
 
-func process(filename string, usersToRepos map[string][]*gitolite.Repo) *os.File {
-	f, gtl := getGtl(filename)
+func (rdr *rdr) process(filename string) (*os.File, *gitolite.Gitolite) {
+	f, gtl := getGtl(filename, nil)
 	// fmt.Println(gtl.String())
 	for _, config := range gtl.Configs() {
 		for _, rule := range config.Rules() {
 			if strings.Contains(rule.Access(), "R") {
 				for _, user := range rule.GetUsers() {
-					updateUsersToRepos(user, config, usersToRepos)
+					rdr.updateUsersToRepos(user, config)
 				}
 			}
 		}
 	}
-	return f
+	return f, gtl
 }
 
-func visit(path string, f os.FileInfo, err error) error {
-	fmt.Printf("Visited: %s\n", path)
-	return nil
-}
-
-func processSubconfs(f *os.File, usersToRepos map[string][]*gitolite.Repo) {
-	root := filepath.Dir(f.Name())
+func (rdr *rdr) processSubconfs() {
+	root := filepath.Dir(rdr.f.Name())
 	fmt.Println(root)
-	filepath.Walk(root, visit)
+	filepath.Walk(root, func(path string, f os.FileInfo, err error) error {
+		if !f.IsDir() {
+			relname := strings.Replace(path, root+string(filepath.Separator), "", 1)
+			relname = strings.Replace(relname, string(filepath.Separator), "/", -1)
+			for _, subconfrx := range rdr.gtl.Subconfs() {
+				//fmt.Printf("%v %v\n", subconfrx.String(), relname)
+				if subconfrx.MatchString(relname) {
+					fmt.Printf("Visited: %s %s\n", relname, path)
+					getGtl(path, rdr.gtl)
+				}
+			}
+		}
+		return nil
+	})
 }
 
-func print(usersToRepos map[string][]*gitolite.Repo) {
-	names := make([]string, 0, len(usersToRepos))
-	for username := range usersToRepos {
+func (rdr *rdr) print() {
+	names := make([]string, 0, len(rdr.usersToRepos))
+	for username := range rdr.usersToRepos {
 		names = append(names, username)
 	}
 	sort.Strings(names)
 	for _, username := range names {
-		repos := usersToRepos[username]
+		repos := rdr.usersToRepos[username]
 		for _, repo := range repos {
 			typeuser := "user"
 			if strings.HasPrefix(username, "proj") {
