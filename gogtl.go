@@ -21,6 +21,7 @@ type rdr struct {
 
 func main() {
 
+	fauditPtr := flag.Bool("audit", false, "print user access audit")
 	flag.Parse()
 	filenames := flag.Args()
 	if len(filenames) == 0 {
@@ -34,7 +35,9 @@ func main() {
 		rdr.f, rdr.gtl = rdr.process(filename, nil)
 		rdr.processSubconfs()
 	}
-	rdr.print()
+	if *fauditPtr {
+		rdr.printAudit()
+	}
 }
 
 func getGtl(filename string, gtl *gitolite.Gitolite) (*os.File, *gitolite.Gitolite) {
@@ -112,7 +115,7 @@ func (rdr *rdr) processSubconfs() {
 	})
 }
 
-func (rdr *rdr) print() {
+func (rdr *rdr) printAudit() {
 	names := make([]string, 0, len(rdr.usersToRepos))
 	for username := range rdr.usersToRepos {
 		names = append(names, username)
