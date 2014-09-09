@@ -740,6 +740,15 @@ func (gtl *Gitolite) addGroupRepoToConfig(config *Config, rpname string) error {
 			break
 		}
 	}
+	if group == nil && gtl.parent != nil {
+		fmt.Println("=> ", gtl.parent.groups)
+		for _, g := range gtl.parent.groups {
+			if g.name == rpname {
+				group = g
+				break
+			}
+		}
+	}
 	if group == nil {
 		if rpname == "@all" {
 			group = &Group{name: "@all", container: gtl}
