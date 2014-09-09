@@ -181,8 +181,10 @@ test1
 			rule.addGroup(grp)
 			// grp is still undefined: its user doesn't count yet
 			So(len(rule.GetUsers()), ShouldEqual, 1)
+			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			rule.addGroup(grp)
 			So(len(rule.GetUsers()), ShouldEqual, 1)
+			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 
 			gtl := NewGitolite(nil)
@@ -191,6 +193,7 @@ test1
 			// grp is defined as user group: its user does count
 			So(len(rule.GetUsers()), ShouldEqual, 2)
 			So(gtl.NbUsers(), ShouldEqual, 1)
+			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21)`)
 			So(rule.IsNakedRW(), ShouldBeFalse)

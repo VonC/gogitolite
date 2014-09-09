@@ -128,12 +128,12 @@ type Config struct {
 type Rule struct {
 	access        string
 	param         string
-	usersOrGroups []userOrGroup
+	usersOrGroups []UserOrGroup
 	cmt           *Comment
 }
 
 // UserOrGroup represents a User or a Group. Used by Rule.
-type userOrGroup interface {
+type UserOrGroup interface {
 	GetName() string
 	GetMembers() []string
 	User() *User
@@ -208,6 +208,28 @@ func (rule *Rule) GetUsers() []*User {
 			for _, usr := range grp.GetUsers() {
 				//fmt.Println(usr)
 				res = append(res, usr)
+			}
+		}
+	}
+	return res
+}
+
+// GetUsersFirstOrGroups gets all users or, if the user group is not defined,
+// the (empty) user group.
+func (rule *Rule) GetUsersFirstOrGroups() []UserOrGroup {
+	res := []UserOrGroup{}
+	for _, uog := range rule.usersOrGroups {
+		if uog.User() != nil {
+			res = append(res, uog)
+		}
+		if uog.Group() != nil {
+			grp := uog.Group()
+			users := grp.GetUsers()
+			for _, usr := range grp.GetUsers() {
+				res = append(res, usr)
+			}
+			if len(users) == 0 {
+				res = append(res, grp)
 			}
 		}
 	}
