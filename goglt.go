@@ -57,10 +57,10 @@ func getGtl(filename string, gtl *gitolite.Gitolite) (*os.File, *gitolite.Gitoli
 	return f, gtl
 }
 
-func (rdr *rdr) updateUsersToRepos(user *gitolite.User, config *gitolite.Config) {
+func (rdr *rdr) updateUsersToRepos(uog gitolite.UserOrGroup, config *gitolite.Config) {
 	var repos []*gitolite.Repo
 	var ok bool
-	if repos, ok = rdr.usersToRepos[user.GetName()]; !ok {
+	if repos, ok = rdr.usersToRepos[uog.GetName()]; !ok {
 		repos = []*gitolite.Repo{}
 	}
 	for _, cfgrepo := range config.GetRepos() {
@@ -75,7 +75,7 @@ func (rdr *rdr) updateUsersToRepos(user *gitolite.User, config *gitolite.Config)
 			repos = append(repos, cfgrepo)
 		}
 	}
-	rdr.usersToRepos[user.GetName()] = repos
+	rdr.usersToRepos[uog.GetName()] = repos
 }
 
 func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) (*os.File, *gitolite.Gitolite) {
@@ -84,8 +84,8 @@ func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) (*os.File, *
 	for _, config := range gtl.Configs() {
 		for _, rule := range config.Rules() {
 			if strings.Contains(rule.Access(), "R") {
-				for _, user := range rule.GetUsers() {
-					rdr.updateUsersToRepos(user, config)
+				for _, uog := range rule.GetUsersFirstOrGroups() {
+					rdr.updateUsersToRepos(uog, config)
 				}
 			}
 		}
