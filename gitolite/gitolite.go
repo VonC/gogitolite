@@ -18,13 +18,15 @@ type Gitolite struct {
 	configs        []*Config
 	reposToConfigs map[string][]*Config
 	subconfs       []*regexp.Regexp
+	parent         *Gitolite
 }
 
 // NewGitolite creates an empty gitolite config
-func NewGitolite() *Gitolite {
+func NewGitolite(parent *Gitolite) *Gitolite {
 	res := &Gitolite{
 		namesToGroups:  make(map[string][]*Group),
 		reposToConfigs: make(map[string][]*Config),
+		parent:         parent,
 	}
 	return res
 }

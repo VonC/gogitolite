@@ -24,12 +24,12 @@ var currentComment = &gitolite.Comment{}
 
 // Read a gitolite config file
 func Read(r io.Reader) (*gitolite.Gitolite, error) {
-	return Update(r, gitolite.NewGitolite())
+	return Update(r, nil)
 }
 
 // Update a gitolite config file
 func Update(r io.Reader, gtl *gitolite.Gitolite) (*gitolite.Gitolite, error) {
-	res := gtl
+	res := gitolite.NewGitolite(gtl)
 	if r == nil {
 		return res, nil
 	}
