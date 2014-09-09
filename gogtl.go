@@ -22,6 +22,7 @@ type rdr struct {
 func main() {
 
 	fauditPtr := flag.Bool("audit", false, "print user access audit")
+	flistPtr := flag.Bool("list", false, "list projects")
 	flag.Parse()
 	filenames := flag.Args()
 	if len(filenames) == 0 {
@@ -37,6 +38,9 @@ func main() {
 	}
 	if *fauditPtr {
 		rdr.printAudit()
+	}
+	if *flistPtr {
+		rdr.listProjects()
 	}
 }
 
@@ -137,5 +141,9 @@ func (rdr *rdr) printAudit() {
 			fmt.Printf("%v,,%v,%v\n", username, repo.GetName(), typeuser)
 		}
 	}
+
+}
+
+func (rdr *rdr) listProjects() {
 
 }
