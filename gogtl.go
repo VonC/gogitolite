@@ -17,12 +17,14 @@ type rdr struct {
 	usersToRepos map[string][]*gitolite.Repo
 	gtl          *gitolite.Gitolite
 	f            *os.File
+	verbose      bool
 }
 
 func main() {
 
 	fauditPtr := flag.Bool("audit", false, "print user access audit")
 	flistPtr := flag.Bool("list", false, "list projects")
+	fverbosePtr := flag.Bool("v", false, "verbose, display filenames read")
 	flag.Parse()
 	filenames := flag.Args()
 	if len(filenames) == 0 {
@@ -30,9 +32,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	rdr := &rdr{usersToRepos: make(map[string][]*gitolite.Repo)}
+	rdr := &rdr{usersToRepos: make(map[string][]*gitolite.Repo), verbose: *fverbosePtr}
 	for _, filename := range filenames {
-		fmt.Printf("Read file '%v'\n", filename)
+		if rdr.verbose {
+			fmt.Printf("Read file '%v'\n", filename)
+		}
 		rdr.f, rdr.gtl = rdr.process(filename, nil)
 		rdr.processSubconfs()
 	}
@@ -102,7 +106,7 @@ func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) (*os.File, *
 
 func (rdr *rdr) processSubconfs() {
 	root := filepath.Dir(rdr.f.Name())
-	fmt.Println(root)
+	//fmt.Println(root)
 	filepath.Walk(root, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
 			relname := strings.Replace(path, root+string(filepath.Separator), "", 1)
@@ -110,7 +114,9 @@ func (rdr *rdr) processSubconfs() {
 			for _, subconfrx := range rdr.gtl.Subconfs() {
 				//fmt.Printf("%v %v\n", subconfrx.String(), relname)
 				if subconfrx.MatchString(relname) {
-					fmt.Printf("Visited: %s %s\n", relname, path)
+					if rdr.verbose {
+						fmt.Printf("Visited: %s %s\n", relname, path)
+					}
 					rdr.process(path, rdr.gtl)
 				}
 			}
