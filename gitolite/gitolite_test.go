@@ -256,6 +256,7 @@ test1
 
 		Convey("Configs can be added", func() {
 			gtl := NewGitolite(nil)
+			gtl2 := NewGitolite(gtl)
 			So(gtl.NbConfigs(), ShouldEqual, 0)
 
 			cfg, err := gtl.AddConfig([]string{"@grprepo"}, &Comment{[]string{"@grprepo comment"}})
@@ -315,6 +316,10 @@ group '@usrgrp1' is a users group, not a repo one`)
 			cfg2, err = gtl.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2 comment"}})
 			So(err, ShouldBeNil)
 			So(cfg2.Comment().String(), ShouldEqual, `cfg2 comment
+`)
+			cfg2b, err := gtl2.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2b comment"}})
+			So(err, ShouldBeNil)
+			So(cfg2b.Comment().String(), ShouldEqual, `cfg2b comment
 `)
 
 			cfga, err := gtl.AddConfig([]string{"gitolite-admin"}, &Comment{[]string{"ga comment"}})
