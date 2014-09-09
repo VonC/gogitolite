@@ -754,7 +754,7 @@ func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, e
 	return config, nil
 }
 
-func (gtl *Gitolite) addGroupRepoToConfig(config *Config, rpname string) error {
+func (gtl *Gitolite) getGroup(rpname string) *Group {
 	var group *Group
 	for _, g := range gtl.groups {
 		if g.name == rpname {
@@ -771,6 +771,11 @@ func (gtl *Gitolite) addGroupRepoToConfig(config *Config, rpname string) error {
 			}
 		}
 	}
+	return group
+}
+
+func (gtl *Gitolite) addGroupRepoToConfig(config *Config, rpname string) error {
+	group := gtl.getGroup(rpname)
 	if group == nil {
 		if rpname == "@all" {
 			group = &Group{name: "@all", container: gtl}
