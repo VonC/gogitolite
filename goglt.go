@@ -45,7 +45,11 @@ func getGtl(filename string, gtl *gitolite.Gitolite) (*os.File, *gitolite.Gitoli
 	}
 	defer f.Close()
 	fr := bufio.NewReader(f)
-	gtl, err := reader.Read(fr)
+	if gtl == nil {
+		gtl, err = reader.Read(fr)
+	} else {
+		gtl, err = reader.Update(fr, gtl)
+	}
 	if err != nil {
 		fmt.Printf("ERR %v\n", err.Error())
 		os.Exit(1)
