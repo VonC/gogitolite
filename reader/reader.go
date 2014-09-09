@@ -41,7 +41,7 @@ func Update(r io.Reader, gtl *gitolite.Gitolite) (*gitolite.Gitolite, error) {
 	for state, err = readEmptyOrCommentLines(c); state != nil && err == nil; {
 		state, err = state(c)
 	}
-	if err == nil && test != "ignorega" {
+	if err == nil && test != "ignorega" && gtl == nil {
 		configs := res.GetConfigsForRepo("gitolite-admin")
 		err = checkConfigRead(configs)
 		/*
