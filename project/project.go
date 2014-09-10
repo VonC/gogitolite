@@ -16,6 +16,20 @@ type Project struct {
 
 func (p *Project) String() string {
 	res := "project " + p.name
+	res = res + ", admins: "
+	for i, admin := range p.admins {
+		if i > 0 {
+			res = res + ", "
+		}
+		res = res + admin.GetName()
+	}
+	res = res + ", members: "
+	for i, member := range p.members {
+		if i > 0 {
+			res = res + ", "
+		}
+		res = res + member.GetName()
+	}
 	return res
 }
 
