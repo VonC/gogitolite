@@ -17,8 +17,9 @@ import (
 type rdr struct {
 	usersToRepos map[string][]*gitolite.Repo
 	gtl          *gitolite.Gitolite
-	f            *os.File
 	verbose      bool
+	subconfs     map[string]*gitolite.Gitolite
+	filename     string
 }
 
 func main() {
@@ -28,19 +29,22 @@ func main() {
 	fverbosePtr := flag.Bool("v", false, "verbose, display filenames read")
 	flag.Parse()
 	filenames := flag.Args()
-	if len(filenames) == 0 {
-		fmt.Println("At least one gitolite.conf file expected")
+	if len(filenames) != 1 {
+		fmt.Println("One gitolite.conf file expected")
 		os.Exit(1)
 	}
-
-	rdr := &rdr{usersToRepos: make(map[string][]*gitolite.Repo), verbose: *fverbosePtr}
-	for _, filename := range filenames {
-		if rdr.verbose {
-			fmt.Printf("Read file '%v'\n", filename)
-		}
-		rdr.f, rdr.gtl = rdr.process(filename, nil)
-		rdr.processSubconfs()
+	filename := filenames[0]
+	rdr := &rdr{usersToRepos: make(map[string][]*gitolite.Repo),
+		verbose:  *fverbosePtr,
+		filename: filename,
+		subconfs: make(map[string]*gitolite.Gitolite),
 	}
+	if rdr.verbose {
+		fmt.Printf("Read file '%v'\n", filename)
+	}
+
+	rdr.gtl = rdr.process(filename, nil)
+	rdr.processSubconfs()
 	if *fauditPtr {
 		rdr.printAudit()
 	}
@@ -49,7 +53,7 @@ func main() {
 	}
 }
 
-func getGtl(filename string, gtl *gitolite.Gitolite) (*os.File, *gitolite.Gitolite) {
+func getGtl(filename string, gtl *gitolite.Gitolite) *gitolite.Gitolite {
 	f, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err.Error())
@@ -66,7 +70,7 @@ func getGtl(filename string, gtl *gitolite.Gitolite) (*os.File, *gitolite.Gitoli
 		fmt.Printf("ERR %v\n", err.Error())
 		os.Exit(1)
 	}
-	return f, gtl
+	return gtl
 }
 
 func (rdr *rdr) updateUsersToRepos(uog gitolite.UserOrGroup, config *gitolite.Config) {
@@ -90,8 +94,8 @@ func (rdr *rdr) updateUsersToRepos(uog gitolite.UserOrGroup, config *gitolite.Co
 	rdr.usersToRepos[uog.GetName()] = repos
 }
 
-func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) (*os.File, *gitolite.Gitolite) {
-	f, gtl := getGtl(filename, parent)
+func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) *gitolite.Gitolite {
+	gtl := getGtl(filename, parent)
 	// fmt.Println(gtl.String())
 	for _, config := range gtl.Configs() {
 		for _, rule := range config.Rules() {
@@ -102,11 +106,11 @@ func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) (*os.File, *
 			}
 		}
 	}
-	return f, gtl
+	return gtl
 }
 
 func (rdr *rdr) processSubconfs() {
-	root := filepath.Dir(rdr.f.Name())
+	root := filepath.Dir(rdr.filename)
 	//fmt.Println(root)
 	filepath.Walk(root, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
@@ -118,7 +122,7 @@ func (rdr *rdr) processSubconfs() {
 					if rdr.verbose {
 						fmt.Printf("Visited: %s %s\n", relname, path)
 					}
-					rdr.process(path, rdr.gtl)
+					rdr.subconfs[path] = rdr.process(path, rdr.gtl)
 				}
 			}
 		}
