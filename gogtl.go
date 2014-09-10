@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/VonC/gogitolite/gitolite"
+	"github.com/VonC/gogitolite/project"
 	"github.com/VonC/gogitolite/reader"
 )
 
@@ -151,5 +152,9 @@ func (rdr *rdr) printAudit() {
 }
 
 func (rdr *rdr) listProjects() {
-
+	pm := project.NewManager(rdr.gtl)
+	fmt.Println("NbProjects: %v\n", pm.NbProjects())
+	for _, project := range pm.Projects() {
+		fmt.Printf("%v\n", project)
+	}
 }

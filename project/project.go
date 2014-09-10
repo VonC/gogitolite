@@ -13,6 +13,16 @@ type Project struct {
 	users []*gitolite.User
 }
 
+// NewManager creates a new project manager
+func NewManager(gtl *gitolite.Gitolite) *Manager {
+	return &Manager{gtl: gtl}
+}
+
+// Projects return the list of detected projects
+func (pm *Manager) Projects() []*Project {
+	return pm.projects
+}
+
 // Manager manages project for a gitolite instance
 type Manager struct {
 	gtl      *gitolite.Gitolite
