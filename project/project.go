@@ -9,8 +9,9 @@ import (
 
 // Project has a name and users
 type Project struct {
-	name  string
-	users []*gitolite.User
+	name    string
+	admins  []gitolite.UserOrGroup
+	members []gitolite.UserOrGroup
 }
 
 // NewManager creates a new project manager
@@ -47,7 +48,7 @@ func (pm *Manager) updateProjects() {
 		for _, rule := range rules {
 			//fmt.Printf("\nRule looked at: '%v' => '%v' '%v'\n", rule, rule.Access(), rule.Param())
 			if rule.IsNakedRW() {
-				currentProject = &Project{users: rule.GetUsers()}
+				currentProject = &Project{admins: rule.GetUsersFirstOrGroups()}
 			} else if isrw, currentProject = pm.currentProjectRW(rule, currentProject); isrw {
 				isrw = true
 			} else if rule.Access() == "-" && rule.Param() == "VREF/NAME/" {
@@ -72,9 +73,9 @@ func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project
 		} else {
 			currentProject.name = projectname
 		}
-		if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
-			fmt.Printf("\nIgnore project name '%v': users differ on 'RW' (%v vs. %v)\n", projectname,
-				currentProject.users, rule.GetUsers())
+		if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsersFirstOrGroups()) {
+			fmt.Printf("\nIgnore project name '%v': Admins differ on 'RW' (%v vs. %v)\n", projectname,
+				currentProject.admins, rule.GetUsersFirstOrGroups())
 			currentProject = nil
 		}
 	}
@@ -82,9 +83,9 @@ func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project
 }
 
 func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolite.Rule, gtl *gitolite.Gitolite) *Project {
-	if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsers()) {
-		fmt.Printf("\nIgnore project name '%v': users differ on '-' (%v vs. %v)\n", currentProject.name,
-			currentProject.users, rule.GetUsers())
+	if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsersFirstOrGroups()) {
+		fmt.Printf("\nIgnore project name '%v': admins differ on '-' (%v vs. %v)\n", currentProject.name,
+			currentProject.admins, rule.GetUsersFirstOrGroups())
 		currentProject = nil
 	}
 	if currentProject != nil {
@@ -106,12 +107,12 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 	return currentProject
 }
 
-func (p *Project) hasSameUsers(users []*gitolite.User) bool {
+func (p *Project) hasSameUsers(users []gitolite.UserOrGroup) bool {
 	//fmt.Printf("\nusers '%v'\n", users)
-	if len(p.users) != len(users) {
+	if len(p.admins) != len(users) {
 		return false
 	}
-	for _, pusers := range p.users {
+	for _, pusers := range p.admins {
 		seen := false
 		for _, user := range users {
 			if pusers.GetName() == user.GetName() {
