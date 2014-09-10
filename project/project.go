@@ -15,8 +15,8 @@ type Project struct {
 }
 
 // NewManager creates a new project manager
-func NewManager(gtl *gitolite.Gitolite) *Manager {
-	return &Manager{gtl: gtl}
+func NewManager(gtl *gitolite.Gitolite, subconfs map[string]*gitolite.Gitolite) *Manager {
+	return &Manager{gtl: gtl, subconfs: subconfs}
 }
 
 // Projects return the list of detected projects
@@ -27,6 +27,7 @@ func (pm *Manager) Projects() []*Project {
 // Manager manages project for a gitolite instance
 type Manager struct {
 	gtl      *gitolite.Gitolite
+	subconfs map[string]*gitolite.Gitolite
 	projects []*Project
 }
 
