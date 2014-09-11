@@ -2,6 +2,7 @@ package project
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/VonC/gogitolite/gitolite"
@@ -85,6 +86,26 @@ func (pm *Manager) updateProjects() {
 	}
 }
 
+var subconfRx = regexp.MustCompile(`(?m)^.+[/\\](.+)\.conf$`)
+
+func (pm *Manager) checkSubConf(p *Project) bool {
+	var subconf *gitolite.Gitolite
+	for subconfpath, gtl := range pm.subconfs {
+		res := subconfRx.FindStringSubmatchIndex(subconfpath)
+		if res != nil {
+			subconfname := subconfpath[res[2]:res[3]]
+			if subconfname == p.name {
+				subconf = gtl
+				break
+			}
+		}
+	}
+	if subconf != nil {
+		return true
+	}
+	return false
+}
+
 func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project) (bool, *Project) {
 	var isrw = false
 	if isrw = rule.Access() == "RW" && strings.HasPrefix(rule.Param(), prefix); isrw {
@@ -121,7 +142,11 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 			group.MarkAsRepoGroup()
 		}
 		if currentProject != nil {
-			pm.projects = append(pm.projects, currentProject)
+			if pm.checkSubConf(currentProject) {
+				pm.projects = append(pm.projects, currentProject)
+			} else {
+				fmt.Printf("\nIgnore project name '%v': no subconf found\n", currentProject.name)
+			}
 		}
 	}
 	currentProject = nil
