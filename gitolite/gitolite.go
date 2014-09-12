@@ -87,10 +87,9 @@ func (grp *Group) IsUndefined() bool {
 
 // Container contains group (of repos or users) and users
 type Container interface {
-	addReposGroup(grp *Group)
-	addUsersGroup(grp *Group)
-	addUser(user *User)
-	GetUsers() []*User
+	addRepoOrGroup(rog RepoOrGroup)
+	addUserOrGroup(uog UserOrGroup)
+	GetUsersOrGroups() []UserOrGroup
 }
 
 // Repo (single or group name)
@@ -110,11 +109,11 @@ type User struct {
 
 // Config for repos with access rules
 type Config struct {
-	repos   []*Repo
-	rules   []*Rule
-	descCmt *Comment
-	desc    string
-	cmt     *Comment
+	reposOrGroups []RepoOrGroup
+	rules         []*Rule
+	descCmt       *Comment
+	desc          string
+	cmt           *Comment
 }
 
 // Rule (of access to repo)
@@ -123,6 +122,11 @@ type Rule struct {
 	param         string
 	usersOrGroups []UserOrGroup
 	cmt           *Comment
+}
+
+// GetUsersOrGroups returns the users or groups of users associated to the rule
+func (rule *Rule) GetUsersOrGroups() []UserOrGroup {
+	return rule.usersOrGroups
 }
 
 // UserOrGroup represents a User or a Group. Used by Rule and Group.
@@ -306,14 +310,11 @@ type userContainer interface {
 func (gtl *Gitolite) GetReposOrGroups() []RepoOrGroup {
 	return gtl.reposOrGroups
 }
-func (gtl *Gitolite) addRepoOrGroup(rog RepoOrGroup) {
-	gtl.reposOrGroups = append(gtl.reposOrGroups, rog)
-}
 func (grp *Group) addRepoOrGroup(rog RepoOrGroup) {
 	grp.reposOrGroups = append(grp.reposOrGroups, rog)
 }
 
-// GetRepos returns the repos listed in a repos group
+// GetRepos returns the repos or groups listed in a repos group
 func (grp *Group) GetReposOrGroups() []RepoOrGroup {
 	if grp.kind == repos {
 		return grp.reposOrGroups
@@ -321,24 +322,29 @@ func (grp *Group) GetReposOrGroups() []RepoOrGroup {
 	return []RepoOrGroup{}
 }
 
-// GetUsers returns all users found in a gitolite config
-func (gtl *Gitolite) GetUsersOrGroup() []UserOrGroup {
+// GetReposOrGroups returns itself since it is a repo
+func (repo *Repo) GetReposOrGroups() []RepoOrGroup {
+	return []RepoOrGroup{repo}
+}
+
+// GetUsersOrGroups returns all users found in a gitolite config
+func (gtl *Gitolite) GetUsersOrGroups() []UserOrGroup {
 	return gtl.usersOrGroups
 }
 func (gtl *Gitolite) addUserOrGroup(uog UserOrGroup) {
 	gtl.usersOrGroups = append(gtl.usersOrGroups, uog)
 }
 
-// GetRepos returns the repos listed in config
-func (cfg *Config) GetRepos() []*Repo {
-	return cfg.repos
+// GetReposOrGroups returns the repos oer groups of repos listed in config
+func (cfg *Config) GetReposOrGroups() []RepoOrGroup {
+	return cfg.reposOrGroups
 }
-func (cfg *Config) addRepo(repo *Repo) {
-	cfg.repos = append(cfg.repos, repo)
+func (cfg *Config) addRepoOrGroup(rog RepoOrGroup) {
+	cfg.reposOrGroups = append(cfg.reposOrGroups, rog)
 }
 
-func (rule *Rule) addUser(user *User) {
-	rule.usersOrGroups = append(rule.usersOrGroups, user)
+func (rule *Rule) addUserOrGroup(uog UserOrGroup) {
+	rule.usersOrGroups = append(rule.usersOrGroups, uog)
 }
 
 func (k kind) String() string {
@@ -380,9 +386,9 @@ func (gtl *Gitolite) GetConfigsForRepos(reponames []string) []*Config {
 	}
 	for _, config := range gtl.configs {
 		rpn := []string{}
-		for _, repo := range config.repos {
+		for _, rog := range config.reposOrGroups {
 			for _, reponame := range reponames {
-				if repo.name == reponame {
+				if rog.GetName() == reponame {
 					rpn = append(rpn, reponame)
 				}
 			}
@@ -405,12 +411,18 @@ func (cmt *Comment) String() string {
 
 // NbGroupRepos returns the number of groups identified as repos
 func (gtl *Gitolite) NbRepoGroups() int {
-	return 0 // TBD
+	res := 0
+	for _, grp := range gtl.groups {
+		if grp.kind == repos {
+			res = res + 1
+		}
+	}
+	return res
 }
 
 // String exposes Config internals (each repos and rules)
 func (cfg *Config) String() string {
-	res := fmt.Sprintf("config %+v => %+v", cfg.repos, cfg.rules)
+	res := fmt.Sprintf("config %+v => %+v", cfg.reposOrGroups, cfg.rules)
 	return res
 }
 
@@ -541,22 +553,26 @@ func (gtl *Gitolite) addGroup(grp *Group) {
 	}
 }
 
-func (gtl *Gitolite) addReposGroup(grp *Group) {
+func (gtl *Gitolite) addRepoOrGroup(rog RepoOrGroup) {
 	seen := false
-	for _, rog := range gtl.reposOrGroups {
-		if rog.GetName() == grp.name {
+	for _, arog := range gtl.reposOrGroups {
+		if arog.GetName() == rog.GetName() {
 			seen = true
 			break
 		}
 	}
 	if !seen {
-		gtl.reposOrGroups = append(gtl.reposOrGroups, grp)
+		gtl.reposOrGroups = append(gtl.reposOrGroups, rog)
 	}
-	for _, repoOrGroupName := range grp.GetMembers() {
-		addRepoOrGroupFromName(grp, repoOrGroupName, gtl)
-		addRepoOrGroupFromName(gtl, repoOrGroupName, gtl)
+	grp := rog.Group()
+	if rog.Group() != nil {
+		for _, repoOrGroupName := range rog.GetMembers() {
+			addRepoOrGroupFromName(grp, repoOrGroupName, gtl)
+			addRepoOrGroupFromName(gtl, repoOrGroupName, gtl)
+		}
+		grp := rog.Group()
+		gtl.addGroup(grp)
 	}
-	gtl.addGroup(grp)
 }
 
 // MarkAsRepoGroup makes sure a group is a repo group
@@ -567,7 +583,7 @@ func (grp *Group) MarkAsRepoGroup() error {
 	if grp.kind == undefined {
 		grp.kind = repos
 	}
-	grp.container.addReposGroup(grp)
+	grp.container.addRepoOrGroup(grp)
 	return nil
 }
 
@@ -621,24 +637,24 @@ func addUserOrGroupFromName(uc userContainer, uogname string, allUsersCtn userCo
 		}
 	}
 	if uog == nil {
-		if !strings.HasPrefix(rogname, "@") {
-			uog = &User{name: rogname}
+		if !strings.HasPrefix(uogname, "@") {
+			uog = &User{name: uogname}
 		} else {
-			uog = &Group{name: rogname, kind: users}
+			uog = &Group{name: uogname, kind: users}
 		}
 		if uc != allUsersCtn {
 			allUsersCtn.addUserOrGroup(uog)
 		}
 	}
 	seen := false
-	for _, auser := range uc.GetUsers() {
-		if auser.name == user.name {
+	for _, auog := range uc.GetUsersOrGroups() {
+		if auog.GetName() == uog.GetName() {
 			seen = true
 			break
 		}
 	}
 	if !seen {
-		uc.addUser(user)
+		uc.addUserOrGroup(uog)
 	}
 
 }
@@ -650,55 +666,69 @@ func (grp *Group) markAsUserGroup() error {
 	}
 	if grp.kind == undefined {
 		grp.kind = users
-		grp.container.addUsersGroup(grp)
+		grp.container.addUserOrGroup(grp)
 	}
 	for _, member := range grp.GetMembers() {
-		addUserFromName(grp, member, grp.container)
+		addUserOrGroupFromName(grp, member, grp.container)
 	}
 	return nil
 }
 
-func (grp *Group) addUser(user *User) {
-	grp.users = append(grp.users, user)
+func (grp *Group) addUserOrGroup(uog UserOrGroup) {
+	grp.usersOrGroups = append(grp.usersOrGroups, uog)
 	seen := false
 	for _, member := range grp.members {
-		if member == user.name {
+		if member == uog.GetName() {
 			seen = true
 		}
 	}
 	if !seen {
-		grp.members = append(grp.members, user.name)
+		grp.members = append(grp.members, uog.GetName())
 	}
 }
 
-// NbUsers returns the number of users (single or groups)
-func (gtl *Gitolite) NbUsers() int {
-	return len(gtl.users)
+// NbUsersOrGroups returns the number of users (single or groups)
+func (gtl *Gitolite) NbUsersOrGroups() int {
+	return len(gtl.usersOrGroups)
 }
 
-// NbGroupUsers returns the number of groups identified as users
-func (gtl *Gitolite) NbGroupUsers() int {
-	return len(gtl.userGroups)
-}
-
-func (gtl *Gitolite) addUsersGroup(grp *Group) {
-	gtl.userGroups = append(gtl.userGroups, grp)
-	gtl.addGroup(grp)
-}
-
-// Rules get all  rules for a given repo
-func (gtl *Gitolite) Rules(reponame string) ([]*Rule, error) {
+// Rules get all rules for a given repo name or group of repos name
+func (gtl *Gitolite) Rules(rogname string) ([]*Rule, error) {
 	var res []*Rule
-	res = append(res, gtl.rulesRepo(reponame)...)
+	res = append(res, gtl.rulesRepo(rogname)...)
 	return res, nil
 }
 
-func (gtl *Gitolite) rulesRepo(reponame string) []*Rule {
-	var res []*Rule
-	if configs, ok := gtl.reposToConfigs[reponame]; ok {
-		for _, config := range configs {
-			res = append(res, config.rules...)
+func (gtl *Gitolite) repoOrGroupFromName(rogname string) RepoOrGroup {
+	for _, rog := range gtl.reposOrGroups {
+		if rog.GetName() == rogname {
+			return rog
 		}
+	}
+	return nil
+}
+
+func (gtl *Gitolite) configsFromRepoOrGroup(rog RepoOrGroup) []*Config {
+	res := []*Config{}
+	if rog == nil {
+		return res
+	}
+	for _, config := range gtl.configs {
+		for _, arog := range config.reposOrGroups {
+			if arog.GetName() == rog.GetName() {
+				res = append(res, config)
+			}
+		}
+	}
+	return res
+}
+
+func (gtl *Gitolite) rulesRepo(rogname string) []*Rule {
+	var res []*Rule
+	rog := gtl.repoOrGroupFromName(rogname)
+	configs := gtl.configsFromRepoOrGroup(rog)
+	for _, config := range configs {
+		res = append(res, config.rules...)
 	}
 	//fmt.Printf("\nrulesRepo for rpname '%v': %v\n", reponame, res)
 	return res
@@ -760,37 +790,44 @@ func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, cur
 		if grpname == "@project1" {
 			fmt.Printf("AddUserOrRepoGroup add '%v' to grp '%v'\n", val, grp.name)
 		}
-		gtl.addNamesToGroups(val, grp)
-		addRepoFromName(grp, val)
+		//addRepoOrGroupFromName(grp, val)
 	}
-	gtl.addNamesToGroups(grpname, grp)
-	//fmt.Printf("\ngtl.AddUserOrRepoGroup %v, %v\n", grp.String(), gtl.namesToGroups)
 	gtl.addGroup(grp)
-	//grp.markAsUserGroup()
-	//grp.kind = users
 	if grpname == "@project1" {
 		fmt.Printf("AddUserOrRepoGroup final grp '%v'\n", grp)
 	}
 	return nil
 }
 
+func (gtl *Gitolite) getGroupsForMember(memberName string) []*Group {
+	res := []*Group{}
+	for _, grp := range gtl.groups {
+		for _, mname := range grp.members {
+			if mname == memberName {
+				res = append(res, grp)
+				break
+			}
+		}
+	}
+	return res
+}
+
 // AddConfig adds a new config and returns it,
 // unless a repo name is used as user group, or is an undefined group name
 func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, error) {
-	config := &Config{repos: []*Repo{}, cmt: comment}
+	config := &Config{reposOrGroups: []RepoOrGroup{}, cmt: comment}
 	for _, rpname := range rpmembers {
 		if !strings.HasPrefix(rpname, "@") {
-			if grps, ok := gtl.namesToGroups[rpname]; ok {
-				for _, grp := range grps {
-					if err := grp.MarkAsRepoGroup(); err != nil {
-						return nil, fmt.Errorf("repo name '%v' already used in a user group\n%v", rpname, err.Error())
-					}
+			grps := gtl.getGroupsForMember(rpname)
+			for _, grp := range grps {
+				if err := grp.MarkAsRepoGroup(); err != nil {
+					return nil, fmt.Errorf("repo name '%v' already used in a user group\n%v", rpname, err.Error())
 				}
 			}
-			addRepoFromName(config, rpname, gtl)
-			addRepoFromName(gtl, rpname, gtl)
+			addRepoOrGroupFromName(config, rpname, gtl)
+			addRepoOrGroupFromName(gtl, rpname, gtl)
 		} else {
-			err := gtl.addGroupRepoToConfig(config, rpname)
+			err := gtl.addRepoGroupToConfig(config, rpname)
 			if err != nil {
 				return nil, err
 			}
@@ -820,22 +857,22 @@ func (gtl *Gitolite) getGroup(rpname string) *Group {
 	return group
 }
 
-func (gtl *Gitolite) addGroupRepoToConfig(config *Config, rpname string) error {
-	group := gtl.getGroup(rpname)
+func (gtl *Gitolite) addRepoGroupToConfig(config *Config, repogrpname string) error {
+	group := gtl.getGroup(repogrpname)
 	if group == nil {
-		if rpname == "@all" {
+		if repogrpname == "@all" {
 			group = &Group{name: "@all", container: gtl}
 		} else {
-			return fmt.Errorf("repo group name '%v' undefined", rpname)
+			return fmt.Errorf("repo group name '%v' undefined", repogrpname)
 		}
 	}
 	//fmt.Printf("\n%v\n", group)
 	if err := group.MarkAsRepoGroup(); err != nil {
 		return err
 	}
-	for _, rpname := range group.GetMembers() {
-		addRepoFromName(gtl, rpname, gtl)
-		addRepoFromName(config, rpname, gtl)
+	for _, rporgrpname := range group.GetMembers() {
+		addRepoOrGroupFromName(gtl, rporgrpname, gtl)
+		addRepoOrGroupFromName(config, rporgrpname, gtl)
 	}
 	return nil
 }
@@ -850,15 +887,39 @@ func (cfg *Config) SetDesc(desc string, comment *Comment) error {
 	return nil
 }
 
-// AddUserToRule adds user to rule unless user name already used in a repo group
-func (gtl *Gitolite) AddUserToRule(rule *Rule, username string) error {
-	addUserFromName(rule, username, gtl)
-	addUserFromName(gtl, username, gtl)
-	if grps, ok := gtl.namesToGroups[username]; ok {
-		for _, grp := range grps {
-			if err := grp.markAsUserGroup(); err != nil {
-				return fmt.Errorf("user name '%v' already used in a repo group\n%v", username, err.Error())
+func (gtl *Gitolite) userOrGroupFromName(uogname string) UserOrGroup {
+	for _, uog := range gtl.usersOrGroups {
+		if uog.GetName() == uogname {
+			return uog
+		}
+	}
+	return nil
+}
+
+func (gtl *Gitolite) groupsFromUserOrGroup(uog UserOrGroup) []*Group {
+	res := []*Group{}
+	if uog == nil {
+		return res
+	}
+	for _, grp := range gtl.groups {
+		for _, member := range grp.members {
+			if member == uog.GetName() {
+				res = append(res, grp)
 			}
+		}
+	}
+	return res
+}
+
+// AddUserToRule adds user to rule unless user name already used in a repo group
+func (gtl *Gitolite) AddUserOrGroupToRule(rule *Rule, uogname string) error {
+	addUserOrGroupFromName(rule, uogname, gtl)
+	addUserOrGroupFromName(gtl, uogname, gtl)
+	uog := gtl.userOrGroupFromName(uogname)
+	grps := gtl.groupsFromUserOrGroup(uog)
+	for _, grp := range grps {
+		if err := grp.markAsUserGroup(); err != nil {
+			return fmt.Errorf("user or user group name '%v' already used in a repo group\n%v", uogname, err.Error())
 		}
 	}
 	return nil
@@ -910,21 +971,6 @@ func (gtl *Gitolite) AddRuleToConfig(rule *Rule, config *Config) {
 	if !seen {
 		config.rules = append(config.rules, rule)
 	}
-	for _, repo := range config.repos {
-		if _, ok := gtl.reposToConfigs[repo.name]; !ok {
-			gtl.reposToConfigs[repo.name] = []*Config{}
-		}
-		seen := false
-		for _, aconfig := range gtl.reposToConfigs[repo.name] {
-			if aconfig == config {
-				seen = true
-				break
-			}
-		}
-		if !seen {
-			gtl.reposToConfigs[repo.name] = append(gtl.reposToConfigs[repo.name], config)
-		}
-	}
 }
 
 // Print prints a Gitolite with reformat.
@@ -938,8 +984,8 @@ func (gtl *Gitolite) Print() string {
 	}
 	for _, config := range gtl.configs {
 		skip := false
-		for _, repo := range config.GetRepos() {
-			if repo.name == "gitolite-admin" {
+		for _, rog := range config.GetReposOrGroups() {
+			if rog.GetName() == "gitolite-admin" {
 				skip = true
 			}
 		}
@@ -984,8 +1030,8 @@ func (grp *Group) Print() string {
 func (cfg *Config) Print() string {
 	res := cfg.cmt.Print()
 	res = res + "repo"
-	for _, repo := range cfg.repos {
-		res = res + " " + repo.name
+	for _, rog := range cfg.reposOrGroups {
+		res = res + " " + rog.GetName()
 	}
 	res = res + "\n"
 	if cfg.desc != "" {
