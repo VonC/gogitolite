@@ -109,7 +109,7 @@ func (pm *Manager) checkSubConf(p *Project) bool {
 func (pm *Manager) checkRepoGroup(p *Project) bool {
 	grpname := "@" + p.name
 	grp := pm.gtl.GetRepoGroup(grpname)
-	fmt.Printf("checkRepoGroup for project group '%v': '%v'\n", grpname, len(grp.GetRepos()))
+	fmt.Printf("checkRepoGroup for project group '%v': '%v'\n", grpname, len(grp.GetReposOrGroups()))
 	return grp != nil
 }
 
