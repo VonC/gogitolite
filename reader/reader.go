@@ -132,7 +132,7 @@ func readRepoOrGroup(c *content) (stateFn, error) {
 	return readRepo, nil
 }
 
-var readGroupRx = regexp.MustCompile(`(?m)^\s*?(@[a-zA-Z0-9_-]+)\s*?=\s*?((?:[a-zA-Z0-9\._-]+\s*?)+)$`)
+var readGroupRx = regexp.MustCompile(`(?m)^\s*?(@[a-zA-Z0-9_-]+)\s*?=\s*?((?:@?[a-zA-Z0-9\._-]+\s*?)+)$`)
 
 func readGroup(c *content) (stateFn, error) {
 	t := strings.TrimSpace(c.s.Text())
@@ -146,9 +146,14 @@ func readGroup(c *content) (stateFn, error) {
 	grpmembers := strings.Split(strings.TrimSpace(t[res[4]:res[5]]), " ")
 	// http://cats.groups.google.com.meowbify.com/forum/#!topic/golang-nuts/-pqkICuokio
 	//fmt.Printf("'%v'\n", grpmembers)
-
+	if grpname == "@project1" {
+		fmt.Printf("Add project1 '%v' '%v'\n", c.gtl.GetRepoGroup(grpname), grpmembers)
+	}
 	if err := c.gtl.AddUserOrRepoGroup(grpname, grpmembers, currentComment); err != nil {
 		return nil, ParseError{msg: fmt.Sprintf("%v at line %v ('%v')", err.Error(), c.l, t)}
+	}
+	if grpname == "@project1" {
+		fmt.Printf("project1 Added '%v'\n", c.gtl.GetRepoGroup(grpname))
 	}
 	currentComment = &gitolite.Comment{}
 
@@ -268,6 +273,21 @@ func readRepoRule(c *content, config *gitolite.Config, t string) (bool, error) {
 	}
 	c.gtl.AddRuleToConfig(rule, config)
 	currentComment = &gitolite.Comment{}
+
+	if strings.HasPrefix(param, "VREF/NAME/conf/subs/") {
+		repogrpname := "@" + param[len("VREF/NAME/conf/subs/"):]
+		grp := c.gtl.GetGroup(repogrpname)
+		if grp == nil {
+			err = c.gtl.AddUserOrRepoGroup(repogrpname, nil, nil)
+			if err != nil {
+				return true, err
+			}
+			grp = c.gtl.GetGroup(repogrpname)
+		}
+		//fmt.Printf("Group '%v' as repo\n", repogrpname)
+		grp.MarkAsRepoGroup()
+	}
+
 	return true, nil
 }
 
