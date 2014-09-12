@@ -15,11 +15,11 @@ import (
 )
 
 type rdr struct {
-	usersToRepos map[string][]*gitolite.Repo
-	gtl          *gitolite.Gitolite
-	verbose      bool
-	subconfs     map[string]*gitolite.Gitolite
-	filename     string
+	usersToReposOrGroup map[string][]gitolite.RepoOrGroup
+	gtl                 *gitolite.Gitolite
+	verbose             bool
+	subconfs            map[string]*gitolite.Gitolite
+	filename            string
 }
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 		os.Exit(1)
 	}
 	filename := filenames[0]
-	rdr := &rdr{usersToRepos: make(map[string][]*gitolite.Repo),
+	rdr := &rdr{usersToReposOrGroup: make(map[string][]gitolite.RepoOrGroup),
 		verbose:  *fverbosePtr,
 		filename: filename,
 		subconfs: make(map[string]*gitolite.Gitolite),
@@ -74,24 +74,24 @@ func getGtl(filename string, gtl *gitolite.Gitolite) *gitolite.Gitolite {
 }
 
 func (rdr *rdr) updateUsersToRepos(uog gitolite.UserOrGroup, config *gitolite.Config) {
-	var repos []*gitolite.Repo
+	var rogs []gitolite.RepoOrGroup
 	var ok bool
-	if repos, ok = rdr.usersToRepos[uog.GetName()]; !ok {
-		repos = []*gitolite.Repo{}
+	if rogs, ok = rdr.usersToReposOrGroup[uog.GetName()]; !ok {
+		rogs = []gitolite.RepoOrGroup{}
 	}
-	for _, cfgrepo := range config.GetRepos() {
+	for _, cfgrog := range config.GetReposOrGroups() {
 		seen := false
-		for _, repo := range repos {
-			if repo.GetName() == cfgrepo.GetName() {
+		for _, rog := range rogs {
+			if rog.GetName() == cfgrog.GetName() {
 				seen = true
 				break
 			}
 		}
 		if !seen {
-			repos = append(repos, cfgrepo)
+			rogs = append(rogs, cfgrog)
 		}
 	}
-	rdr.usersToRepos[uog.GetName()] = repos
+	rdr.usersToReposOrGroup[uog.GetName()] = rogs
 }
 
 func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) *gitolite.Gitolite {
@@ -131,13 +131,13 @@ func (rdr *rdr) processSubconfs() {
 }
 
 func (rdr *rdr) printAudit() {
-	names := make([]string, 0, len(rdr.usersToRepos))
-	for username := range rdr.usersToRepos {
+	names := make([]string, 0, len(rdr.usersToReposOrGroup))
+	for username := range rdr.usersToReposOrGroup {
 		names = append(names, username)
 	}
 	sort.Strings(names)
 	for _, username := range names {
-		repos := rdr.usersToRepos[username]
+		repos := rdr.usersToReposOrGroup[username]
 		for _, repo := range repos {
 			typeuser := "user"
 			if strings.HasPrefix(username, "@") {
