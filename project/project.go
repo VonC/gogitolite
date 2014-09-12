@@ -106,6 +106,13 @@ func (pm *Manager) checkSubConf(p *Project) bool {
 	return false
 }
 
+func (pm *Manager) checkRepoGroup(p *Project) bool {
+	grpname := "@" + p.name
+	grp := pm.gtl.GetRepoGroup(grpname)
+	fmt.Printf("checkRepoGroup for project group '%v': '%v'\n", grpname, len(grp.GetRepos()))
+	return grp != nil
+}
+
 func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project) (bool, *Project) {
 	var isrw = false
 	if isrw = rule.Access() == "RW" && strings.HasPrefix(rule.Param(), prefix); isrw {
@@ -143,9 +150,13 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 		}
 		if currentProject != nil {
 			if pm.checkSubConf(currentProject) {
-				pm.projects = append(pm.projects, currentProject)
+				if pm.checkRepoGroup(currentProject) {
+					pm.projects = append(pm.projects, currentProject)
+				} else {
+					fmt.Printf("Ignore project name '%v': no repos group '%v' found\n", currentProject.name, "@"+currentProject.name)
+				}
 			} else {
-				fmt.Printf("\nIgnore project name '%v': no subconf found\n", currentProject.name)
+				fmt.Printf("Ignore project name '%v': no subconf found\n", currentProject.name)
 			}
 		}
 	}
