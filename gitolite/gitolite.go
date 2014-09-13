@@ -89,6 +89,7 @@ func (grp *Group) IsUndefined() bool {
 type Container interface {
 	addRepoOrGroup(rog RepoOrGroup)
 	addUserOrGroup(uog UserOrGroup)
+	GetReposOrGroups() []RepoOrGroup
 	GetUsersOrGroups() []UserOrGroup
 }
 
@@ -332,7 +333,25 @@ func (gtl *Gitolite) GetUsersOrGroups() []UserOrGroup {
 	return gtl.usersOrGroups
 }
 func (gtl *Gitolite) addUserOrGroup(uog UserOrGroup) {
-	gtl.usersOrGroups = append(gtl.usersOrGroups, uog)
+	seen := false
+	for _, auog := range gtl.usersOrGroups {
+		if auog.GetName() == uog.GetName() {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		gtl.usersOrGroups = append(gtl.usersOrGroups, uog)
+	}
+	grp := uog.Group()
+	if grp != nil {
+		for _, userOrGroupName := range uog.GetMembers() {
+			addUserOrGroupFromName(grp, userOrGroupName, gtl)
+			addUserOrGroupFromName(gtl, userOrGroupName, gtl)
+		}
+		grp := uog.Group()
+		gtl.addGroup(grp)
+	}
 }
 
 // GetReposOrGroups returns the repos oer groups of repos listed in config
@@ -414,7 +433,7 @@ func (gtl *Gitolite) NbRepoGroups() int {
 	res := 0
 	for _, grp := range gtl.groups {
 		if grp.kind == repos {
-			// res = res + 1
+			res = res + 1
 		}
 	}
 	return res
@@ -598,7 +617,7 @@ func (gtl *Gitolite) addRepoOrGroup(rog RepoOrGroup) {
 		gtl.reposOrGroups = append(gtl.reposOrGroups, rog)
 	}
 	grp := rog.Group()
-	if rog.Group() != nil {
+	if grp != nil {
 		for _, repoOrGroupName := range rog.GetMembers() {
 			addRepoOrGroupFromName(grp, repoOrGroupName, gtl)
 			addRepoOrGroupFromName(gtl, repoOrGroupName, gtl)
@@ -617,6 +636,9 @@ func (grp *Group) MarkAsRepoGroup() error {
 		grp.kind = repos
 	}
 	grp.container.addRepoOrGroup(grp)
+	for _, member := range grp.GetMembers() {
+		addRepoOrGroupFromName(grp, member, grp.container)
+	}
 	return nil
 }
 
@@ -709,15 +731,6 @@ func (grp *Group) markAsUserGroup() error {
 
 func (grp *Group) addUserOrGroup(uog UserOrGroup) {
 	grp.usersOrGroups = append(grp.usersOrGroups, uog)
-	seen := false
-	for _, member := range grp.members {
-		if member == uog.GetName() {
-			seen = true
-		}
-	}
-	if !seen {
-		grp.members = append(grp.members, uog.GetName())
-	}
 }
 
 // NbUsersOrGroups returns the number of users (single or groups)

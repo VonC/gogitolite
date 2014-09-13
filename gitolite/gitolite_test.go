@@ -35,7 +35,7 @@ func TestProject(t *testing.T) {
 
 		Convey("Users or Repos Group", func() {
 			gtl := NewGitolite(nil)
-			grp := &Group{name: "grp1"}
+			grp := &Group{name: "@grp1"}
 			grp.container = gtl
 			var err error
 			err = grp.markAsUserGroup()
@@ -44,15 +44,15 @@ func TestProject(t *testing.T) {
 			So(grp.IsUsers(), ShouldBeTrue)
 			So(grp.kind.String(), ShouldEqual, "<users>")
 			err = grp.MarkAsRepoGroup()
-			So(err.Error(), ShouldEqual, "group 'grp1' is a users group, not a repo one")
-			So(grp.GetName(), ShouldEqual, "grp1")
+			So(err.Error(), ShouldEqual, "group '@grp1' is a users group, not a repo one")
+			So(grp.GetName(), ShouldEqual, "@grp1")
 			So(grp.User(), ShouldBeNil)
 			So(grp.Group(), ShouldEqual, grp)
 			So(gtl.NbGroup(), ShouldEqual, 1)
-			So(gtl.NbGroupRepos(), ShouldEqual, 0)
-			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+			So(gtl.NbRepoGroups(), ShouldEqual, 0)
+			So(gtl.NbUserGroups(), ShouldEqual, 1)
 
-			grp = &Group{name: "grp2"}
+			grp = &Group{name: "@grp2"}
 			grp.container = gtl
 			err = grp.MarkAsRepoGroup()
 			So(err, ShouldBeNil)
@@ -60,15 +60,15 @@ func TestProject(t *testing.T) {
 			So(grp.IsUsers(), ShouldBeFalse)
 			So(grp.kind.String(), ShouldEqual, "<repos>")
 			err = grp.markAsUserGroup()
-			So(err.Error(), ShouldEqual, "group 'grp2' is a repos group, not a user one")
-			So(grp.GetName(), ShouldEqual, "grp2")
+			So(err.Error(), ShouldEqual, "group '@grp2' is a repos group, not a user one")
+			So(grp.GetName(), ShouldEqual, "@grp2")
 			So(gtl.NbGroup(), ShouldEqual, 2)
-			So(gtl.NbGroupRepos(), ShouldEqual, 1)
-			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+			So(gtl.NbRepoGroups(), ShouldEqual, 1)
+			So(gtl.NbUserGroups(), ShouldEqual, 1)
 
-			So(gtl.GetGroup("grp1"), ShouldNotBeNil)
-			So(gtl.GetGroup("grp2"), ShouldEqual, grp)
-			So(gtl.GetGroup("grp3"), ShouldBeNil)
+			So(gtl.GetGroup("@grp1"), ShouldNotBeNil)
+			So(gtl.GetGroup("@grp2"), ShouldEqual, grp)
+			So(gtl.GetGroup("@grp3"), ShouldBeNil)
 		})
 		Convey("Users can be added", func() {
 			gtl := NewGitolite(nil)
@@ -80,35 +80,35 @@ func TestProject(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(gtl.NbUsers(), ShouldEqual, 1)
 			So(fmt.Sprintf("%v", grp.GetMembers()), ShouldEqual, "[user1]")
-			usr := grp.GetUsers()[0]
+			usr := grp.GetUsersOrGroups()[0]
 			So(usr, ShouldNotBeNil)
 			So(usr.GetName(), ShouldEqual, "user1")
 			So(fmt.Sprintf("%v", usr.GetMembers()), ShouldEqual, "[]")
 			So(usr.User(), ShouldEqual, usr)
 			So(usr.Group(), ShouldBeNil)
 			So(gtl.NbGroup(), ShouldEqual, 1)
-			So(gtl.NbGroupRepos(), ShouldEqual, 0)
-			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+			So(gtl.NbRepoGroups(), ShouldEqual, 0)
+			So(gtl.NbUserGroups(), ShouldEqual, 1)
 
-			addUserFromName(grp, "user1", gtl)
-			So(len(grp.GetUsers()), ShouldEqual, 1)
+			addUserOrGroupFromName(grp, "user1", gtl)
+			So(len(grp.GetUsersOrGroups()), ShouldEqual, 1)
 
 			err = gtl.AddUserOrRepoGroup("grp1", []string{"u1", "u2"}, &Comment{[]string{"duplicate group"}})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "Duplicate group name 'grp1'")
-			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+			So(gtl.NbUserGroups(), ShouldEqual, 1)
 
 			err = gtl.AddUserOrRepoGroup("grp2", []string{"u1", "u2", "u1"}, &Comment{[]string{"duplicate user"}})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "Duplicate group element name 'u1'")
-			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+			So(gtl.NbUserGroups(), ShouldEqual, 1)
 
 			err = gtl.AddUserOrRepoGroup("grp2", []string{"u1", "u2"}, &Comment{[]string{"legit user group"}})
 			So(err, ShouldBeNil)
 			grp = gtl.GetGroup("grp2")
 			err = grp.markAsUserGroup()
 			So(err, ShouldBeNil)
-			So(gtl.NbGroupUsers(), ShouldEqual, 2)
+			So(gtl.NbUserGroups(), ShouldEqual, 2)
 		})
 
 		Convey("Repos can be added", func() {
@@ -121,21 +121,21 @@ func TestProject(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(gtl.NbRepos(), ShouldEqual, 1)
 			So(gtl.NbUsers(), ShouldEqual, 0)
-			So(len(grp.GetUsers()), ShouldEqual, 0)
+			So(len(grp.GetUsersOrGroups()), ShouldEqual, 0)
 			So(fmt.Sprintf("%v", grp.GetMembers()), ShouldEqual, "[repo1]")
 			So(gtl.NbGroup(), ShouldEqual, 1)
-			So(gtl.NbGroupRepos(), ShouldEqual, 1)
-			So(gtl.NbGroupUsers(), ShouldEqual, 0)
+			So(gtl.NbRepoGroups(), ShouldEqual, 1)
+			So(gtl.NbUserGroups(), ShouldEqual, 0)
 
-			addRepoFromName(grp, "repo1", gtl)
-			So(gtl.NbGroupRepos(), ShouldEqual, 1)
-			So(len(grp.GetRepos()), ShouldEqual, 1)
-			addRepoFromName(grp, "repo2", gtl)
-			addRepoFromName(grp, "repo2", gtl)
-			So(len(grp.GetRepos()), ShouldEqual, 2)
-			So(grp.GetRepos()[0].GetName(), ShouldEqual, "repo1")
+			addRepoOrGroupFromName(grp, "repo1", gtl)
+			So(gtl.NbRepoGroups(), ShouldEqual, 1)
+			So(len(grp.GetReposOrGroups()), ShouldEqual, 1)
+			addRepoOrGroupFromName(grp, "repo2", gtl)
+			addRepoOrGroupFromName(grp, "repo2", gtl)
+			So(len(grp.GetReposOrGroups()), ShouldEqual, 2)
+			So(grp.GetReposOrGroups()[0].GetName(), ShouldEqual, "repo1")
 
-			repo := gtl.repos[0]
+			repo := gtl.reposOrGroups[0]
 			So(repo, ShouldNotBeNil)
 			So(repo.String(), ShouldEqual, `repo 'repo1'`)
 		})
@@ -167,23 +167,23 @@ test1
 			So(rule.HasAnyUserOrGroup(), ShouldBeFalse)
 
 			usr := &User{"u1"}
-			rule.addUser(usr)
+			rule.addUserOrGroup(usr)
 			So(len(rule.usersOrGroups), ShouldEqual, 1)
-			So(len(rule.GetUsers()), ShouldEqual, 1)
+			So(len(rule.GetUsersOrGroups()), ShouldEqual, 1)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 
 			grp := &Group{name: "grp1", cmt: &Comment{[]string{"grp1 comment"}}}
 			usr = &User{"u21"}
-			grp.addUser(usr)
+			grp.addUserOrGroup(usr)
 			So(grp.Comment().String(), ShouldEqual, `grp1 comment
 `)
 
 			rule.addGroup(grp)
 			// grp is still undefined: its user doesn't count yet
-			So(len(rule.GetUsers()), ShouldEqual, 1)
+			So(len(rule.GetUsersOrGroups()), ShouldEqual, 1)
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			rule.addGroup(grp)
-			So(len(rule.GetUsers()), ShouldEqual, 1)
+			So(len(rule.GetUsersOrGroups()), ShouldEqual, 1)
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 
@@ -191,29 +191,29 @@ test1
 			grp.container = gtl
 			grp.markAsUserGroup()
 			// grp is defined as user group: its user does count
-			So(len(rule.GetUsers()), ShouldEqual, 2)
+			So(len(rule.GetUsersOrGroups()), ShouldEqual, 2)
 			So(gtl.NbUsers(), ShouldEqual, 1)
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21)`)
 			So(rule.IsNakedRW(), ShouldBeFalse)
 			usr = &User{"u22"}
-			grp.addUser(usr)
-			gtl.addUser(usr)
+			grp.addUserOrGroup(usr)
+			gtl.addUserOrGroup(usr)
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21, u22)`)
 
-			gtl.AddUserToRule(rule, "u3")
+			gtl.AddUserGroupToRule(rule, "u3")
 			So(rule.String(), ShouldEqual, `RW test = u1, grp1 (u21, u22), u3`)
 			// u1 was never added to glt, only to rule
 			So(gtl.NbUsers(), ShouldEqual, 3)
 			// Rule was never properly added to gitolite or any conf
-			So(fmt.Sprintf("%v", gtl.namesToGroups), ShouldEqual, "map[]")
+			// So(fmt.Sprintf("%v", gtl.namesToGroups), ShouldEqual, "map[]")
 
 			reposgrp := &Group{name: "repogrp", container: gtl, members: []string{"repo1", "u4", "repo2"}}
 			// gtl.addReposGroup(reposgrp)
 			reposgrp.MarkAsRepoGroup()
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			err := gtl.AddUserToRule(rule, "u4")
+			err := gtl.AddUserGroupToRule(rule, "u4")
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldStartWith, "user name 'u4' already used in a repo group")
 
@@ -222,12 +222,12 @@ test1
 			grp = gtl.GetGroup("grp4")
 			err = grp.markAsUserGroup()
 			So(err, ShouldBeNil)
-			So(gtl.NbGroupUsers(), ShouldEqual, 2)
+			So(gtl.NbUserGroups(), ShouldEqual, 2)
 			So(gtl.NbUsers(), ShouldEqual, 6)
 			// So(fmt.Sprintf("%v", gtl.users), ShouldEqual, "e")
 			err = gtl.AddUserGroupToRule(rule, "grp4")
 			So(err, ShouldBeNil)
-			So(gtl.NbGroupUsers(), ShouldEqual, 2)
+			So(gtl.NbUserGroups(), ShouldEqual, 2)
 			So(gtl.NbUsers(), ShouldEqual, 6)
 
 			err = gtl.AddUserGroupToRule(rule, "grp5")
@@ -245,13 +245,13 @@ test1
 			// define a user group *after* being used in a rule
 			err = gtl.AddUserGroupToRule(rule, "@grpusers")
 			So(err, ShouldBeNil)
-			So(gtl.NbGroupUsers(), ShouldEqual, 5)
+			So(gtl.NbUserGroups(), ShouldEqual, 5)
 			So(gtl.NbUsers(), ShouldEqual, 6)
 
 			err = gtl.AddUserOrRepoGroup("@grpusers", []string{"u41", "u42"}, &Comment{[]string{"legit user @grpusers"}})
 			So(err, ShouldBeNil)
 			grp = gtl.GetGroup("grp4")
-			So(len(grp.GetUsers()), ShouldEqual, 2)
+			So(len(grp.GetUsersOrGroups()), ShouldEqual, 2)
 		})
 
 		Convey("Configs can be added", func() {
@@ -275,11 +275,11 @@ test1
 			So(gtl.NbRepos(), ShouldEqual, 2)
 
 			cfg = gtl.GetConfigsForRepo("repo1")[0]
-			So(len(cfg.GetRepos()), ShouldEqual, 2)
+			So(len(cfg.GetReposOrGroups()), ShouldEqual, 2)
 			So(len(cfg.Rules()), ShouldEqual, 0)
 
 			reposgrp := &Group{name: "@repogrp1", container: gtl, members: []string{"repo11", "repo12"}}
-			gtl.addReposGroup(reposgrp)
+			gtl.addRepoOrGroup(reposgrp)
 			So(gtl.NbRepos(), ShouldEqual, 4)
 
 			//reposusr := &Group{name: "@usrgrp1", container: gtl, members: []string{"user11", "user12"}}
@@ -332,17 +332,18 @@ group '@usrgrp1' is a users group, not a repo one`)
 			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}})
 			So(err.Error(), ShouldEqual, "No more than one desc per config")
 
-			So(len(gtl.reposToConfigs["repo11"]), ShouldEqual, 0)
+			So(len(gtl.GetConfigsForRepo("repo11")), ShouldEqual, 0)
 			cmt := &Comment{[]string{"rule comment"}}
 			rule := NewRule("RW", "test", cmt)
 			grp = gtl.GetGroup("@usrgrp1")
 			rule.addGroup(grp)
 			gtl.AddRuleToConfig(rule, cfg2)
-			So(len(gtl.reposToConfigs["repo11"]), ShouldEqual, 1)
+			gtl.GetConfigsForRepo("repo11")
+			So(len(gtl.GetConfigsForRepo("repo11")), ShouldEqual, 1)
 			// So(fmt.Sprintf("%v", gtl.reposToConfigs), ShouldEqual, "z")
 			So(len(cfg2.Rules()), ShouldEqual, 1)
 			gtl.AddRuleToConfig(rule, cfg2)
-			So(len(gtl.reposToConfigs["repo11"]), ShouldEqual, 1)
+			So(len(gtl.GetConfigsForRepo("repo11")), ShouldEqual, 1)
 			So(len(cfg2.Rules()), ShouldEqual, 1)
 			// So(fmt.Sprintf("%v", gtl.reposToConfigs), ShouldEqual, "z")
 
