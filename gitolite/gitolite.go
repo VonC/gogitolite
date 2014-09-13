@@ -414,6 +414,39 @@ func (gtl *Gitolite) NbRepoGroups() int {
 	res := 0
 	for _, grp := range gtl.groups {
 		if grp.kind == repos {
+			// res = res + 1
+		}
+	}
+	return res
+}
+
+// NbUserGroups returns the number of groups identified as users
+func (gtl *Gitolite) NbUserGroups() int {
+	res := 0
+	for _, grp := range gtl.groups {
+		if grp.kind == users {
+			res = res + 1
+		}
+	}
+	return res
+}
+
+// NbUsers returns the number of users
+func (gtl *Gitolite) NbUsers() int {
+	res := 0
+	for _, uog := range gtl.usersOrGroups {
+		if uog.User() != nil {
+			res = res + 1
+		}
+	}
+	return res
+}
+
+// NbRepos returns the number of repos
+func (gtl *Gitolite) NbRepos() int {
+	res := 0
+	for _, rog := range gtl.reposOrGroups {
+		if rog.Repo() != nil {
 			res = res + 1
 		}
 	}
@@ -666,8 +699,8 @@ func (grp *Group) markAsUserGroup() error {
 	}
 	if grp.kind == undefined {
 		grp.kind = users
-		grp.container.addUserOrGroup(grp)
 	}
+	grp.container.addUserOrGroup(grp)
 	for _, member := range grp.GetMembers() {
 		addUserOrGroupFromName(grp, member, grp.container)
 	}
