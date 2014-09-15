@@ -38,7 +38,9 @@ func TestProject(t *testing.T) {
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &Manager{gtl: gtl}
+			subconfs := make(map[string]*gitolite.Gitolite)
+			subconfs["path/project.conf"] = gtl
+			pm := NewManager(gtl, subconfs)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
