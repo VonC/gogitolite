@@ -267,6 +267,9 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 				   RW                                = projectowner
 				   RW VREF/NAME/conf/subs/project    = projectowner
 				   -  VREF/NAME/                     = projectowner
+				   RW                                = projectowner2
+				   RW VREF/NAME/conf/subs/project2   = projectowner2
+				   -  VREF/NAME/                     = projectowner2
 
 				 repo module1
 				   RW+ = projectowner @almadmins
@@ -276,11 +279,29 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
-			So(gtl.NbUsers(), ShouldEqual, 4)
-			So(fmt.Sprintf("%v", gtl.GetUsersOrGroups()), ShouldEqual, "[user 'gitoliteadm' group '@almadmins'<users>: [alm1 alm2] user 'alm1' user 'alm2' user 'projectowner']")
+			So(gtl.NbRepoGroups(), ShouldEqual, 2)
+			So(gtl.NbUsers(), ShouldEqual, 5)
+			So(fmt.Sprintf("%v", gtl.GetUsersOrGroups()), ShouldEqual, "[user 'gitoliteadm' group '@almadmins'<users>: [alm1 alm2] user 'alm1' user 'alm2' user 'projectowner' user 'projectowner2']")
 			almadmin := gtl.GetGroup("@almadmins")
 			So(almadmin, ShouldNotBeNil)
 			So(fmt.Sprintf("%v", almadmin.String()), ShouldEqual, "group '@almadmins'<users>: [alm1 alm2]")
+		})
+
+		Convey("subconf with a repo group should not be a user group", func() {
+			var gitoliteconf = `
+				@project = module1 module2
+
+				repo arepo
+				   RW+     =   gitoliteadm @project
+				   RW                                = projectowner
+				   RW VREF/NAME/conf/subs/project    = projectowner
+				   -  VREF/NAME/                     = projectowner
+		`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := Read(r)
+			So(err, ShouldNotBeNil)
+			So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
+			So(gtl, ShouldNotBeNil)
 		})
 
 	})
@@ -308,7 +329,7 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 			So(err, ShouldNotBeNil)
 			So(strings.Contains(err.Error(), "already used in a repo group"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.NbUsers(), ShouldEqual, 1)
+			So(gtl.NbUsers(), ShouldEqual, 0)
 		})
 
 	})
@@ -533,7 +554,7 @@ R param = user @users
 			config := gtl.GetConfigsForRepo("otherRepo")[0]
 			rule := config.Rules()[0]
 			So(fmt.Sprintf("%v", rule.String()), ShouldEqual, "R param = user, @users (u1, u2)")
-			So(len(rule.GetUsersOrGroups()), ShouldEqual, 3)
+			So(len(rule.GetUsersOrGroups()), ShouldEqual, 2)
 		})
 
 	})
