@@ -117,10 +117,10 @@ func TestRead(t *testing.T) {
 							 repo  rep1 rep2 rep3`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
-			So(gtl.NbGroupRepos(), ShouldEqual, 1)
+			So(gtl.NbRepoGroups(), ShouldEqual, 1)
 			grp := gtl.GetGroup("@grp1")
 			So(grp, ShouldNotBeNil)
-			So(len(grp.GetUsers()), ShouldEqual, 0)
+			So(len(grp.GetUsersOrGroups()), ShouldEqual, 0)
 		})
 	})
 
@@ -224,7 +224,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(err, ShouldBeNil)
 			So(len(rules), ShouldEqual, 2)
 			So(rules[0].String(), ShouldEqual, "RW+ dev = @grp2")
-			So(len(gtl.GetUsers()), ShouldEqual, 3)
+			So(len(gtl.GetUsersOrGroups()), ShouldEqual, 3)
 			So(rules[1].String(), ShouldEqual, "RW+ master = user11, @grp3 (user3, user4)")
 		})
 
@@ -281,7 +281,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 4)
-			So(fmt.Sprintf("%v", gtl.GetUsers()), ShouldEqual, "[user 'gitoliteadm' user 'alm1' user 'alm2' user 'projectowner']")
+			So(fmt.Sprintf("%v", gtl.GetUsersOrGroups()), ShouldEqual, "[user 'gitoliteadm' user 'alm1' user 'alm2' user 'projectowner']")
 			almadmin := gtl.GetGroup("@almadmins")
 			So(almadmin, ShouldNotBeNil)
 			So(fmt.Sprintf("%v", almadmin.String()), ShouldEqual, "group '@almadmins'<users>: [alm1 alm2]")
@@ -301,7 +301,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(strings.Contains(err.Error(), "already used in a user group"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 3)
-			So(gtl.NbGroupUsers(), ShouldEqual, 1)
+			So(gtl.NbUserGroups(), ShouldEqual, 1)
 		})
 		Convey("A user name shouldn't be part of a repo group", func() {
 			r := strings.NewReader(
@@ -328,7 +328,7 @@ reposToConfigs: 3 [rep1 => [config [repo 'rep1' repo 'rep2'] => [RW+ master = us
 			So(err.Error(), ShouldEqual, "There must be one and only gitolite-admin repo config")
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbUsers(), ShouldEqual, 0)
-			So(gtl.NbGroupUsers(), ShouldEqual, 0)
+			So(gtl.NbUserGroups(), ShouldEqual, 0)
 		})
 
 		Convey("A gitolite-admin config must have at least one rule", func() {
@@ -537,7 +537,7 @@ R param = user @users
 			config := gtl.GetConfigsForRepo("otherRepo")[0]
 			rule := config.Rules()[0]
 			So(fmt.Sprintf("%v", rule.String()), ShouldEqual, "R param = user, @users (u1, u2)")
-			So(len(rule.GetUsers()), ShouldEqual, 3)
+			So(len(rule.GetUsersOrGroups()), ShouldEqual, 3)
 		})
 
 	})

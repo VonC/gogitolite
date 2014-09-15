@@ -226,7 +226,7 @@ func readRepoRulesComment(t string) (bool, error) {
 }
 
 func readRepoRuleGroupUsers(rule *gitolite.Rule, username string, c *content, t string) error {
-	if err := c.gtl.AddUserGroupToRule(rule, username); err != nil {
+	if err := c.gtl.AddUserOrGroupToRule(rule, username); err != nil {
 		return ParseError{msg: fmt.Sprintf("%v\nAt line %v (%v)", err.Error(), c.l, t)}
 	}
 	return nil
