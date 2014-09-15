@@ -854,9 +854,6 @@ func (rule *Rule) HasAnyUserOrGroup() bool {
 // AddUserOrRepoGroup adds a user or repo group to a gitolite config
 func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, currentComment *Comment) error {
 	grp := &Group{name: grpname, members: grpmembers, container: gtl, cmt: currentComment}
-	if grpname == "@project1" {
-		fmt.Printf("AddUserOrRepoGroup '%v'\n", gtl.groups)
-	}
 	for _, g := range gtl.groups {
 		if g.GetName() == grpname {
 			if len(g.members) > 0 {
@@ -864,9 +861,6 @@ func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, cur
 			}
 			g.cmt = grp.cmt
 			grp = g
-			if grpname == "@project1" {
-				fmt.Printf("AddUserOrRepoGroup FOUND\n")
-			}
 		}
 	}
 	seen := map[string]bool{}
@@ -876,15 +870,9 @@ func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, cur
 		} else {
 			return fmt.Errorf("Duplicate group element name '%v'", val)
 		}
-		if grpname == "@project1" {
-			fmt.Printf("AddUserOrRepoGroup add '%v' to grp '%v'\n", val, grp.name)
-		}
 		//addRepoOrGroupFromName(grp, val)
 	}
 	gtl.addGroup(grp)
-	if grpname == "@project1" {
-		fmt.Printf("AddUserOrRepoGroup final grp '%v'\n", grp)
-	}
 	return nil
 }
 
