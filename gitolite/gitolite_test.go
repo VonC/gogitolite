@@ -90,14 +90,17 @@ func TestProject(t *testing.T) {
 			So(gtl.NbGroup(), ShouldEqual, 1)
 			So(gtl.NbRepoGroups(), ShouldEqual, 0)
 			So(gtl.NbUserGroups(), ShouldEqual, 1)
+			So(gtl.NbUsersOrGroups(), ShouldEqual, 3)
 
 			addUserOrGroupFromName(grp, "user1", gtl)
 			So(len(grp.GetUsersOrGroups()), ShouldEqual, 2)
+			So(gtl.NbUsersOrGroups(), ShouldEqual, 3)
 
 			err = gtl.AddUserOrRepoGroup("@grp1", []string{"u1", "u2"}, &Comment{[]string{"duplicate group"}})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "Duplicate group name '@grp1'")
 			So(gtl.NbUserGroups(), ShouldEqual, 1)
+			So(gtl.NbUsersOrGroups(), ShouldEqual, 3)
 
 			err = gtl.AddUserOrRepoGroup("@grp2", []string{"u1", "u2", "u1"}, &Comment{[]string{"duplicate user"}})
 			So(err, ShouldNotBeNil)
@@ -111,6 +114,7 @@ func TestProject(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(gtl.NbUserGroups(), ShouldEqual, 2)
 			So(len(grp.GetAllUsers()), ShouldEqual, 3)
+			So(gtl.NbUsersOrGroups(), ShouldEqual, 5)
 		})
 
 		Convey("Repos can be added", func() {
