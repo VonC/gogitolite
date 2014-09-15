@@ -147,6 +147,8 @@ func TestProject(t *testing.T) {
 			So(gtl.NbReposOrGroups(), ShouldEqual, 4)
 			grp2 := gtl.GetRepoGroup("@grp2").Group()
 			So(grp2, ShouldNotBeNil)
+			grp2n := gtl.GetRepoGroup("@grp22").Group()
+			So(grp2n, ShouldBeNil)
 			addRepoOrGroupFromName(grp2, "repo22", gtl)
 			So(gtl.NbReposOrGroups(), ShouldEqual, 5)
 			addRepoOrGroupFromName(grp2, "@grp1", gtl)
