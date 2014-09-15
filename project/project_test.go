@@ -199,9 +199,11 @@ func TestProject(t *testing.T) {
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
 			pm := &Manager{gtl: gtl}
-			So(err, ShouldBeNil)
+			So(err, ShouldNotBeNil)
+			So(gtl, ShouldNotBeNil)
+			So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(gtl.NbRepos(), ShouldEqual, 2)
 			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
