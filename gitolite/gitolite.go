@@ -334,13 +334,7 @@ func (gtl *Gitolite) GetUsersOrGroups() []UserOrGroup {
 	return gtl.usersOrGroups
 }
 func (gtl *Gitolite) addUserOrGroup(uog UserOrGroup) {
-	seen := false
-	for _, auog := range gtl.usersOrGroups {
-		if auog.GetName() == uog.GetName() {
-			seen = true
-			break
-		}
-	}
+	seen := isUserOrGroupSeen(uog.GetName(), gtl.usersOrGroups)
 	if !seen {
 		gtl.usersOrGroups = append(gtl.usersOrGroups, uog)
 	}
@@ -626,13 +620,7 @@ func (gtl *Gitolite) addGroup(grp *Group) {
 }
 
 func (gtl *Gitolite) addRepoOrGroup(rog RepoOrGroup) {
-	seen := false
-	for _, arog := range gtl.reposOrGroups {
-		if arog.GetName() == rog.GetName() {
-			seen = true
-			break
-		}
-	}
+	seen := isRepoOrGroupSeen(rog.GetName(), gtl.reposOrGroups)
 	if !seen {
 		gtl.reposOrGroups = append(gtl.reposOrGroups, rog)
 	}
@@ -691,13 +679,7 @@ func addRepoOrGroupFromName(rc repoContainer, rogname string, allReposCtn repoCo
 			allReposCtn.addRepoOrGroup(rog)
 		}
 	}
-	seen := false
-	for _, arog := range rc.GetReposOrGroups() {
-		if arog.GetName() == rog.GetName() {
-			seen = true
-			break
-		}
-	}
+	seen := isRepoOrGroupSeen(rog.GetName(), rc.GetReposOrGroups())
 	if !seen {
 		rc.addRepoOrGroup(rog)
 	}
@@ -750,13 +732,7 @@ func addUserOrGroupFromName(uc userContainer, uogname string, allUsersCtn userCo
 			allUsersCtn.addUserOrGroup(uog)
 		}
 	}
-	seen := false
-	for _, auog := range uc.GetUsersOrGroups() {
-		if auog.GetName() == uog.GetName() {
-			seen = true
-			break
-		}
-	}
+	seen := isUserOrGroupSeen(uog.GetName(), uc.GetUsersOrGroups())
 	if !seen {
 		uc.addUserOrGroup(uog)
 	}
@@ -779,14 +755,8 @@ func (grp *Group) markAsUserGroup() error {
 }
 
 func addStringNoDup(list []string, s string) []string {
-	notSeen := true
+	notSeen := !isNameSeen(s, list)
 	res := list
-	for _, as := range list {
-		if as == s {
-			notSeen = false
-			break
-		}
-	}
 	if notSeen {
 		res = append(list, s)
 	}
