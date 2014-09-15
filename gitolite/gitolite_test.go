@@ -321,6 +321,8 @@ test1
 			reposgrp := &Group{name: "@repogrp1", container: gtl, members: []string{"repo11", "repo12"}}
 			gtl.addRepoOrGroup(reposgrp)
 			So(gtl.NbRepos(), ShouldEqual, 4)
+			So(len(gtl.configsFromRepoOrGroup(nil)), ShouldEqual, 0)
+			So(len(gtl.configsFromRepoOrGroup(reposgrp)), ShouldEqual, 0)
 
 			//reposusr := &Group{name: "@usrgrp1", container: gtl, members: []string{"user11", "user12"}}
 			gtl.AddUserOrRepoGroup("@usrgrp1", []string{"user11", "user12"}, &Comment{[]string{"usrgrp1 comment"}})
@@ -361,6 +363,7 @@ group '@usrgrp1' is a users group, not a repo one`)
 			So(err, ShouldBeNil)
 			So(cfg2b.Comment().String(), ShouldEqual, `cfg2b comment
 `)
+			So(len(gtl.configsFromRepoOrGroup(reposgrp)), ShouldEqual, 1)
 
 			cfga, err := gtl.AddConfig([]string{"gitolite-admin"}, &Comment{[]string{"ga comment"}})
 			So(err, ShouldBeNil)
