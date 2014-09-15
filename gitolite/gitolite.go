@@ -340,6 +340,7 @@ func (gtl *Gitolite) addUserOrGroup(uog UserOrGroup) {
 	}
 	grp := uog.Group()
 	if grp != nil {
+		grp.container = gtl
 		for _, userOrGroupName := range uog.GetMembers() {
 			addUserOrGroupFromName(grp, userOrGroupName, gtl)
 			addUserOrGroupFromName(gtl, userOrGroupName, gtl)
@@ -608,14 +609,26 @@ func (rule *Rule) addGroup(group *Group) {
 
 func (gtl *Gitolite) addGroup(grp *Group) {
 	seen := false
+	var gg *Group
 	for _, group := range gtl.groups {
-		if grp == group {
+		if grp.GetName() == group.GetName() {
 			seen = true
+			gg = group
 			break
 		}
 	}
 	if !seen {
 		gtl.groups = append(gtl.groups, grp)
+	} else {
+		//fmt.Println("\nGRP: ", grp, ", GG: ", gg)
+		for _, member := range gg.GetMembers() {
+			if !isNameSeen(member, grp.GetMembers()) {
+				grp.members = append(grp.members, member)
+			}
+		}
+		if grp.kind != undefined {
+			gg.kind = grp.kind
+		}
 	}
 }
 
@@ -1002,6 +1015,11 @@ func (gtl *Gitolite) AddUserOrGroupToRule(rule *Rule, uogname string) error {
 	uog := gtl.userOrGroupFromName(uogname)
 	grps := gtl.groupsFromUserOrGroup(uog)
 	for _, grp := range grps {
+		grp.markAsUserGroup()
+	}
+	if uog.Group() != nil {
+		grp := uog.Group()
+		//fmt.Println("\nAddUserOrGroupToRule ", grp)
 		grp.markAsUserGroup()
 	}
 	return nil

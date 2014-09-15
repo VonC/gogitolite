@@ -235,6 +235,11 @@ test1
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			So(len(rule.GetAllUsers()), ShouldEqual, 2)
 
+			grpp := &Group{name: "@grp1", cmt: &Comment{[]string{"@grp1 comment"}}}
+			//usr = &User{"u22"}
+			//grpp.addUserOrGroup(usr)
+			gtl.addGroup(grpp)
+
 			So(rule.String(), ShouldEqual, `RW test = u1, @grp1 (u21)`)
 			So(rule.IsNakedRW(), ShouldBeFalse)
 			usr = &User{"u22"}
