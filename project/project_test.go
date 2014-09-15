@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/VonC/gogitolite/gitolite"
 	"github.com/VonC/gogitolite/reader"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -54,15 +55,18 @@ func TestProject(t *testing.T) {
 	      RW                                = projectowner
 	      RW VREF/NAME/conf/subs/project    = projectowner
 	      -  VREF/NAME/                     = projectowner
-
 `
 			r := strings.NewReader(gitoliteconf)
 			gtl, err := reader.Read(r)
-			pm := &Manager{gtl: gtl}
+			subconfs := make(map[string]*gitolite.Gitolite)
+			subconfs["path/project.conf"] = gtl
+			pm := NewManager(gtl, subconfs)
 			So(err, ShouldBeNil)
+			So(gtl, ShouldNotBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.NbRepos(), ShouldEqual, 1)
+			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 1)
+			//fmt.Println("\nPRJ: ", pm)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(fmt.Sprintf("groups '%v'", gtl.GetGroup("@project")), ShouldEqual, "groups 'group '@project'<repos>: [module1 module2]'")
 		})

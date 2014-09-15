@@ -63,6 +63,7 @@ var prefix = "VREF/NAME/conf/subs/"
 func (pm *Manager) updateProjects() {
 	gtl := pm.gtl
 	configs := gtl.GetConfigsForRepo("gitolite-admin")
+	//fmt.Println("\nCFGS: ", configs)
 	for _, config := range configs {
 		var currentProject *Project
 		rules := config.Rules()
@@ -92,8 +93,10 @@ func (pm *Manager) checkSubConf(p *Project) bool {
 	var subconf *gitolite.Gitolite
 	for subconfpath, gtl := range pm.subconfs {
 		res := subconfRx.FindStringSubmatchIndex(subconfpath)
+		//fmt.Println("\nSUBCFGpath ", subconfpath, res)
 		if res != nil {
 			subconfname := subconfpath[res[2]:res[3]]
+			//fmt.Println("subconfname ", subconfname, p.name)
 			if subconfname == p.name {
 				subconf = gtl
 				break
@@ -109,7 +112,7 @@ func (pm *Manager) checkSubConf(p *Project) bool {
 func (pm *Manager) checkRepoGroup(p *Project) bool {
 	grpname := "@" + p.name
 	grp := pm.gtl.GetRepoGroup(grpname)
-	fmt.Printf("checkRepoGroup for project group '%v': '%v'\n", grpname, len(grp.GetReposOrGroups()))
+	//fmt.Printf("checkRepoGroup for project group '%v': '%v'\n", grpname, len(grp.GetReposOrGroups()))
 	return grp != nil
 }
 
@@ -151,6 +154,7 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 		if currentProject != nil {
 			if pm.checkSubConf(currentProject) {
 				if pm.checkRepoGroup(currentProject) {
+					//fmt.Println("\nCP ", currentProject)
 					pm.projects = append(pm.projects, currentProject)
 				} else {
 					fmt.Printf("Ignore project name '%v': no repos group '%v' found\n", currentProject.name, "@"+currentProject.name)
