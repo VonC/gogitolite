@@ -117,6 +117,11 @@ func TestProject(t *testing.T) {
 			So(gtl.NbUserGroups(), ShouldEqual, 2)
 			So(len(grp.GetAllUsers()), ShouldEqual, 3)
 			So(gtl.NbUsersOrGroups(), ShouldEqual, 5)
+			grp1 := gtl.getGroup("@grp1")
+
+			So(len(gtl.groupsFromUserOrGroup(nil)), ShouldEqual, 0)
+			So(len(gtl.groupsFromUserOrGroup(grp)), ShouldEqual, 0)
+			So(len(gtl.groupsFromUserOrGroup(grp1)), ShouldEqual, 1)
 		})
 
 		Convey("Repos can be added", func() {
