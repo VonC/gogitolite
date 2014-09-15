@@ -999,13 +999,14 @@ func (gtl *Gitolite) AddUserOrGroupToRule(rule *Rule, uogname string) error {
 	}
 	addUserOrGroupFromName(rule, uogname, gtl)
 	addUserOrGroupFromName(gtl, uogname, gtl)
-	uog := gtl.userOrGroupFromName(uogname)
-	grps := gtl.groupsFromUserOrGroup(uog)
-	for _, grp := range grps {
-		if err := grp.markAsUserGroup(); err != nil {
-			return fmt.Errorf("user or user group name '%v' already used in a repo group\n%v", uogname, err.Error())
-		}
-	}
+	/*
+		uog := gtl.userOrGroupFromName(uogname)
+		grps := gtl.groupsFromUserOrGroup(uog)
+		for _, grp := range grps {
+			if err := grp.markAsUserGroup(); err != nil {
+				return fmt.Errorf("user or user group name '%v' already used in a repo group\n%v", uogname, err.Error())
+			}
+		}*/
 	return nil
 }
 
