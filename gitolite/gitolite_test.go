@@ -95,6 +95,8 @@ func TestProject(t *testing.T) {
 			addUserOrGroupFromName(grp, "user1", gtl)
 			So(len(grp.GetUsersOrGroups()), ShouldEqual, 2)
 			So(gtl.NbUsersOrGroups(), ShouldEqual, 3)
+			So(gtl.userOrGroupFromName("user1"), ShouldNotBeNil)
+			So(gtl.userOrGroupFromName("user1b"), ShouldBeNil)
 
 			err = gtl.AddUserOrRepoGroup("@grp1", []string{"u1", "u2"}, &Comment{[]string{"duplicate group"}})
 			So(err, ShouldNotBeNil)
