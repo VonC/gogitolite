@@ -142,6 +142,15 @@ func TestProject(t *testing.T) {
 			So(repo.String(), ShouldEqual, `repo 'repo1'`)
 			So(len(repo.GetMembers()), ShouldEqual, 0)
 			So(len(repo.Repo().GetReposOrGroups()), ShouldEqual, 1)
+
+			addRepoOrGroupFromName(gtl, "@grp2", gtl)
+			grp2 := gtl.GetRepoGroup("@grp2").Group()
+			So(grp2, ShouldNotBeNil)
+			addRepoOrGroupFromName(grp2, "repo22", gtl)
+			addRepoOrGroupFromName(grp2, "@grp1", gtl)
+			So(grp2.hasRepoOrGroup("repo1"), ShouldBeTrue)
+			So(grp2.hasRepoOrGroup("repo22"), ShouldBeTrue)
+			So(grp.hasRepoOrGroup("repo22"), ShouldBeFalse)
 		})
 
 		Convey("Comments can be added", func() {
