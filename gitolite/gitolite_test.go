@@ -211,6 +211,7 @@ test1
 			usr = &User{"u22"}
 			grp.addUserOrGroup(usr)
 			gtl.addUserOrGroup(usr)
+			gtl.addUserOrGroup(usr)
 			So(rule.String(), ShouldEqual, `RW test = u1, @grp1 (u21, u22)`)
 
 			gtl.AddUserOrGroupToRule(rule, "u3")
