@@ -168,12 +168,14 @@ test1
 			So(rule.Param(), ShouldEqual, "test")
 			So(rule.Comment().comments[0], ShouldEqual, "rule comment")
 			So(rule.HasAnyUserOrGroup(), ShouldBeFalse)
+			So(len(rule.GetAllUsers()), ShouldEqual, 0)
 
 			usr := &User{"u1"}
 			rule.addUserOrGroup(usr)
 			So(len(rule.usersOrGroups), ShouldEqual, 1)
 			So(len(rule.GetUsersOrGroups()), ShouldEqual, 1)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
+			So(len(rule.GetAllUsers()), ShouldEqual, 1)
 
 			grp := &Group{name: "@grp1", cmt: &Comment{[]string{"@grp1 comment"}}}
 			usr = &User{"u21"}
@@ -189,6 +191,7 @@ test1
 			So(len(rule.GetUsersOrGroups()), ShouldEqual, 2)
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
+			So(len(rule.GetAllUsers()), ShouldEqual, 1)
 
 			gtl := NewGitolite(nil)
 			grp.container = gtl
@@ -200,6 +203,7 @@ test1
 			//fmt.Println(gtl.String())
 			//os.Exit(1)
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
+			So(len(rule.GetAllUsers()), ShouldEqual, 2)
 
 			So(rule.String(), ShouldEqual, `RW test = u1, @grp1 (u21)`)
 			So(rule.IsNakedRW(), ShouldBeFalse)
