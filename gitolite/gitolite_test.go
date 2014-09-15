@@ -336,6 +336,7 @@ test1
 			gtl.AddUserOrRepoGroup("@usrgrp2", []string{}, &Comment{[]string{"usrgrp2 comment"}})
 			grp := gtl.GetGroup("@usrgrp1")
 			err = grp.markAsUserGroup()
+			//user11 := grp.GetAllUsers()[0]
 			So(err, ShouldBeNil)
 			grp = gtl.GetGroup("@usrgrp2")
 			err = grp.markAsUserGroup()
@@ -387,9 +388,10 @@ group '@usrgrp1' is a users group, not a repo one`)
 			So(len(gtl.GetConfigsForRepo("repo11")), ShouldEqual, 1)
 			cmt := &Comment{[]string{"rule comment"}}
 			rule := NewRule("RW", "test", cmt)
-			grp = gtl.GetGroup("@usrgrp1")
+			grp = gtl.GetGroup("@usrgrp2")
 			rule.addGroup(grp)
 			gtl.AddRuleToConfig(rule, cfg2)
+			gtl.AddUserOrGroupToRule(rule, "user11")
 			gtl.GetConfigsForRepo("repo11")
 			So(len(gtl.GetConfigsForRepo("repo11")), ShouldEqual, 1)
 			// So(fmt.Sprintf("%v", gtl.reposToConfigs), ShouldEqual, "z")
@@ -415,13 +417,13 @@ repo @repogrp1
 # cfg2 desc comment
 desc = cfg2 desc
 # rule comment
-RW test = @usrgrp1
+RW test = @usrgrp2 user11
 `)
 
 			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@all, @repogrp1, @usrgrp1, @usrgrp2]
 NbRepoOrGroups: 7 [@all, repo1, repo2, @repogrp1, repo11, repo12, gitolite-admin]
 NbUserOrGroups: 4 [@usrgrp1, user11, user12, @usrgrp2]
-NbConfigs: 4 [config [group '@all'<repos>: []] => rules [], config [repo 'repo1' repo 'repo2'] => rules [], config [group '@repogrp1'<repos>: [repo11 repo12]] => rules [RW test = @usrgrp1 (user11, user12)], config [repo 'gitolite-admin'] => rules []]
+NbConfigs: 4 [config [group '@all'<repos>: []] => rules [], config [repo 'repo1' repo 'repo2'] => rules [], config [group '@repogrp1'<repos>: [repo11 repo12]] => rules [RW test = @usrgrp2, user11], config [repo 'gitolite-admin'] => rules []]
 `)
 
 			r, err := gtl.Rules("repo12")
