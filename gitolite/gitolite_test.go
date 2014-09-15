@@ -141,6 +141,7 @@ func TestProject(t *testing.T) {
 			So(repo, ShouldNotBeNil)
 			So(repo.String(), ShouldEqual, `repo 'repo1'`)
 			So(len(repo.GetMembers()), ShouldEqual, 0)
+			So(len(repo.Repo().GetReposOrGroups()), ShouldEqual, 1)
 		})
 
 		Convey("Comments can be added", func() {
