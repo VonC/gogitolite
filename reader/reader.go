@@ -102,12 +102,14 @@ func readEmptyOrCommentLines(c *content) (stateFn, error) {
 			if err != nil {
 				return nil, ParseError{msg: fmt.Sprintf("Invalid subconf regexp:\n%v at line %v ('%v')", err.Error(), c.l, t)}
 			}
+		} else {
+			currentComment.AddComment(t)
+			//fmt.Println("\nCMT: ", currentComment, "\nGTL: ", c.gtl)
 		}
 		if !c.s.Scan() {
 			keepReading = false
 		} else {
 			c.l = c.l + 1
-			currentComment.AddComment(t)
 			t = c.s.Text()
 		}
 	}

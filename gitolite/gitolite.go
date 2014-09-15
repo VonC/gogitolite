@@ -442,7 +442,7 @@ func (cmt *Comment) String() string {
 	return res
 }
 
-// NbGroupRepos returns the number of groups identified as repos
+// NbRepoGroups returns the number of groups identified as repos
 func (gtl *Gitolite) NbRepoGroups() int {
 	res := 0
 	for _, grp := range gtl.groups {
@@ -579,7 +579,7 @@ func (usr *User) String() string {
 
 // IsEmpty checks if config includes any repo or groups
 func (gtl *Gitolite) IsEmpty() bool {
-	return (gtl.usersOrGroups == nil || len(gtl.usersOrGroups) == 0) && (gtl.reposOrGroups == nil || len(gtl.reposOrGroups) == 0)
+	return !(len(gtl.groups) > 0 || len(gtl.usersOrGroups) > 0 || len(gtl.reposOrGroups) > 0)
 }
 
 // NbGroup returns the number of groups (people or repos)
