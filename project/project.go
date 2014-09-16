@@ -58,8 +58,6 @@ func (pm *Manager) NbProjects() int {
 	return len(pm.projects)
 }
 
-var prefix = "VREF/NAME/conf/subs/"
-
 func (pm *Manager) updateProjects() {
 	gtl := pm.gtl
 	configs := gtl.GetConfigsForRepo("gitolite-admin")
@@ -72,6 +70,7 @@ func (pm *Manager) updateProjects() {
 			//fmt.Printf("\nRule looked at: '%v' => '%v' '%v'\n", rule, rule.Access(), rule.Param())
 			if rule.IsNakedRW() {
 				currentProject = &Project{admins: rule.GetUsersFirstOrGroups()}
+				//fmt.Println(currentProject)
 			} else if isrw, currentProject = pm.currentProjectRW(rule, currentProject); isrw {
 				isrw = true
 			} else if rule.Access() == "-" && rule.Param() == "VREF/NAME/" {
@@ -116,10 +115,14 @@ func (pm *Manager) checkRepoGroup(p *Project) bool {
 	return grp != nil
 }
 
+var prefix = "VREF/NAME/conf/subs/"
+
 func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project) (bool, *Project) {
 	var isrw = false
+	//fmt.Println("\nRULE '", rule, "'")
 	if isrw = rule.Access() == "RW" && strings.HasPrefix(rule.Param(), prefix); isrw {
 		projectname := rule.Param()[len(prefix):]
+		//fmt.Println("\nPRJ '", projectname, "'")
 		if currentProject == nil {
 			fmt.Printf("\nIgnore project name '%v': no RW rule before\n", projectname)
 		} else {
