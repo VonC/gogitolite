@@ -321,7 +321,7 @@ func TestProject(t *testing.T) {
 		repo gitolite-admin
 	      RW+     =   gitoliteadm @almadmins
 	      RW                                = projectowner1
-	      RW VREF/NAME/conf/subs/project    = projectowner
+	      RW VREF/NAME/conf/subs/project    = projectowner1 po2
 	      -  VREF/NAME/                     = projectowner
 
 	    repo module1
