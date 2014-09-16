@@ -157,7 +157,7 @@ func (rdr *rdr) printAudit() {
 
 func (rdr *rdr) listProjects() {
 	pm := project.NewManager(rdr.gtl, rdr.subconfs)
-	fmt.Println("NbProjects: %v\n", pm.NbProjects())
+	fmt.Printf("NbProjects: %v\n", pm.NbProjects())
 	for _, project := range pm.Projects() {
 		fmt.Printf("%v\n", project)
 	}
