@@ -85,7 +85,7 @@ func TestProject(t *testing.T) {
 	      -  VREF/NAME/                     = projectowner1 projectowner2
 
 	    repo module1
-	      RW = user1 user11
+	      RW = user1 user11 user2
 	    repo module2
 	      RW = user2 user21
 `
