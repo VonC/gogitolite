@@ -237,7 +237,39 @@ func addUser(users []*User, user *User) []*User {
 	return users
 }
 
-// GetUsers returns the users of a Group (including the ones in a user group including the Group)
+func addRepo(repos []*Repo, repo *Repo) []*Repo {
+	seen := false
+	for _, r := range repos {
+		if r.GetName() == repo.GetName() {
+			seen = true
+		}
+	}
+	if !seen {
+		repos = append(repos, repo)
+	}
+	return repos
+}
+
+// GetAllRepos returns the repos  of a Group (including the ones in a repo group including the Group)
+func (grp *Group) GetAllRepos() []*Repo {
+	res := []*Repo{}
+	for _, rog := range grp.GetReposOrGroups() {
+		if rog.Repo() != nil {
+			repo := rog.Repo()
+			res = addRepo(res, repo)
+		}
+		if rog.Group() != nil {
+			group := rog.Group()
+			repos := group.GetAllRepos()
+			for _, repo := range repos {
+				res = addRepo(res, repo)
+			}
+		}
+	}
+	return res
+}
+
+// GetAllUsers returns the users of a Group (including the ones in a user group including the Group)
 func (grp *Group) GetAllUsers() []*User {
 	res := []*User{}
 	for _, uog := range grp.GetUsersOrGroups() {

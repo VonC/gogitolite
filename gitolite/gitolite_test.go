@@ -134,6 +134,7 @@ func TestProject(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(gtl.NbRepos(), ShouldEqual, 1)
 			So(gtl.NbUsers(), ShouldEqual, 0)
+			So(len(grp.GetAllRepos()), ShouldEqual, 1)
 			So(len(grp.GetUsersOrGroups()), ShouldEqual, 0)
 			So(fmt.Sprintf("%v", grp.GetMembers()), ShouldEqual, "[repo1]")
 			So(gtl.NbGroup(), ShouldEqual, 1)
@@ -142,10 +143,12 @@ func TestProject(t *testing.T) {
 
 			addRepoOrGroupFromName(grp, "repo1", gtl)
 			So(gtl.NbRepoGroups(), ShouldEqual, 1)
+			So(len(grp.GetAllRepos()), ShouldEqual, 1)
 			So(len(grp.GetReposOrGroups()), ShouldEqual, 1)
 			addRepoOrGroupFromName(grp, "repo2", gtl)
 			addRepoOrGroupFromName(grp, "repo2", gtl)
 			So(len(grp.GetReposOrGroups()), ShouldEqual, 2)
+			So(len(grp.GetAllRepos()), ShouldEqual, 2)
 			So(grp.GetReposOrGroups()[0].GetName(), ShouldEqual, "repo1")
 			So(gtl.repoOrGroupFromName("repo1"), ShouldNotBeNil)
 			So(gtl.repoOrGroupFromName("repo1b"), ShouldBeNil)
@@ -166,11 +169,15 @@ func TestProject(t *testing.T) {
 			So(gtl.NbReposOrGroups(), ShouldEqual, 5)
 			addRepoOrGroupFromName(grp2, "@grp1", gtl)
 			So(gtl.NbReposOrGroups(), ShouldEqual, 5)
+			So(len(grp2.GetAllRepos()), ShouldEqual, 3)
 			So(grp2.hasRepoOrGroup("repo1"), ShouldBeTrue)
 			So(grp2.hasRepoOrGroup("repo22"), ShouldBeTrue)
 			So(grp.hasRepoOrGroup("repo22"), ShouldBeFalse)
 
+			addRepoOrGroupFromName(grp2, "repo1", gtl)
+
 			So(gtl.NbReposOrGroups(), ShouldEqual, 5)
+			So(len(grp2.GetAllRepos()), ShouldEqual, 3)
 		})
 
 		Convey("Comments can be added", func() {
