@@ -189,8 +189,8 @@ func (usr *User) GetName() string {
 }
 
 // GetName returns the name of a repo
-func (r *Repo) GetName() string {
-	return r.name
+func (repo *Repo) GetName() string {
+	return repo.name
 }
 
 // GetMembers helps a RepoOrGroup to get all its repos (itself for Repos, its members for a group)
@@ -213,7 +213,7 @@ func (grp *Group) GetMembers() []string {
 	return grp.members
 }
 
-// GetUsers returns the users of a user group, or an empty list for a repo group
+// GetUsersOrGroups returns the users of a user group, or an empty list for a repo group
 func (grp *Group) GetUsersOrGroups() []UserOrGroup {
 	if grp.kind == users {
 		return grp.usersOrGroups
@@ -288,7 +288,7 @@ func (grp *Group) GetAllUsers() []*User {
 	return res
 }
 
-// GetUsers returns the users of a rule (including the ones in a user group set for that rule)
+// GetAllUsers returns the users of a rule (including the ones in a user group set for that rule)
 func (rule *Rule) GetAllUsers() []*User {
 	res := []*User{}
 	for _, uog := range rule.usersOrGroups {
@@ -339,7 +339,7 @@ type userContainer interface {
 	addUserOrGroup(uog UserOrGroup)
 }
 
-// GetRepos returns the repos found in a gitolite conf
+// GetReposOrGroups returns the repos or groups of repos found in a gitolite conf
 func (gtl *Gitolite) GetReposOrGroups() []RepoOrGroup {
 	return gtl.reposOrGroups
 }
@@ -348,7 +348,7 @@ func (grp *Group) addRepoOrGroup(rog RepoOrGroup) {
 	grp.members = addStringNoDup(grp.members, rog.GetName())
 }
 
-// GetRepos returns the repos or groups listed in a repos group
+// GetReposOrGroups returns the repos or groups of repos listed in a repos group
 func (grp *Group) GetReposOrGroups() []RepoOrGroup {
 	if grp.kind == repos {
 		return grp.reposOrGroups
@@ -601,8 +601,8 @@ func (rule *Rule) IsNakedRW() bool {
 }
 
 // String exposes Repo internals (its name)
-func (r *Repo) String() string {
-	return fmt.Sprintf("repo '%v'", r.name)
+func (repo *Repo) String() string {
+	return fmt.Sprintf("repo '%v'", repo.name)
 }
 
 // String exposes User internals (its name)
@@ -620,7 +620,7 @@ func (gtl *Gitolite) NbGroup() int {
 	return len(gtl.groups)
 }
 
-// NbRepos returns the number of repos (single or groups)
+// NbReposOrGroups returns the number of repos (single or groups)
 func (gtl *Gitolite) NbReposOrGroups() int {
 	return len(gtl.reposOrGroups)
 }
@@ -1037,7 +1037,7 @@ func (gtl *Gitolite) groupsFromUserOrGroup(uog UserOrGroup) []*Group {
 	return res
 }
 
-// AddUserToRule adds user to rule unless user name already used in a repo group
+// AddUserOrGroupToRule adds user to rule unless user name already used in a repo group
 func (gtl *Gitolite) AddUserOrGroupToRule(rule *Rule, uogname string) error {
 	if uogname != "@all" && isRepoOrGroupSeen(uogname, gtl.reposOrGroups) {
 		return fmt.Errorf("user or user group name '%v' already used in a repo group", uogname)
