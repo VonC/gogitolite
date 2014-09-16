@@ -71,6 +71,38 @@ func TestProject(t *testing.T) {
 			//fmt.Println("\nPRJ: ", pm)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(fmt.Sprintf("groups '%v'", gtl.GetGroup("@project")), ShouldEqual, "groups 'group '@project'<repos>: [module1 module2]'")
+			So(pm.Projects()[0].String(), ShouldEqual, "project project, admins: projectowner, members: ")
+		})
+
+		Convey("Detects one project with several admins and users", func() {
+			var gitoliteconf = `
+		@project = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner1 projectowner2
+	      RW VREF/NAME/conf/subs/project    = projectowner1 projectowner2
+	      -  VREF/NAME/                     = projectowner1 projectowner2
+
+	    repo module1
+	      RW = user1 user11
+	    repo module2
+	      RW = user2 user21
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := reader.Read(r)
+			subconfs := make(map[string]*gitolite.Gitolite)
+			subconfs["path/project.conf"] = gtl
+			pm := NewManager(gtl, subconfs)
+			So(err, ShouldBeNil)
+			So(gtl, ShouldNotBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(pm.NbProjects(), ShouldEqual, 1)
+			//fmt.Println("\nPRJ: ", pm)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(fmt.Sprintf("groups '%v'", gtl.GetGroup("@project")), ShouldEqual, "groups 'group '@project'<repos>: [module1 module2]'")
+			So(pm.Projects()[0].String(), ShouldEqual, "project project, admins: projectowner1, projectowner2, members: user1, user11, user2, user21")
 		})
 
 		Convey("No project if no RW rule before", func() {

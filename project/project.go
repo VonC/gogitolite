@@ -156,6 +156,7 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 				if pm.checkRepoGroup(currentProject) {
 					//fmt.Println("\nCP ", currentProject)
 					pm.projects = append(pm.projects, currentProject)
+					pm.updateMembers(currentProject)
 				} else {
 					fmt.Printf("Ignore project name '%v': no repos group '%v' found\n", currentProject.name, "@"+currentProject.name)
 				}
@@ -166,6 +167,34 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 	}
 	currentProject = nil
 	return currentProject
+}
+
+func (pm *Manager) updateMembers(p *Project) {
+	group := pm.gtl.GetGroup("@" + p.name)
+	repos := group.GetAllRepos()
+	for _, repo := range repos {
+		configs := pm.gtl.GetConfigsForRepo(repo.GetName())
+		//fmt.Println("\nCFG: ", repo.GetName(), " => ", configs)
+		for _, config := range configs {
+			for _, rule := range config.Rules() {
+				if strings.HasPrefix(rule.Access(), "R") {
+					uogs := rule.GetUsersFirstOrGroups()
+					for _, uog := range uogs {
+						seen := false
+						for _, member := range p.members {
+							if member.GetName() == uog.GetName() {
+								seen = true
+								break
+							}
+						}
+						if !seen {
+							p.members = append(p.members, uog)
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 func (p *Project) hasSameUsers(users []gitolite.UserOrGroup) bool {
