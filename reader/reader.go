@@ -296,6 +296,7 @@ func readRepoRules(c *content) (stateFn, error) {
 	//rules := []*gitolite.Rule{}
 	config := c.currentConfig
 	for keepReading := true; keepReading; {
+		//fmt.Printf("readRepoRules '%v'\n", t)
 		lineProcessed, err := readRepoRulesDesc(c, config, t)
 		if !lineProcessed {
 			lineProcessed, err = readRepoRulesComment(t)
@@ -304,6 +305,7 @@ func readRepoRules(c *content) (stateFn, error) {
 			lineProcessed, err = readRepoRule(c, config, t)
 		}
 		if err != nil {
+			//fmt.Printf("readRepoRules ERR '%v'\n", err)
 			return nil, err
 		}
 		if !lineProcessed {

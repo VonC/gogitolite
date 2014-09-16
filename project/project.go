@@ -144,16 +144,7 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 		currentProject = nil
 	}
 	if currentProject != nil {
-		group := gtl.GetGroup("@" + currentProject.name)
-		if group == nil {
-			fmt.Printf("\nIgnore project name '%v': no repo group found\n", currentProject.name)
-			currentProject = nil
-		} else if group.IsUsers() {
-			fmt.Printf("\nIgnore project name '%v': user group found (instead of repo group)\n", currentProject.name)
-			currentProject = nil
-		} else if group.IsUndefined() {
-			group.MarkAsRepoGroup()
-		}
+		// no need to check @projectName group: it is defined as a repo group
 		if currentProject != nil {
 			if pm.checkSubConf(currentProject) {
 				if pm.checkRepoGroup(currentProject) {
