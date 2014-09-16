@@ -253,11 +253,11 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, _ := reader.Read(r)
+			gtl, err := reader.Read(r)
 			subconfs := make(map[string]*gitolite.Gitolite)
 			subconfs["path/project.conf"] = gtl
 			pm := NewManager(gtl, subconfs)
-			//So(err, ShouldNotBeNil)
+			So(err, ShouldBeNil)
 			So(gtl, ShouldNotBeNil)
 			//So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -279,9 +279,9 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, _ := reader.Read(r)
+			gtl, err := reader.Read(r)
 			pm := NewManager(gtl, nil)
-			//So(err, ShouldNotBeNil)
+			So(err, ShouldBeNil)
 			So(gtl, ShouldNotBeNil)
 			//So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -302,11 +302,11 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, _ := reader.Read(r)
+			gtl, err := reader.Read(r)
 			subconfs := make(map[string]*gitolite.Gitolite)
 			subconfs["path/project.conf"] = gtl
 			pm := NewManager(gtl, subconfs)
-			//So(err, ShouldNotBeNil)
+			So(err, ShouldBeNil)
 			So(gtl, ShouldNotBeNil)
 			//So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -328,11 +328,11 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, _ := reader.Read(r)
+			gtl, err := reader.Read(r)
 			subconfs := make(map[string]*gitolite.Gitolite)
 			subconfs["path/project.conf"] = gtl
 			pm := NewManager(gtl, subconfs)
-			//So(err, ShouldNotBeNil)
+			So(err, ShouldBeNil)
 			So(gtl, ShouldNotBeNil)
 			//So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -354,11 +354,11 @@ func TestProject(t *testing.T) {
 	      RW+ = projectowner @almadmins
 `
 			r := strings.NewReader(gitoliteconf)
-			gtl, _ := reader.Read(r)
+			gtl, err := reader.Read(r)
 			subconfs := make(map[string]*gitolite.Gitolite)
 			subconfs["path/project.conf"] = gtl
 			pm := NewManager(gtl, subconfs)
-			//So(err, ShouldNotBeNil)
+			So(err, ShouldBeNil)
 			So(gtl, ShouldNotBeNil)
 			//So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
 			So(gtl.IsEmpty(), ShouldBeFalse)
