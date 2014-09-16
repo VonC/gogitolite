@@ -73,6 +73,21 @@ func getGtl(filename string, gtl *gitolite.Gitolite) *gitolite.Gitolite {
 	return gtl
 }
 
+func addRogNoDup(rog gitolite.RepoOrGroup, rogs []gitolite.RepoOrGroup) []gitolite.RepoOrGroup {
+	res := rogs
+	seen := false
+	for _, arog := range rogs {
+		if arog.GetName() == rog.GetName() {
+			seen = true
+			break
+		}
+	}
+	if !seen {
+		res = append(rogs, rog)
+	}
+	return res
+}
+
 func (rdr *rdr) updateUsersToRepos(uog gitolite.UserOrGroup, config *gitolite.Config) {
 	var rogs []gitolite.RepoOrGroup
 	var ok bool
@@ -80,15 +95,13 @@ func (rdr *rdr) updateUsersToRepos(uog gitolite.UserOrGroup, config *gitolite.Co
 		rogs = []gitolite.RepoOrGroup{}
 	}
 	for _, cfgrog := range config.GetReposOrGroups() {
-		seen := false
-		for _, rog := range rogs {
-			if rog.GetName() == cfgrog.GetName() {
-				seen = true
-				break
+		rogs = addRogNoDup(cfgrog, rogs)
+		if cfgrog.Group() != nil {
+			cfggrp := cfgrog.Group()
+			repos := cfggrp.GetAllRepos()
+			for _, repo := range repos {
+				rogs = addRogNoDup(repo, rogs)
 			}
-		}
-		if !seen {
-			rogs = append(rogs, cfgrog)
 		}
 	}
 	rdr.usersToReposOrGroup[uog.GetName()] = rogs
