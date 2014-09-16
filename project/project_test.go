@@ -314,5 +314,31 @@ func TestProject(t *testing.T) {
 			So(pm.NbProjects(), ShouldEqual, 0)
 		})
 
+		Convey("No project if admins change", func() {
+			var gitoliteconf = `
+		@project = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner1
+	      RW VREF/NAME/conf/subs/project    = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, _ := reader.Read(r)
+			subconfs := make(map[string]*gitolite.Gitolite)
+			subconfs["path/project.conf"] = gtl
+			pm := NewManager(gtl, subconfs)
+			//So(err, ShouldNotBeNil)
+			So(gtl, ShouldNotBeNil)
+			//So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(pm.NbProjects(), ShouldEqual, 0)
+		})
+
 	})
 }
