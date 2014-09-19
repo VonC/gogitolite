@@ -49,7 +49,8 @@ repo @project
 				panic(err)
 			}
 
-			main("-v", "-audit", "_tests/p1/conf/gitolite.conf")
+			args = []string{"-v", "-audit", "_tests/p1/conf/gitolite.conf"}
+			main()
 		})
 	})
 }

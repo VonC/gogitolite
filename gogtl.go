@@ -22,12 +22,18 @@ type rdr struct {
 	filename            string
 }
 
+var args []string
+
 func main() {
 
 	fauditPtr := flag.Bool("audit", false, "print user access audit")
 	flistPtr := flag.Bool("list", false, "list projects")
 	fverbosePtr := flag.Bool("v", false, "verbose, display filenames read")
-	flag.Parse()
+	a := os.Args[1:]
+	if args != nil {
+		a = args
+	}
+	flag.CommandLine.Parse(a)
 	filenames := flag.Args()
 	if len(filenames) != 1 {
 		fmt.Println("One gitolite.conf file expected")
