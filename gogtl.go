@@ -23,40 +23,50 @@ type rdr struct {
 }
 
 var args []string
+var r *rdr
+var fauditPtr *bool
+var flistPtr *bool
+var fverbosePtr *bool
+
+func init() {
+	fauditPtr = flag.Bool("audit", false, "print user access audit")
+	flistPtr = flag.Bool("list", false, "list projects")
+	fverbosePtr = flag.Bool("v", false, "verbose, display filenames read")
+
+}
 
 func main() {
 
-	fauditPtr := flag.Bool("audit", false, "print user access audit")
-	flistPtr := flag.Bool("list", false, "list projects")
-	fverbosePtr := flag.Bool("v", false, "verbose, display filenames read")
 	a := os.Args[1:]
 	if args != nil {
 		a = args
 	}
 	flag.CommandLine.Parse(a)
 	filenames := flag.Args()
+	var filename string
 	if len(filenames) != 1 {
-		fmt.Println("One gitolite.conf file expected")
-		os.Exit(1)
+		fmt.Errorf("One gitolite.conf file expected")
+		goto eop
 	}
-	filename := filenames[0]
-	rdr := &rdr{usersToReposOrGroup: make(map[string][]gitolite.RepoOrGroup),
+	filename = filenames[0]
+	r = &rdr{usersToReposOrGroup: make(map[string][]gitolite.RepoOrGroup),
 		verbose:  *fverbosePtr,
 		filename: filename,
 		subconfs: make(map[string]*gitolite.Gitolite),
 	}
-	if rdr.verbose {
+	if r.verbose {
 		fmt.Printf("Read file '%v'\n", filename)
 	}
 
-	rdr.gtl = rdr.process(filename, nil)
-	rdr.processSubconfs()
+	r.gtl = r.process(filename, nil)
+	r.processSubconfs()
 	if *fauditPtr {
-		rdr.printAudit()
+		r.printAudit()
 	}
 	if *flistPtr {
-		rdr.listProjects()
+		r.listProjects()
 	}
+eop:
 }
 
 func getGtl(filename string, gtl *gitolite.Gitolite) *gitolite.Gitolite {
