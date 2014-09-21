@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -44,6 +45,7 @@ func main() {
 	flag.CommandLine.Parse(a)
 	filenames := flag.Args()
 	var filename string
+	var err error
 	if len(filenames) != 1 {
 		fmt.Errorf("One gitolite.conf file expected")
 		goto eop
@@ -58,35 +60,42 @@ func main() {
 		fmt.Printf("Read file '%v'\n", filename)
 	}
 
-	r.gtl = r.process(filename, nil)
-	r.processSubconfs()
-	if *fauditPtr {
-		r.printAudit()
-	}
-	if *flistPtr {
-		r.listProjects()
+	r.gtl, err = r.process(filename, nil)
+	if err == nil {
+		r.processSubconfs()
+		if *fauditPtr {
+			r.printAudit()
+		}
+		if *flistPtr {
+			r.listProjects()
+		}
 	}
 eop:
 }
 
-func getGtl(filename string, gtl *gitolite.Gitolite) *gitolite.Gitolite {
+func getGtlFromFile(filename string, gtl *gitolite.Gitolite) (*gitolite.Gitolite, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("ERR %v\n", err.Error())
-		os.Exit(1)
+		return nil, err
 	}
 	defer f.Close()
 	fr := bufio.NewReader(f)
+	return getGtl2(fr, gtl)
+}
+
+func getGtl2(r io.Reader, gtl *gitolite.Gitolite) (*gitolite.Gitolite, error) {
+	var err error
 	if gtl == nil {
-		gtl, err = reader.Read(fr)
+		gtl, err = reader.Read(r)
 	} else {
-		gtl, err = reader.Update(fr, gtl)
+		gtl, err = reader.Update(r, gtl)
 	}
 	if err != nil {
 		fmt.Printf("ERR %v\n", err.Error())
-		os.Exit(1)
+		return nil, err
 	}
-	return gtl
+	return gtl, nil
 }
 
 func addRogNoDup(rog gitolite.RepoOrGroup, rogs []gitolite.RepoOrGroup) []gitolite.RepoOrGroup {
@@ -123,8 +132,11 @@ func (rdr *rdr) updateUsersToRepos(uog gitolite.UserOrGroup, config *gitolite.Co
 	rdr.usersToReposOrGroup[uog.GetName()] = rogs
 }
 
-func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) *gitolite.Gitolite {
-	gtl := getGtl(filename, parent)
+func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) (*gitolite.Gitolite, error) {
+	gtl, err := getGtlFromFile(filename, parent)
+	if err != nil {
+		return nil, err
+	}
 	// fmt.Println(gtl.String())
 	for _, config := range gtl.Configs() {
 		for _, rule := range config.Rules() {
@@ -135,7 +147,7 @@ func (rdr *rdr) process(filename string, parent *gitolite.Gitolite) *gitolite.Gi
 			}
 		}
 	}
-	return gtl
+	return gtl, nil
 }
 
 func (rdr *rdr) processSubconfs() {
@@ -151,7 +163,12 @@ func (rdr *rdr) processSubconfs() {
 					if rdr.verbose {
 						fmt.Printf("Visited: %s %s\n", relname, path)
 					}
-					rdr.subconfs[path] = rdr.process(path, rdr.gtl)
+					subgtl, err := rdr.process(path, rdr.gtl)
+					if err != nil {
+						fmt.Printf("Ignore non-existing file: %s %s\n", relname, path)
+					} else {
+						rdr.subconfs[path] = subgtl
+					}
 				}
 			}
 		}
