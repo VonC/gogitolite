@@ -29,6 +29,7 @@ func init() {
 	      RW = user2 user21
 	    repo @project
 	      RW = pu1
+      subconf "subs/*.conf"
 `
 	if err := os.MkdirAll("_tests/p1/conf/subs", 0755); err != nil {
 		panic(err)
@@ -80,7 +81,7 @@ func TestProject(t *testing.T) {
 
 		Convey("Detects one project with several admins and users", func() {
 
-			args = []string{"-audit", "_tests/p1/conf/gitolite.conf"}
+			args = []string{"-v", "-audit", "_tests/p1/conf/gitolite.conf"}
 			main()
 			So(r, ShouldNotBeNil)
 			gtl, err := getGtlFromFile("_tests/p1/conf/gitolite.conf", r.gtl)
