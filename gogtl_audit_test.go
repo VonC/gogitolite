@@ -18,7 +18,7 @@ func init() {
 		@almadmins = admin1 admin2
 
 		repo gitolite-admin
-	      RW+     =   gitoliteadm @almadmins
+	      RW+     =   gitoliteadm @almadmins @alm2
 	      RW                                = projectowner1 projectowner2
 	      RW VREF/NAME/conf/subs/project    = projectowner1 projectowner2
 	      -  VREF/NAME/                     = projectowner1 projectowner2
