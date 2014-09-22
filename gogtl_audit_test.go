@@ -44,6 +44,13 @@ repo @project
 	if err := ioutil.WriteFile("_tests/p1/conf/subs/project.conf", []byte(projectconf), 0644); err != nil {
 		panic(err)
 	}
+	var projectbadconf = `
+repo
+  RW = user3bad
+`
+	if err := ioutil.WriteFile("_tests/p1/conf/subs/projectbad.conf", []byte(projectbadconf), 0644); err != nil {
+		panic(err)
+	}
 }
 
 /*

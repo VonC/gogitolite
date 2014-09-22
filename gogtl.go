@@ -165,7 +165,7 @@ func (rdr *rdr) processSubconfs() {
 					}
 					subgtl, err := rdr.process(path, rdr.gtl)
 					if err != nil {
-						fmt.Printf("Ignore non-existing file: %s %s\n", relname, path)
+						fmt.Printf("Ignore subconf file: %s %s because of err '%v'\n", relname, path, err)
 					} else {
 						rdr.subconfs[path] = subgtl
 					}
