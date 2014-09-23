@@ -39,7 +39,7 @@ func init() {
 	}
 	var projectconf = `
 repo @project
-  RW = user3
+  RW = user3 HBu1
 `
 	if err := ioutil.WriteFile("_tests/p1/conf/subs/project.conf", []byte(projectconf), 0644); err != nil {
 		panic(err)
