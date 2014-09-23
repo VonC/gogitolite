@@ -28,11 +28,13 @@ var r *rdr
 var fauditPtr *bool
 var flistPtr *bool
 var fverbosePtr *bool
+var fprintPtr *bool
 
 func init() {
 	fauditPtr = flag.Bool("audit", false, "print user access audit")
 	flistPtr = flag.Bool("list", false, "list projects")
 	fverbosePtr = flag.Bool("v", false, "verbose, display filenames read")
+	fprintPtr = flag.Bool("print", false, "print config")
 
 }
 
@@ -47,7 +49,7 @@ func main() {
 	var filename string
 	var err error
 	if len(filenames) != 1 {
-		fmt.Errorf("One gitolite.conf file expected")
+		fmt.Println("One gitolite.conf file expected")
 		goto eop
 	}
 	filename = filenames[0]
@@ -68,6 +70,9 @@ func main() {
 		}
 		if *flistPtr {
 			r.listProjects()
+		}
+		if *fprintPtr {
+			fmt.Printf("%v", r.gtl.Print())
 		}
 	}
 eop:

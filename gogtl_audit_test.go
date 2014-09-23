@@ -103,4 +103,16 @@ func TestProject(t *testing.T) {
 			So(r, ShouldNotBeNil)
 		})
 	})
+
+	Convey("Prints configs", t, func() {
+		Convey("Print a gitolite config", func() {
+
+			args = []string{"-print", "_tests/p1/conf/gitolite.conf"}
+			main()
+			So(r, ShouldNotBeNil)
+			gtl, err := getGtlFromFile("_tests/p1/conf/gitolite.conf", r.gtl)
+			So(err, ShouldBeNil)
+			So(gtl, ShouldNotBeNil)
+		})
+	})
 }
