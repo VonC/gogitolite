@@ -1160,7 +1160,7 @@ func (cfg *Config) Print() string {
 // Print prints the comments and access/params and user or groups of a rule
 func (rule *Rule) Print() string {
 	res := rule.cmt.Print()
-	res = res + rule.Access()
+	res = res + "    " + rule.Access()
 	if rule.Param() != "" {
 		res = res + " " + rule.Param()
 	}
