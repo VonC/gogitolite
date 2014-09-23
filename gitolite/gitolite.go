@@ -14,6 +14,12 @@ type Gitolite struct {
 	configs       []*Config
 	subconfs      []*regexp.Regexp
 	parent        *Gitolite
+	elts          []Printable
+}
+
+// Printable is an element which can be printed
+type Printable interface {
+	Print() string
 }
 
 // NewGitolite creates an empty gitolite config
@@ -929,6 +935,7 @@ func (gtl *Gitolite) AddUserOrRepoGroup(grpname string, grpmembers []string, cur
 		//addRepoOrGroupFromName(grp, val)
 	}
 	gtl.addGroup(grp)
+	gtl.elts = append(gtl.elts, grp)
 	return nil
 }
 
@@ -967,6 +974,7 @@ func (gtl *Gitolite) AddConfig(rpmembers []string, comment *Comment) (*Config, e
 		}
 	}
 	gtl.configs = append(gtl.configs, config)
+	gtl.elts = append(gtl.elts, config)
 	return config, nil
 }
 
@@ -1095,22 +1103,8 @@ func (gtl *Gitolite) AddRuleToConfig(rule *Rule, config *Config) {
 // Print prints a Gitolite with reformat.
 func (gtl *Gitolite) Print() string {
 	res := ""
-	for _, group := range gtl.groups {
-		res = res + group.Print()
-	}
-	for _, config := range gtl.GetConfigsForRepo("gitolite-admin") {
-		res = res + config.Print()
-	}
-	for _, config := range gtl.configs {
-		skip := false
-		for _, rog := range config.GetReposOrGroups() {
-			if rog.GetName() == "gitolite-admin" {
-				skip = true
-			}
-		}
-		if !skip {
-			res = res + config.Print()
-		}
+	for _, p := range gtl.elts {
+		res = res + p.Print()
 	}
 	return res
 }
