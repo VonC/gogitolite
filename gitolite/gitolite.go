@@ -101,6 +101,7 @@ type Repo struct {
 // Comment groups empty or lines with #
 type Comment struct {
 	comments []string
+	sameLine string
 }
 
 // User (or group of users)
@@ -874,6 +875,18 @@ func (cmt *Comment) AddComment(comment string) {
 	if comment != "" {
 		cmt.comments = append(cmt.comments, comment)
 	}
+}
+
+// SameLineComment set the same line comment
+func (cmt *Comment) SetSameLine(comment string) {
+	comment = strings.TrimSpace(comment)
+	if comment != "" {
+		cmt.sameLine = comment
+	}
+}
+
+func (cmt *Comment) SameLine() string {
+	return cmt.sameLine
 }
 
 // Rules are the rules listed in a config
