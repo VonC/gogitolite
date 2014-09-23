@@ -880,9 +880,7 @@ func (cmt *Comment) AddComment(comment string) {
 // SameLineComment set the same line comment
 func (cmt *Comment) SetSameLine(comment string) {
 	comment = strings.TrimSpace(comment)
-	if comment != "" {
-		cmt.sameLine = comment
-	}
+	cmt.sameLine = comment
 }
 
 func (cmt *Comment) SameLine() string {

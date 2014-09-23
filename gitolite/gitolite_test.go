@@ -191,6 +191,8 @@ func TestProject(t *testing.T) {
 			So(len(cmt.comments), ShouldEqual, 3)
 			So(cmt.comments[1], ShouldEqual, "test1")
 			So(cmt.comments[2], ShouldEqual, "# test2")
+			cmt.SetSameLine("   # same line test  ")
+			So(cmt.SameLine(), ShouldEqual, "# same line test")
 
 			So(cmt.String(), ShouldEqual, `test
 test1
