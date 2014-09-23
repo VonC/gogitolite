@@ -128,7 +128,7 @@ func TestRead(t *testing.T) {
 		Convey("single rule", func() {
 			r := strings.NewReader(
 				`repo arepo1
-								RW+ = user1`)
+								RW+ = user1 `)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
@@ -470,6 +470,17 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 `)
 			So(gtl.GetConfigsForRepo("r1")[0].Rules()[0].Comment().String(), ShouldEqual, `#   main admins
 `)
+		})
+
+		Convey("A reader can get comment in the same line as a repo rule", func() {
+			r := strings.NewReader(
+				`repo arepo1
+								RW+ = user1  # com d ev`)
+			gtl, err := Read(r)
+			So(err, ShouldBeNil)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			cmt := gtl.GetConfigsForRepo("arepo1")[0].Rules()[0].Comment()
+			So(cmt.SameLine(), ShouldEqual, "# com d ev")
 		})
 
 	})
