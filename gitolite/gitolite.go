@@ -878,9 +878,7 @@ func (gtl *Gitolite) rulesRepo(rogname string) []*Rule {
 // AddComment adds a new line of comment to the current set.
 func (cmt *Comment) AddComment(comment string) {
 	comment = strings.TrimSpace(comment)
-	if comment != "" {
-		cmt.comments = append(cmt.comments, comment)
-	}
+	cmt.comments = append(cmt.comments, comment)
 }
 
 // SameLineComment set the same line comment
@@ -1114,7 +1112,7 @@ func (cmt *Comment) Print() string {
 	res := ""
 	if cmt != nil {
 		for _, comment := range cmt.comments {
-			if !strings.HasPrefix(comment, "#") {
+			if !strings.HasPrefix(comment, "#") && comment != "" {
 				res = res + "# "
 			}
 			res = res + comment + "\n"
