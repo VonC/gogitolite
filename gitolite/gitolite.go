@@ -1161,7 +1161,7 @@ func (cfg *Config) Print() string {
 	res = res + "\n"
 	if cfg.desc != "" {
 		if cfg.descCmt != nil {
-			res = res + cfg.descCmt.Print()
+			res = res + "    " + cfg.descCmt.Print()
 		}
 		res = res + "    desc  = " + cfg.desc + "\n"
 	}
