@@ -130,6 +130,17 @@ type Rule struct {
 	param         string
 	usersOrGroups []UserOrGroup
 	cmt           *Comment
+	space         int
+	pspace        int
+}
+
+func (rule *Rule) maxSpace() (int, int) {
+	s := len(rule.Access())
+	if s < 5 {
+		s = 5
+	}
+	ps := len(rule.Param())
+	return s, ps
 }
 
 // GetUsersOrGroups returns the users or groups of users associated to the rule
@@ -1149,9 +1160,22 @@ func (cfg *Config) Print() string {
 		if cfg.descCmt != nil {
 			res = res + cfg.descCmt.Print()
 		}
-		res = res + "desc = " + cfg.desc + "\n"
+		res = res + "    desc  = " + cfg.desc + "\n"
+	}
+	maxspace := 0
+	maxpspace := 0
+	for _, rule := range cfg.Rules() {
+		space, pspace := rule.maxSpace()
+		if space > maxspace {
+			maxspace = space
+		}
+		if pspace > maxpspace {
+			maxpspace = pspace
+		}
 	}
 	for _, rule := range cfg.Rules() {
+		rule.space = maxspace
+		rule.pspace = maxpspace
 		res = res + rule.Print()
 	}
 	return res
@@ -1160,13 +1184,16 @@ func (cfg *Config) Print() string {
 // Print prints the comments and access/params and user or groups of a rule
 func (rule *Rule) Print() string {
 	res := rule.cmt.Print()
-	res = res + "    " + rule.Access()
-	if rule.Param() != "" {
-		res = res + " " + rule.Param()
-	}
+	f := "    %-" + fmt.Sprintf("%d", rule.space) + "s"
+	res = res + fmt.Sprintf(f, rule.Access())
+	f = "%-" + fmt.Sprintf("%d", rule.pspace) + "s"
+	res = res + fmt.Sprintf(f, rule.Param())
 	res = res + " ="
 	for _, userOrGroup := range rule.usersOrGroups {
 		res = res + " " + userOrGroup.GetName()
+	}
+	if rule.cmt != nil && rule.cmt.sameLine != "" {
+		res = res + " # " + rule.cmt.sameLine
 	}
 	res = res + "\n"
 	return res
