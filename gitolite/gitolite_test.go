@@ -401,6 +401,7 @@ group '@usrgrp1' is a users group, not a repo one`)
 			//os.Exit(0)
 			So(len(gtl.GetConfigsForRepo("repo11")), ShouldEqual, 1)
 			cmt := &Comment{[]string{"rule comment"}, ""}
+			cmt.sameLine = "test"
 			rule := NewRule("RW", "test", cmt)
 			grp = gtl.GetGroup("@usrgrp2")
 			rule.addGroup(grp)
@@ -431,7 +432,7 @@ repo @repogrp1
 # cfg2 desc comment
 desc = cfg2 desc
 # rule comment
-RW test = @usrgrp2 user11
+RW test = @usrgrp2 user11 # test
 `)
 
 			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@all, @repogrp1, @usrgrp1, @usrgrp2]
