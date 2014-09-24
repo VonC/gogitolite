@@ -689,6 +689,9 @@ func (gtl *Gitolite) addRepoOrGroup(rog RepoOrGroup) {
 	}
 	grp := rog.Group()
 	if grp != nil {
+		if !seen {
+			gtl.elts = append(gtl.elts, grp)
+		}
 		for _, repoOrGroupName := range rog.GetMembers() {
 			addRepoOrGroupFromName(grp, repoOrGroupName, gtl)
 			addRepoOrGroupFromName(gtl, repoOrGroupName, gtl)
