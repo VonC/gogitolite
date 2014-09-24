@@ -1146,7 +1146,7 @@ func (grp *Group) Print() string {
 				res = res + " " + m
 			}
 		}
-		res = res + "\n"
+		res = res + "\n\n"
 	}
 	return res
 }
@@ -1181,7 +1181,7 @@ func (cfg *Config) Print() string {
 		rule.pspace = maxpspace
 		res = res + rule.Print()
 	}
-	return res
+	return res + "\n"
 }
 
 // Print prints the comments and access/params and user or groups of a rule
