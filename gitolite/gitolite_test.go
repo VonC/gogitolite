@@ -416,23 +416,30 @@ group '@usrgrp1' is a users group, not a repo one`)
 			So(len(cfg2.Rules()), ShouldEqual, 1)
 			// So(fmt.Sprintf("%v", gtl.reposToConfigs), ShouldEqual, "z")
 
-			So(gtl.Print(), ShouldEqual, `@repogrp1 = repo11 repo12
-# usrgrp1 comment
-@usrgrp1 = user11 user12
-# usrgrp2 comment
-@usrgrp2 =
-# ga comment
-repo gitolite-admin
-# @all comment
+			So(gtl.Print(), ShouldEqual, `# @all comment
 repo @all
+
 # cfg1 comment
 repo repo1 repo2
+
+@repogrp1 = repo11 repo12
+
+# usrgrp1 comment
+@usrgrp1 = user11 user12
+
+# usrgrp2 comment
+@usrgrp2 =
+
 # cfg2 comment
 repo @repogrp1
 # cfg2 desc comment
-desc = cfg2 desc
-# rule comment
-RW test = @usrgrp2 user11 # test
+    desc  = cfg2 desc
+    # rule comment
+    RW   test = @usrgrp2 user11 # test
+
+# ga comment
+repo gitolite-admin
+
 `)
 
 			So(gtl.String(), ShouldEqual, `NbGroups: 4 [@all, @repogrp1, @usrgrp1, @usrgrp2]
