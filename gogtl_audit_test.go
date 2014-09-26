@@ -15,6 +15,8 @@ var (
 	gitoliteconf     string
 	bout             *bytes.Buffer
 	wout             *bufio.Writer
+	berr             *bytes.Buffer
+	werr             *bufio.Writer
 )
 
 func init() {
@@ -60,7 +62,23 @@ repo
 	bout = bytes.NewBuffer(nil)
 	wout = bufio.NewWriter(bout)
 	out()
+	oerr()
 	sout = wout
+	berr = bytes.NewBuffer(nil)
+	werr = bufio.NewWriter(berr)
+	serr = werr
+}
+
+func resetStds() {
+	bout = bytes.NewBuffer(nil)
+	sout.Reset(bout)
+	berr = bytes.NewBuffer(nil)
+	serr.Reset(berr)
+}
+
+func flushStds() {
+	sout.Flush()
+	serr.Flush()
 }
 
 /*
