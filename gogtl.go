@@ -23,19 +23,30 @@ type rdr struct {
 	filename            string
 }
 
-var args []string
-var r *rdr
-var fauditPtr *bool
-var flistPtr *bool
-var fverbosePtr *bool
-var fprintPtr *bool
+var (
+	args        []string
+	r           *rdr
+	fauditPtr   *bool = flag.Bool("audit", false, "print user access audit")
+	flistPtr    *bool = flag.Bool("list", false, "list projects")
+	fverbosePtr *bool = flag.Bool("v", false, "verbose, display filenames read")
+	fprintPtr   *bool = flag.Bool("print", false, "print config")
+
+	sout = os.Stdout
+	serr = os.Stderr
+)
 
 func init() {
-	fauditPtr = flag.Bool("audit", false, "print user access audit")
-	flistPtr = flag.Bool("list", false, "list projects")
-	fverbosePtr = flag.Bool("v", false, "verbose, display filenames read")
-	fprintPtr = flag.Bool("print", false, "print config")
-
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr,
+			"Usage: gogitolite.exe [opts] gitolite.conf\n")
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.VisitAll(func(flag *flag.Flag) {
+			format := "  -%s=%s: %s\n"
+			if !strings.HasPrefix(flag.Name, "test.") {
+				fmt.Fprintf(serr, format, flag.Name, flag.DefValue, flag.Usage)
+			}
+		})
+	}
 }
 
 func main() {
@@ -43,6 +54,10 @@ func main() {
 	a := os.Args[1:]
 	if args != nil {
 		a = args
+		if len(a) == 1 && a[0] == "-h" {
+			flag.Usage()
+			return
+		}
 	}
 	flag.CommandLine.Parse(a)
 	filenames := flag.Args()

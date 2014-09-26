@@ -66,6 +66,12 @@ func TestProject(t *testing.T) {
 
 	Convey("Detects projects", t, func() {
 
+		Convey("Default usage", func() {
+
+			args = []string{"-h"}
+			main()
+			So(r, ShouldBeNil)
+		})
 		Convey("Error if no file", func() {
 
 			args = []string{"-v", "-audit"}
