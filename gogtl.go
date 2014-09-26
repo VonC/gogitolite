@@ -31,7 +31,7 @@ var (
 	fverbosePtr *bool = flag.Bool("v", false, "verbose, display filenames read")
 	fprintPtr   *bool = flag.Bool("print", false, "print config")
 
-	sout = os.Stdout
+	sout *bufio.Writer
 	serr = os.Stderr
 )
 
@@ -49,6 +49,13 @@ func init() {
 	}
 }
 
+func out() io.Writer {
+	if sout == nil {
+		return os.Stdout
+	}
+	return sout
+}
+
 func main() {
 
 	a := os.Args[1:]
@@ -64,7 +71,7 @@ func main() {
 	var filename string
 	var err error
 	if len(filenames) != 1 {
-		fmt.Println("One gitolite.conf file expected")
+		fmt.Fprintf(serr, "%s", "One gitolite.conf file expected")
 		goto eop
 	}
 	filename = filenames[0]
@@ -74,7 +81,7 @@ func main() {
 		subconfs: make(map[string]*gitolite.Gitolite),
 	}
 	if r.verbose {
-		fmt.Printf("Read file '%v'\n", filename)
+		fmt.Fprintf(out(), "Read file '%v'\n", filename)
 	}
 
 	r.gtl, err = r.process(filename, nil)

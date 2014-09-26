@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -8,8 +10,12 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var gitoliteconf_bad string
-var gitoliteconf string
+var (
+	gitoliteconf_bad string
+	gitoliteconf     string
+	bout             *bytes.Buffer
+	wout             *bufio.Writer
+)
 
 func init() {
 	gitoliteconf_bad = `test`
@@ -51,6 +57,10 @@ repo
 	if err := ioutil.WriteFile("_tests/p1/conf/subs/projectbad.conf", []byte(projectbadconf), 0644); err != nil {
 		panic(err)
 	}
+	bout = bytes.NewBuffer(nil)
+	wout = bufio.NewWriter(bout)
+	out()
+	sout = wout
 }
 
 /*
@@ -63,17 +73,14 @@ repo
      RW = otheruser1 otheruser2...
 */
 func TestProject(t *testing.T) {
-
 	Convey("Detects projects", t, func() {
 
 		Convey("Default usage", func() {
-
 			args = []string{"-h"}
 			main()
 			So(r, ShouldBeNil)
 		})
 		Convey("Error if no file", func() {
-
 			args = []string{"-v", "-audit"}
 			main()
 			So(r, ShouldBeNil)
