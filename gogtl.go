@@ -32,18 +32,18 @@ var (
 	fprintPtr   *bool = flag.Bool("print", false, "print config")
 
 	sout *bufio.Writer
-	serr = os.Stderr
+	serr *bufio.Writer
 )
 
 func init() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr,
+		fmt.Fprintf(oerr(),
 			"Usage: gogitolite.exe [opts] gitolite.conf\n")
-		fmt.Fprintf(os.Stderr, "Options:\n")
+		fmt.Fprintf(oerr(), "Options:\n")
 		flag.VisitAll(func(flag *flag.Flag) {
 			format := "  -%s=%s: %s\n"
 			if !strings.HasPrefix(flag.Name, "test.") {
-				fmt.Fprintf(serr, format, flag.Name, flag.DefValue, flag.Usage)
+				fmt.Fprintf(oerr(), format, flag.Name, flag.DefValue, flag.Usage)
 			}
 		})
 	}
@@ -54,6 +54,13 @@ func out() io.Writer {
 		return os.Stdout
 	}
 	return sout
+}
+
+func oerr() io.Writer {
+	if serr == nil {
+		return os.Stderr
+	}
+	return serr
 }
 
 func main() {
@@ -94,7 +101,7 @@ func main() {
 			r.listProjects()
 		}
 		if *fprintPtr {
-			fmt.Printf("%v", r.gtl.Print())
+			fmt.Fprintf(out(), "%v", r.gtl.Print())
 		}
 	}
 eop:
@@ -103,7 +110,7 @@ eop:
 func getGtlFromFile(filename string, gtl *gitolite.Gitolite) (*gitolite.Gitolite, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		fmt.Printf("ERR %v\n", err.Error())
+		fmt.Fprintf(oerr(), "ERR %v\n", err.Error())
 		return nil, err
 	}
 	defer f.Close()
@@ -119,7 +126,7 @@ func getGtl2(r io.Reader, gtl *gitolite.Gitolite) (*gitolite.Gitolite, error) {
 		gtl, err = reader.Update(r, gtl)
 	}
 	if err != nil {
-		fmt.Printf("ERR %v\n", err.Error())
+		fmt.Fprintf(oerr(), "ERR %v\n", err.Error())
 		return nil, err
 	}
 	return gtl, nil
@@ -188,11 +195,11 @@ func (rdr *rdr) processSubconfs() {
 				//fmt.Printf("%v %v\n", subconfrx.String(), relname)
 				if subconfrx.MatchString(relname) {
 					if rdr.verbose {
-						fmt.Printf("Visited: %s %s\n", relname, path)
+						fmt.Fprintf(out(), "Visited: %s %s\n", relname, path)
 					}
 					subgtl, err := rdr.process(path, rdr.gtl)
 					if err != nil {
-						fmt.Printf("Ignore subconf file: %s %s because of err '%v'\n", relname, path, err)
+						fmt.Fprintf(oerr(), "Ignore subconf file: %s %s because of err '%v'\n", relname, path, err)
 					} else {
 						rdr.subconfs[path] = subgtl
 					}
@@ -222,7 +229,7 @@ func (rdr *rdr) printAudit() {
 			} else if strings.Contains(username, "dmin") {
 				typeuser = "system"
 			}
-			fmt.Printf("%v,,%v,%v\n", username, repo.GetName(), typeuser)
+			fmt.Fprintf(out(), "%v,,%v,%v\n", username, repo.GetName(), typeuser)
 		}
 	}
 
@@ -230,8 +237,8 @@ func (rdr *rdr) printAudit() {
 
 func (rdr *rdr) listProjects() {
 	pm := project.NewManager(rdr.gtl, rdr.subconfs)
-	fmt.Printf("NbProjects: %v\n", pm.NbProjects())
+	fmt.Fprintf(out(), "NbProjects: %v\n", pm.NbProjects())
 	for _, project := range pm.Projects() {
-		fmt.Printf("%v\n", project)
+		fmt.Fprintf(out(), "%v\n", project)
 	}
 }
