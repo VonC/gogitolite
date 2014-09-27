@@ -434,7 +434,9 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.GetGroup("@grpusers").Comment().String(), ShouldEqual, `#  a   comment
+			So(gtl.GetGroup("@grpusers").Comment().String(), ShouldEqual, `
+#  a   comment
+
 `)
 		})
 
@@ -450,7 +452,8 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.GetGroup("@grpusers").Comment().String(), ShouldEqual, `#  a group  comment
 `)
-			So(gtl.GetConfigsForRepo("r1")[0].Comment().String(), ShouldEqual, `# config comment
+			So(gtl.GetConfigsForRepo("r1")[0].Comment().String(), ShouldEqual, `
+# config comment
 `)
 		})
 
@@ -495,8 +498,11 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 						@developers3  =   dilbert alice  wally3`)
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
-			So(gtl.Print(), ShouldEqual, `# comment
+			So(gtl.Print(), ShouldEqual, `
+# comment
+
 @developers3 = dilbert alice wally3
+
 `)
 		})
 
@@ -510,10 +516,12 @@ NbConfigs: 2 [config [group '@grp1'<repos>: [rep1 rep2]] => rules [RW+ master = 
 			gtl, err := Read(r)
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
-			So(gtl.Print(), ShouldEqual, `# config comment
+			So(gtl.Print(), ShouldEqual, `
+# config comment
 repo r1
-#   main admins
-RW+ = gitoliteadm @almadmins
+    #   main admins
+    RW+   = gitoliteadm @almadmins
+
 `)
 		})
 
