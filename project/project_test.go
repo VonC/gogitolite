@@ -367,4 +367,31 @@ func TestProject(t *testing.T) {
 		})
 
 	})
+
+	Convey("Update projects", t, func() {
+
+		Convey("Update a non-existing project means adding/creating one", func() {
+			var gitoliteconf = `
+		@project2 = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner
+	      RW VREF/NAME/conf/subs/project2   = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := reader.Read(r)
+			pm := NewManager(gtl, nil)
+			So(err, ShouldBeNil)
+			So(gtl, ShouldNotBeNil)
+			//So(strings.Contains(err.Error(), "group '@project' is a users group, not a repo one"), ShouldBeTrue)
+			So(gtl.IsEmpty(), ShouldBeFalse)
+			So(gtl.NbRepos(), ShouldEqual, 3)
+			So(pm.NbProjects(), ShouldEqual, 0)
+		})
+	})
 }
