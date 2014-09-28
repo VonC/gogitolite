@@ -108,6 +108,7 @@ type Repo struct {
 type Comment struct {
 	comments []string
 	sameLine string
+	space    string
 }
 
 // User (or group of users)
@@ -1126,6 +1127,7 @@ func (cmt *Comment) Print() string {
 	res := ""
 	if cmt != nil {
 		for _, comment := range cmt.comments {
+			res = res + cmt.space
 			if !strings.HasPrefix(comment, "#") && comment != "" {
 				res = res + "# "
 			}
@@ -1186,7 +1188,8 @@ func (cfg *Config) Print() string {
 
 // Print prints the comments and access/params and user or groups of a rule
 func (rule *Rule) Print() string {
-	res := "    " + rule.cmt.Print()
+	rule.cmt.space = "    "
+	res := rule.cmt.Print()
 	f := "    %-" + fmt.Sprintf("%d", rule.space) + "s"
 	res = res + fmt.Sprintf(f, rule.Access())
 	f = "%-" + fmt.Sprintf("%d", rule.pspace) + "s"
