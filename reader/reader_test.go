@@ -537,9 +537,11 @@ repo r1
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.Print(), ShouldEqual, `# ga comment
 repo gitolite-admin
-RW+ = admin
+    RW+   = admin
+
 repo otherRepo
-R param = user
+    R    param = user
+
 `)
 		})
 
@@ -560,14 +562,17 @@ R param = user
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			res := `# group users
 @users = u1 u2
+
 # ga comment
 repo gitolite-admin
-RW+ = admin
+    RW+   = admin
+
 repo otherRepo
-# desc comment
-desc = a desc
-# rule comment
-R param = user @users
+    # desc comment
+    desc  = a desc
+    # rule comment
+    R    param = user @users
+
 `
 			So(gtl.Print(), ShouldEqual, res)
 			config := gtl.GetConfigsForRepo("otherRepo")[0]
