@@ -78,7 +78,7 @@ func main() {
 	var filename string
 	var err error
 	if len(filenames) != 1 {
-		fmt.Fprintf(serr, "%s", "One gitolite.conf file expected")
+		fmt.Fprintf(oerr(), "%s", "One gitolite.conf file expected")
 		goto eop
 	}
 	filename = filenames[0]
