@@ -263,10 +263,10 @@ project project, admins: projectowner1, projectowner2, members: user1, user11, u
 
 
 repo gitolite-admin
-        RW+                              = gitoliteadm @almadmins @alm2
-        RW                               = projectowner1 projectowner2
-        RW   VREF/NAME/conf/subs/project = projectowner1 projectowner2
-        -    VREF/NAME/                  = projectowner1 projectowner2
+    RW+                              = gitoliteadm @almadmins @alm2
+    RW                               = projectowner1 projectowner2
+    RW   VREF/NAME/conf/subs/project = projectowner1 projectowner2
+    -    VREF/NAME/                  = projectowner1 projectowner2
 
 
 
@@ -274,13 +274,13 @@ repo gitolite-admin
 
 
 repo module1
-        RW    = user1 user11 user2
+    RW    = user1 user11 user2
 
 repo module2
-        RW    = user2 user21
+    RW    = user2 user21
 
 repo @project
-        RW    = pu1
+    RW    = pu1
 
 `)
 			So(berr.String(), ShouldEqual, `ERR Parse Error: group or repo expected after line 2 ('repo')
