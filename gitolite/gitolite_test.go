@@ -98,18 +98,18 @@ func TestProject(t *testing.T) {
 			So(gtl.userOrGroupFromName("user1"), ShouldNotBeNil)
 			So(gtl.userOrGroupFromName("user1b"), ShouldBeNil)
 
-			err = gtl.AddUserOrRepoGroup("@grp1", []string{"u1", "u2"}, &Comment{[]string{"duplicate group"}, ""})
+			err = gtl.AddUserOrRepoGroup("@grp1", []string{"u1", "u2"}, &Comment{[]string{"duplicate group"}, "", ""})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "Duplicate group name '@grp1'")
 			So(gtl.NbUserGroups(), ShouldEqual, 1)
 			So(gtl.NbUsersOrGroups(), ShouldEqual, 3)
 
-			err = gtl.AddUserOrRepoGroup("@grp2", []string{"u1", "u2", "u1"}, &Comment{[]string{"duplicate user"}, ""})
+			err = gtl.AddUserOrRepoGroup("@grp2", []string{"u1", "u2", "u1"}, &Comment{[]string{"duplicate user"}, "", ""})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "Duplicate group element name 'u1'")
 			So(gtl.NbUserGroups(), ShouldEqual, 1)
 
-			err = gtl.AddUserOrRepoGroup("@grp2", []string{"u1", "u2", "@grp1"}, &Comment{[]string{"legit user group"}, ""})
+			err = gtl.AddUserOrRepoGroup("@grp2", []string{"u1", "u2", "@grp1"}, &Comment{[]string{"legit user group"}, "", ""})
 			So(err, ShouldBeNil)
 			grp = gtl.GetGroup("@grp2")
 			err = grp.markAsUserGroup()
@@ -201,7 +201,7 @@ test1
 		})
 
 		Convey("Rules can be added", func() {
-			cmt := &Comment{[]string{"rule comment"}, ""}
+			cmt := &Comment{[]string{"rule comment"}, "", ""}
 			rule := NewRule("RW", "test", cmt)
 			So(rule.Access(), ShouldEqual, "RW")
 			So(rule.Param(), ShouldEqual, "test")
@@ -216,7 +216,7 @@ test1
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
 			So(len(rule.GetAllUsers()), ShouldEqual, 1)
 
-			grp := &Group{name: "@grp1", cmt: &Comment{[]string{"@grp1 comment"}, ""}}
+			grp := &Group{name: "@grp1", cmt: &Comment{[]string{"@grp1 comment"}, "", ""}}
 			usr = &User{"u21"}
 			grp.addUserOrGroup(usr)
 			So(grp.Comment().String(), ShouldEqual, `@grp1 comment
@@ -244,7 +244,7 @@ test1
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			So(len(rule.GetAllUsers()), ShouldEqual, 2)
 
-			grpp := &Group{name: "@grp1", cmt: &Comment{[]string{"@grp1 comment"}, ""}}
+			grpp := &Group{name: "@grp1", cmt: &Comment{[]string{"@grp1 comment"}, "", ""}}
 			//usr = &User{"u22"}
 			//grpp.addUserOrGroup(usr)
 			gtl.addGroup(grpp)
@@ -273,7 +273,7 @@ test1
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldStartWith, "user or user group name 'u4' already used in a repo group")
 
-			err = gtl.AddUserOrRepoGroup("@grp4", []string{"u41", "u42"}, &Comment{[]string{"legit user group4"}, ""})
+			err = gtl.AddUserOrRepoGroup("@grp4", []string{"u41", "u42"}, &Comment{[]string{"legit user group4"}, "", ""})
 			So(err, ShouldBeNil)
 
 			grp = gtl.GetGroup("@grp4")
@@ -306,7 +306,7 @@ test1
 			So(gtl.NbUserGroups(), ShouldEqual, 5)
 			So(gtl.NbUsers(), ShouldEqual, 5)
 
-			err = gtl.AddUserOrRepoGroup("@grpusers", []string{"u41", "u42"}, &Comment{[]string{"legit user @grpusers"}, ""})
+			err = gtl.AddUserOrRepoGroup("@grpusers", []string{"u41", "u42"}, &Comment{[]string{"legit user @grpusers"}, "", ""})
 			So(err, ShouldBeNil)
 			grp = gtl.GetGroup("@grp4")
 			So(len(grp.GetUsersOrGroups()), ShouldEqual, 2)
@@ -318,18 +318,18 @@ test1
 			So(gtl.NbConfigs(), ShouldEqual, 0)
 			//fmt.Println("\nCFG: ", gtl)
 
-			cfg, err := gtl.AddConfig([]string{"@grprepo"}, &Comment{[]string{"@grprepo comment"}, ""})
+			cfg, err := gtl.AddConfig([]string{"@grprepo"}, &Comment{[]string{"@grprepo comment"}, "", ""})
 			So(cfg, ShouldBeNil)
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "repo group name '@grprepo' undefined")
 			//fmt.Println("\nCFG: ", gtl)
 
-			cfg, err = gtl.AddConfig([]string{"@all"}, &Comment{[]string{"@all comment"}, ""})
+			cfg, err = gtl.AddConfig([]string{"@all"}, &Comment{[]string{"@all comment"}, "", ""})
 			So(cfg, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 			//fmt.Println("\nCFG: ", gtl)
 
-			gtl.AddConfig([]string{"repo1", "repo2"}, &Comment{[]string{"cfg1 comment"}, ""})
+			gtl.AddConfig([]string{"repo1", "repo2"}, &Comment{[]string{"cfg1 comment"}, "", ""})
 			So(gtl.NbConfigs(), ShouldEqual, 2)
 			So(fmt.Sprintf("%v", gtl.GetConfigsForRepo("repo1")), ShouldEqual, "[config [repo 'repo1' repo 'repo2'] => rules []]")
 			So(len(gtl.GetConfigsForRepos([]string{})), ShouldEqual, 0)
@@ -346,8 +346,8 @@ test1
 			So(len(gtl.configsFromRepoOrGroup(reposgrp)), ShouldEqual, 0)
 
 			//reposusr := &Group{name: "@usrgrp1", container: gtl, members: []string{"user11", "user12"}}
-			gtl.AddUserOrRepoGroup("@usrgrp1", []string{"user11", "user12"}, &Comment{[]string{"usrgrp1 comment"}, ""})
-			gtl.AddUserOrRepoGroup("@usrgrp2", []string{}, &Comment{[]string{"usrgrp2 comment"}, ""})
+			gtl.AddUserOrRepoGroup("@usrgrp1", []string{"user11", "user12"}, &Comment{[]string{"usrgrp1 comment"}, "", ""})
+			gtl.AddUserOrRepoGroup("@usrgrp2", []string{}, &Comment{[]string{"usrgrp2 comment"}, "", ""})
 			grp := gtl.GetGroup("@usrgrp1")
 			err = grp.markAsUserGroup()
 			//user11 := grp.GetAllUsers()[0]
@@ -358,49 +358,49 @@ test1
 			So(gtl.NbUsers(), ShouldEqual, 2)
 			So(gtl.NbRepos(), ShouldEqual, 4)
 
-			cfg2, err := gtl.AddConfig([]string{"@usrgrp1"}, &Comment{[]string{"cfg2 comment"}, ""})
+			cfg2, err := gtl.AddConfig([]string{"@usrgrp1"}, &Comment{[]string{"cfg2 comment"}, "", ""})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "group '@usrgrp1' is a users group, not a repo one")
 			So(cfg2, ShouldBeNil)
 			So(gtl.NbRepos(), ShouldEqual, 4)
 			So(len(gtl.Configs()), ShouldEqual, 2)
 
-			cfg2, err = gtl.AddConfig([]string{"@repounknown"}, &Comment{[]string{"cfg2 comment"}, ""})
+			cfg2, err = gtl.AddConfig([]string{"@repounknown"}, &Comment{[]string{"cfg2 comment"}, "", ""})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "repo group name '@repounknown' undefined")
 			So(cfg2, ShouldBeNil)
 
-			cfg2, err = gtl.AddConfig([]string{"user11"}, &Comment{[]string{"cfg2 comment"}, ""})
+			cfg2, err = gtl.AddConfig([]string{"user11"}, &Comment{[]string{"cfg2 comment"}, "", ""})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, `repo name 'user11' already used in a user group
 group '@usrgrp1' is a users group, not a repo one`)
 			So(cfg2, ShouldBeNil)
 			So(gtl.NbRepos(), ShouldEqual, 4)
 
-			cfg2, err = gtl.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2 comment"}, ""})
+			cfg2, err = gtl.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2 comment"}, "", ""})
 			So(err, ShouldBeNil)
 			So(cfg2.Comment().String(), ShouldEqual, `cfg2 comment
 `)
-			cfg2b, err := gtl2.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2b comment"}, ""})
+			cfg2b, err := gtl2.AddConfig([]string{"@repogrp1"}, &Comment{[]string{"cfg2b comment"}, "", ""})
 			So(err, ShouldBeNil)
 			So(cfg2b.Comment().String(), ShouldEqual, `cfg2b comment
 `)
 			So(len(gtl.configsFromRepoOrGroup(reposgrp)), ShouldEqual, 1)
 
-			cfga, err := gtl.AddConfig([]string{"gitolite-admin"}, &Comment{[]string{"ga comment"}, ""})
+			cfga, err := gtl.AddConfig([]string{"gitolite-admin"}, &Comment{[]string{"ga comment"}, "", ""})
 			So(err, ShouldBeNil)
 			So(cfga, ShouldNotBeNil)
 
-			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}, ""})
+			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}, "", ""})
 			So(err, ShouldBeNil)
 			So(cfg2.Desc(), ShouldEqual, "cfg2 desc")
-			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}, ""})
+			err = cfg2.SetDesc("cfg2 desc", &Comment{[]string{"cfg2 desc comment"}, "", ""})
 			So(err.Error(), ShouldEqual, "No more than one desc per config")
 
 			//fmt.Println("\nGTL ", gtl)
 			//os.Exit(0)
 			So(len(gtl.GetConfigsForRepo("repo11")), ShouldEqual, 1)
-			cmt := &Comment{[]string{"rule comment"}, ""}
+			cmt := &Comment{[]string{"rule comment"}, "", ""}
 			cmt.sameLine = "test"
 			rule := NewRule("RW", "test", cmt)
 			grp = gtl.GetGroup("@usrgrp2")
@@ -432,7 +432,7 @@ repo repo1 repo2
 
 # cfg2 comment
 repo @repogrp1
-# cfg2 desc comment
+    # cfg2 desc comment
     desc  = cfg2 desc
     # rule comment
     RW   test = @usrgrp2 user11 # test
