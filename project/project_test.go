@@ -75,6 +75,8 @@ func TestProject(t *testing.T) {
 			subconfs := make(map[string]*gitolite.Gitolite)
 			subconfs["path/project.conf"] = gtl
 			pm := NewManager(gtl, subconfs)
+			flushStds()
+			resetStds()
 			So(err, ShouldBeNil)
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
@@ -106,6 +108,8 @@ func TestProject(t *testing.T) {
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(fmt.Sprintf("groups '%v'", gtl.GetGroup("@project")), ShouldEqual, "groups 'group '@project'<repos>: [module1 module2]'")
 			So(pm.Projects()[0].String(), ShouldEqual, "project project, admins: projectowner, members: ")
+			flushStds()
+			resetStds()
 		})
 
 		Convey("Detects one project with several admins and users", func() {
@@ -137,6 +141,8 @@ func TestProject(t *testing.T) {
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(fmt.Sprintf("groups '%v'", gtl.GetGroup("@project")), ShouldEqual, "groups 'group '@project'<repos>: [module1 module2]'")
 			So(pm.Projects()[0].String(), ShouldEqual, "project project, admins: projectowner1, projectowner2, members: user1, user11, user2, user21")
+			flushStds()
+			resetStds()
 		})
 
 		Convey("No project if no RW rule before", func() {
@@ -159,6 +165,8 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			resetStds()
 		})
 
 		Convey("No project if none detected", func() {
@@ -178,6 +186,8 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			resetStds()
 		})
 
 		Convey("No project if users changes in VREF/NAME/conf", func() {
@@ -201,6 +211,8 @@ func TestProject(t *testing.T) {
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			resetStds()
 		})
 
 		Convey("No project if users changes in VREF/NAME/", func() {
@@ -224,6 +236,8 @@ func TestProject(t *testing.T) {
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(gtl.NbUsers(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			resetStds()
 		})
 
 		Convey("No project if no repo group", func() {
@@ -244,6 +258,8 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 2)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			resetStds()
 		})
 
 		Convey("No project if user group", func() {
@@ -271,6 +287,8 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 2)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			resetStds()
 		})
 
 		Convey("No project if empty name", func() {
@@ -297,6 +315,10 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			So(berr.String(), ShouldEqual, `Ignore project with no name
+`)
+			resetStds()
 		})
 
 		Convey("No project if no subconfs", func() {
@@ -321,6 +343,10 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			So(berr.String(), ShouldEqual, `Ignore project name 'project': no subconf found
+`)
+			resetStds()
 		})
 
 		Convey("No project if no RW rule first", func() {
@@ -346,6 +372,10 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			So(berr.String(), ShouldEqual, `Ignore project name 'project': no RW rule before.
+`)
+			resetStds()
 		})
 
 		Convey("No project if admins change", func() {
@@ -372,6 +402,10 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			So(berr.String(), ShouldEqual, `Ignore project name 'project': Admins differ on 'RW' ([user 'projectowner1'] vs. [user 'projectowner1' user 'po2'])
+`)
+			resetStds()
 		})
 
 		Convey("No project if admins change on last rule", func() {
@@ -398,6 +432,10 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			So(berr.String(), ShouldEqual, `Ignore project name 'project': admins differ on '-' ([user 'projectowner'] vs. [user 'projectowner1'])
+`)
+			resetStds()
 		})
 
 	})
@@ -426,6 +464,10 @@ func TestProject(t *testing.T) {
 			So(gtl.IsEmpty(), ShouldBeFalse)
 			So(gtl.NbRepos(), ShouldEqual, 3)
 			So(pm.NbProjects(), ShouldEqual, 0)
+			flushStds()
+			So(berr.String(), ShouldEqual, `Ignore project name 'project2': no subconf found
+`)
+			resetStds()
 		})
 	})
 }
