@@ -1,6 +1,8 @@
 package project
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -9,6 +11,26 @@ import (
 	"github.com/VonC/gogitolite/reader"
 	. "github.com/smartystreets/goconvey/convey"
 )
+
+var (
+	bout *bytes.Buffer
+	wout *bufio.Writer
+	berr *bytes.Buffer
+	werr *bufio.Writer
+)
+
+func init() {
+
+	out()
+	oerr()
+	bout = bytes.NewBuffer(nil)
+	wout = bufio.NewWriter(bout)
+	sout = wout
+	berr = bytes.NewBuffer(nil)
+	werr = bufio.NewWriter(berr)
+	serr = werr
+	out()
+}
 
 /*
    subconf "subs/*.conf"
