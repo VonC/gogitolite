@@ -1,12 +1,34 @@
 package project
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"os"
 	"regexp"
 	"strings"
 
 	"github.com/VonC/gogitolite/gitolite"
 )
+
+var (
+	sout *bufio.Writer
+	serr *bufio.Writer
+)
+
+func out() io.Writer {
+	if sout == nil {
+		return os.Stdout
+	}
+	return sout
+}
+
+func oerr() io.Writer {
+	if serr == nil {
+		return os.Stderr
+	}
+	return serr
+}
 
 // Project has a name and users
 type Project struct {
@@ -75,7 +97,7 @@ func (pm *Manager) updateProjects() {
 				isrw = true
 			} else if rule.Access() == "-" && rule.Param() == "VREF/NAME/" {
 				if currentProject != nil && currentProject.name == "" {
-					fmt.Printf("\nIgnore project with no name\n")
+					fmt.Fprintf(oerr(), "Ignore project with no name\n")
 					currentProject = nil
 				}
 				currentProject = pm.currentProjectVREFName(currentProject, rule, gtl)
@@ -117,12 +139,12 @@ func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project
 		projectname := rule.Param()[len(prefix):]
 		//fmt.Println("\nPRJ '", projectname, "'")
 		if currentProject == nil {
-			fmt.Printf("\nIgnore project name '%v': no RW rule before\n", projectname)
+			fmt.Fprintf(oerr(), "Ignore project name '%v': no RW rule before.\n", projectname)
 		} else {
 			currentProject.name = projectname
 		}
 		if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsersFirstOrGroups()) {
-			fmt.Printf("\nIgnore project name '%v': Admins differ on 'RW' (%v vs. %v)\n", projectname,
+			fmt.Fprintf(oerr(), "Ignore project name '%v': Admins differ on 'RW' (%v vs. %v)\n", projectname,
 				currentProject.admins, rule.GetUsersFirstOrGroups())
 			currentProject = nil
 		}
@@ -132,7 +154,7 @@ func (pm *Manager) currentProjectRW(rule *gitolite.Rule, currentProject *Project
 
 func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolite.Rule, gtl *gitolite.Gitolite) *Project {
 	if currentProject != nil && !currentProject.hasSameUsers(rule.GetUsersFirstOrGroups()) {
-		fmt.Printf("\nIgnore project name '%v': admins differ on '-' (%v vs. %v)\n", currentProject.name,
+		fmt.Fprintf(oerr(), "Ignore project name '%v': admins differ on '-' (%v vs. %v)\n", currentProject.name,
 			currentProject.admins, rule.GetUsersFirstOrGroups())
 		currentProject = nil
 	}
@@ -143,7 +165,7 @@ func (pm *Manager) currentProjectVREFName(currentProject *Project, rule *gitolit
 				pm.projects = append(pm.projects, currentProject)
 				pm.updateMembers(currentProject)
 			} else {
-				fmt.Printf("Ignore project name '%v': no subconf found\n", currentProject.name)
+				fmt.Fprintf(oerr(), "Ignore project name '%v': no subconf found\n", currentProject.name)
 			}
 		}
 	}
