@@ -32,6 +32,18 @@ func init() {
 	out()
 }
 
+func resetStds() {
+	bout = bytes.NewBuffer(nil)
+	sout.Reset(bout)
+	berr = bytes.NewBuffer(nil)
+	serr.Reset(berr)
+}
+
+func flushStds() {
+	sout.Flush()
+	serr.Flush()
+}
+
 /*
    subconf "subs/*.conf"
 
