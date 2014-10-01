@@ -42,7 +42,7 @@ func init() {
 		fmt.Fprintf(oerr(), "Options:\n")
 		flag.VisitAll(func(flag *flag.Flag) {
 			format := "  -%s=%s: %s\n"
-			if !strings.HasPrefix(flag.Name, "test.") {
+			if !strings.HasPrefix(flag.Name, "test.") && !strings.HasPrefix(flag.Name, "json") && !strings.HasPrefix(flag.Name, "story") && !strings.HasPrefix(flag.Name, "silent") {
 				fmt.Fprintf(oerr(), format, flag.Name, flag.DefValue, flag.Usage)
 			}
 		})
