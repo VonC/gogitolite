@@ -896,12 +896,13 @@ func (cmt *Comment) AddComment(comment string) {
 	cmt.comments = append(cmt.comments, comment)
 }
 
-// SameLineComment set the same line comment
+// SetSameLine set the same line comment
 func (cmt *Comment) SetSameLine(comment string) {
 	comment = strings.TrimSpace(comment)
 	cmt.sameLine = comment
 }
 
+// SameLine get same line comment, or empty string if none
 func (cmt *Comment) SameLine() string {
 	return cmt.sameLine
 }
