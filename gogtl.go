@@ -26,10 +26,10 @@ type rdr struct {
 var (
 	args        []string
 	r           *rdr
-	fauditPtr   *bool = flag.Bool("audit", false, "print user access audit")
-	flistPtr    *bool = flag.Bool("list", false, "list projects")
-	fverbosePtr *bool = flag.Bool("v", false, "verbose, display filenames read")
-	fprintPtr   *bool = flag.Bool("print", false, "print config")
+	fauditPtr   = flag.Bool("audit", false, "print user access audit")
+	flistPtr    = flag.Bool("list", false, "list projects")
+	fverbosePtr = flag.Bool("v", false, "verbose, display filenames read")
+	fprintPtr   = flag.Bool("print", false, "print config")
 
 	sout *bufio.Writer
 	serr *bufio.Writer

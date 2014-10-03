@@ -11,16 +11,16 @@ import (
 )
 
 var (
-	gitoliteconf_bad string
-	gitoliteconf     string
-	bout             *bytes.Buffer
-	wout             *bufio.Writer
-	berr             *bytes.Buffer
-	werr             *bufio.Writer
+	gitoliteconfBad string
+	gitoliteconf    string
+	bout            *bytes.Buffer
+	wout            *bufio.Writer
+	berr            *bytes.Buffer
+	werr            *bufio.Writer
 )
 
 func init() {
-	gitoliteconf_bad = `test`
+	gitoliteconfBad = `test`
 	gitoliteconf = `
 		@project = module1 module2
 		@almadmins = admin1 admin2
@@ -131,7 +131,7 @@ Options:
 		})
 		Convey("Error if bad gitolite-admin config file content", func() {
 
-			r := strings.NewReader(gitoliteconf_bad)
+			r := strings.NewReader(gitoliteconfBad)
 			gtl, err := getGtl2(r, nil)
 			flushStds()
 			So(err, ShouldNotBeNil)
