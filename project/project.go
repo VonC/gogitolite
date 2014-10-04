@@ -220,3 +220,12 @@ func (p *Project) hasSameUsers(users []gitolite.UserOrGroup) bool {
 	}
 	return true
 }
+
+func (pm *Manager) AddProject(name string) error {
+	for _, p := range pm.projects {
+		if p.name == name {
+			return fmt.Errorf("project '%v' already exits", name)
+		}
+	}
+	return nil
+}
