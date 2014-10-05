@@ -470,4 +470,33 @@ func TestProject(t *testing.T) {
 			resetStds()
 		})
 	})
+
+	Convey("Add a project", t, func() {
+
+		Convey("Adding an existing project errors", func() {
+			var gitoliteconf = `
+		@project = module1 module2
+
+		repo gitolite-admin
+	      RW+     =   gitoliteadm @almadmins
+	      RW                                = projectowner
+	      RW VREF/NAME/conf/subs/project    = projectowner
+	      -  VREF/NAME/                     = projectowner
+
+	    repo module1
+	      RW+ = projectowner @almadmins
+`
+			r := strings.NewReader(gitoliteconf)
+			gtl, err := reader.Read(r)
+			subconfs := make(map[string]*gitolite.Gitolite)
+			subconfs["path/project.conf"] = gtl
+			pm := NewManager(gtl, subconfs)
+			flushStds()
+			resetStds()
+			So(err, ShouldBeNil)
+			err = pm.AddProject("project")
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "project 'project' already exits")
+		})
+	})
 }
