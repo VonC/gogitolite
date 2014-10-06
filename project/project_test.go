@@ -472,9 +472,7 @@ func TestProject(t *testing.T) {
 	})
 
 	Convey("Add a project", t, func() {
-
-		Convey("Adding an existing project errors", func() {
-			var gitoliteconf = `
+		var gitoliteconf = `
 		@project = module1 module2
 
 		repo gitolite-admin
@@ -486,13 +484,16 @@ func TestProject(t *testing.T) {
 	    repo module1
 	      RW+ = projectowner @almadmins
 `
-			r := strings.NewReader(gitoliteconf)
-			gtl, err := reader.Read(r)
-			subconfs := make(map[string]*gitolite.Gitolite)
-			subconfs["path/project.conf"] = gtl
-			pm := NewManager(gtl, subconfs)
-			flushStds()
-			resetStds()
+		r := strings.NewReader(gitoliteconf)
+		gtl, err := reader.Read(r)
+		subconfs := make(map[string]*gitolite.Gitolite)
+		subconfs["path/project.conf"] = gtl
+		pm := NewManager(gtl, subconfs)
+		flushStds()
+		resetStds()
+
+		Convey("Adding an existing project errors", func() {
+
 			So(err, ShouldBeNil)
 			err = pm.AddProject("project")
 			So(err, ShouldNotBeNil)
