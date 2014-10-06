@@ -499,5 +499,12 @@ func TestProject(t *testing.T) {
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "project 'project' already exits")
 		})
+		Convey("Adding a new project works", func() {
+
+			So(err, ShouldBeNil)
+			err = pm.AddProject("project2")
+			So(err, ShouldBeNil)
+			So(pm.NbProjects(), ShouldEqual, 2)
+		})
 	})
 }
