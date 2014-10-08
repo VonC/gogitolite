@@ -221,6 +221,7 @@ func (p *Project) hasSameUsers(users []gitolite.UserOrGroup) bool {
 	return true
 }
 
+// AddProject add a new project (fails if project already exists)
 func (pm *Manager) AddProject(name string) error {
 	for _, p := range pm.projects {
 		if p.name == name {
