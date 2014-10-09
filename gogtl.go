@@ -229,7 +229,9 @@ func (rdr *rdr) printAudit() {
 			} else if strings.Contains(username, "dmin") {
 				typeuser = "system"
 			}
-			fmt.Fprintf(out(), "%v,,%v,%v\n", username, repo.GetName(), typeuser)
+			if username != "" {
+				fmt.Fprintf(out(), "%v,,%v,%v\n", username, repo.GetName(), typeuser)
+			}
 		}
 	}
 
