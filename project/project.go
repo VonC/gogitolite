@@ -222,11 +222,15 @@ func (p *Project) hasSameUsers(users []gitolite.UserOrGroup) bool {
 }
 
 // AddProject add a new project (fails if project already exists)
-func (pm *Manager) AddProject(name string) error {
+func (pm *Manager) AddProject(name string, projectNames []string) error {
 	for _, p := range pm.projects {
 		if p.name == name {
 			return fmt.Errorf("project '%v' already exits", name)
 		}
 	}
+	gtl := pm.gtl
+	currentComment := &gitolite.Comment{}
+	currentComment.AddComment("project '" + name + "'")
+	gtl.AddUserOrRepoGroup(name, projectNames, currentComment)
 	return nil
 }

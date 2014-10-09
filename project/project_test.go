@@ -495,14 +495,14 @@ func TestProject(t *testing.T) {
 		Convey("Adding an existing project errors", func() {
 
 			So(err, ShouldBeNil)
-			err = pm.AddProject("project")
+			err = pm.AddProject("project", []string{"prj1", "prj2"})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "project 'project' already exits")
 		})
 		Convey("Adding a new project works", func() {
 
 			So(err, ShouldBeNil)
-			err = pm.AddProject("project2")
+			err = pm.AddProject("project2", []string{"prj21", "prj2"})
 			So(err, ShouldBeNil)
 			So(pm.NbProjects(), ShouldEqual, 2)
 		})
