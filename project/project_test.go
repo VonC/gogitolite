@@ -500,11 +500,12 @@ func TestProject(t *testing.T) {
 			So(err.Error(), ShouldEqual, "project 'project' already exits")
 		})
 		Convey("Adding a new project works", func() {
-
-			So(err, ShouldBeNil)
 			err = pm.AddProject("project2", []string{"prj21", "prj2"})
 			So(err, ShouldBeNil)
-			So(pm.NbProjects(), ShouldEqual, 2)
+			So(gtl.NbGroup(), ShouldEqual, 3)
+			So(gtl.NbReposOrGroups(), ShouldEqual, 4)
+			So(fmt.Sprintf("%v", gtl.GetReposOrGroups()), ShouldEqual, "[repo 'gitolite-admin' group '@project'<repos>: [module1 module2] repo 'module1' repo 'module2']")
+			//So(pm.NbProjects(), ShouldEqual, 2)
 		})
 	})
 }
