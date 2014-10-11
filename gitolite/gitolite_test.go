@@ -222,11 +222,11 @@ test1
 			So(grp.Comment().String(), ShouldEqual, `@grp1 comment
 `)
 
-			rule.addGroup(grp)
+			rule.AddGroup(grp)
 			// grp is still undefined: its user doesn't count yet
 			So(len(rule.GetUsersOrGroups()), ShouldEqual, 2)
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
-			rule.addGroup(grp)
+			rule.AddGroup(grp)
 			So(len(rule.GetUsersOrGroups()), ShouldEqual, 2)
 			So(len(rule.GetUsersFirstOrGroups()), ShouldEqual, 2)
 			So(rule.HasAnyUserOrGroup(), ShouldBeTrue)
@@ -404,7 +404,7 @@ group '@usrgrp1' is a users group, not a repo one`)
 			cmt.sameLine = "test"
 			rule := NewRule("RW", "test", cmt)
 			grp = gtl.GetGroup("@usrgrp2")
-			rule.addGroup(grp)
+			rule.AddGroup(grp)
 			gtl.AddRuleToConfig(rule, cfg2)
 			gtl.AddUserOrGroupToRule(rule, "user11")
 			gtl.GetConfigsForRepo("repo11")

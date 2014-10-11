@@ -644,7 +644,8 @@ func (gtl *Gitolite) NbReposOrGroups() int {
 	return len(gtl.reposOrGroups)
 }
 
-func (rule *Rule) addGroup(group *Group) {
+// Add Group (should be UserOrGroup) to a Rule
+func (rule *Rule) AddGroup(group *Group) {
 	notFound := true
 	for _, uog := range rule.usersOrGroups {
 		rulegrp := uog.Group()
