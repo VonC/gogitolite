@@ -232,8 +232,11 @@ func (pm *Manager) AddProject(name string, projectNames []string) error {
 	currentComment := &gitolite.Comment{}
 	currentComment.AddComment("project '" + name + "'")
 	gtl.AddUserOrRepoGroup(name, projectNames, currentComment)
-	// configs := gtl.GetConfigsForRepo("gitolite-admin")
-	// config := configs[0]
-	// gtl.AddRuleToConfig(rule, config)
+	configs := gtl.GetConfigsForRepo("gitolite-admin")
+	config := configs[0]
+	rule := gitolite.NewRule("RW", "", nil)
+	group := gtl.GetGroup(name)
+	rule.AddGroup(group)
+	gtl.AddRuleToConfig(rule, config)
 	return nil
 }

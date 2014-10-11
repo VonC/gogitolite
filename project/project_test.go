@@ -505,6 +505,16 @@ func TestProject(t *testing.T) {
 			So(gtl.NbGroup(), ShouldEqual, 3)
 			So(gtl.NbReposOrGroups(), ShouldEqual, 4)
 			So(fmt.Sprintf("%v", gtl.GetReposOrGroups()), ShouldEqual, "[repo 'gitolite-admin' group '@project'<repos>: [module1 module2] repo 'module1' repo 'module2']")
+			cfg := gtl.GetConfigsForRepo("gitolite-admin")[0]
+			So(cfg.Print(), ShouldEqual, `
+repo gitolite-admin
+    RW+                              = gitoliteadm @almadmins
+    RW                               = projectowner
+    RW   VREF/NAME/conf/subs/project = projectowner
+    -    VREF/NAME/                  = projectowner
+    RW                               = project2
+
+`)
 			//So(pm.NbProjects(), ShouldEqual, 2)
 		})
 	})
