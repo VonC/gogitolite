@@ -234,9 +234,15 @@ func (pm *Manager) AddProject(name string, projectNames []string) error {
 	gtl.AddUserOrRepoGroup(name, projectNames, currentComment)
 	configs := gtl.GetConfigsForRepo("gitolite-admin")
 	config := configs[0]
+
 	rule := gitolite.NewRule("RW", "", nil)
 	group := gtl.GetGroup(name)
 	rule.AddGroup(group)
 	gtl.AddRuleToConfig(rule, config)
+
+	rule = gitolite.NewRule("RW", "VREF/NAME/conf/subs/"+name, nil)
+	rule.AddGroup(group)
+	gtl.AddRuleToConfig(rule, config)
+
 	return nil
 }

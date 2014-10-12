@@ -508,11 +508,12 @@ func TestProject(t *testing.T) {
 			cfg := gtl.GetConfigsForRepo("gitolite-admin")[0]
 			So(cfg.Print(), ShouldEqual, `
 repo gitolite-admin
-    RW+                              = gitoliteadm @almadmins
-    RW                               = projectowner
-    RW   VREF/NAME/conf/subs/project = projectowner
-    -    VREF/NAME/                  = projectowner
-    RW                               = project2
+    RW+                               = gitoliteadm @almadmins
+    RW                                = projectowner
+    RW   VREF/NAME/conf/subs/project  = projectowner
+    -    VREF/NAME/                   = projectowner
+    RW                                = project2
+    RW   VREF/NAME/conf/subs/project2 = project2
 
 `)
 			//So(pm.NbProjects(), ShouldEqual, 2)
