@@ -514,6 +514,7 @@ repo gitolite-admin
     -    VREF/NAME/                   = projectowner
     RW                                = project2
     RW   VREF/NAME/conf/subs/project2 = project2
+    -    VREF/NAME/                   = project2
 
 `)
 			//So(pm.NbProjects(), ShouldEqual, 2)

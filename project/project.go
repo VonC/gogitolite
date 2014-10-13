@@ -244,5 +244,9 @@ func (pm *Manager) AddProject(name string, projectNames []string) error {
 	rule.AddGroup(group)
 	gtl.AddRuleToConfig(rule, config)
 
+	rule = gitolite.NewRule("-", "VREF/NAME/", nil)
+	rule.AddGroup(group)
+	gtl.AddRuleToConfig(rule, config)
+
 	return nil
 }
