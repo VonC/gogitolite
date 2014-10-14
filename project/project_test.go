@@ -512,9 +512,9 @@ repo gitolite-admin
     RW                                = projectowner
     RW   VREF/NAME/conf/subs/project  = projectowner
     -    VREF/NAME/                   = projectowner
-    RW                                = project2
-    RW   VREF/NAME/conf/subs/project2 = project2
-    -    VREF/NAME/                   = project2
+    RW                                = projadm21, prjadm22
+    RW   VREF/NAME/conf/subs/project2 = projadm21, prjadm22
+    -    VREF/NAME/                   = projadm21, prjadm22
 
 `)
 			//So(pm.NbProjects(), ShouldEqual, 2)
