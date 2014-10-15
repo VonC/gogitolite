@@ -222,7 +222,7 @@ func (p *Project) hasSameUsers(users []gitolite.UserOrGroup) bool {
 }
 
 // AddProject add a new project (fails if project already exists)
-func (pm *Manager) AddProject(name string, projectNames []string) error {
+func (pm *Manager) AddProject(name string, projectNames, projOwnerNames []string) error {
 	for _, p := range pm.projects {
 		if p.name == name {
 			return fmt.Errorf("project '%v' already exits", name)
@@ -232,21 +232,27 @@ func (pm *Manager) AddProject(name string, projectNames []string) error {
 	currentComment := &gitolite.Comment{}
 	currentComment.AddComment("project '" + name + "'")
 	gtl.AddUserOrRepoGroup(name, projectNames, currentComment)
+	currentComment = &gitolite.Comment{}
 	configs := gtl.GetConfigsForRepo("gitolite-admin")
 	config := configs[0]
 
 	rule := gitolite.NewRule("RW", "", nil)
-	group := gtl.GetGroup(name)
-	rule.AddGroup(group)
+	addProjectOwnerToRule(projOwnerNames, rule, gtl)
 	gtl.AddRuleToConfig(rule, config)
 
 	rule = gitolite.NewRule("RW", "VREF/NAME/conf/subs/"+name, nil)
-	rule.AddGroup(group)
+	addProjectOwnerToRule(projOwnerNames, rule, gtl)
 	gtl.AddRuleToConfig(rule, config)
 
 	rule = gitolite.NewRule("-", "VREF/NAME/", nil)
-	rule.AddGroup(group)
+	addProjectOwnerToRule(projOwnerNames, rule, gtl)
 	gtl.AddRuleToConfig(rule, config)
 
 	return nil
+}
+
+func addProjectOwnerToRule(projOwnerNames []string, rule *gitolite.Rule, gtl *gitolite.Gitolite) {
+	for _, projectOwnerName := range projOwnerNames {
+		gtl.AddUserOrGroupToRule(rule, projectOwnerName)
+	}
 }

@@ -495,12 +495,12 @@ func TestProject(t *testing.T) {
 		Convey("Adding an existing project errors", func() {
 
 			So(err, ShouldBeNil)
-			err = pm.AddProject("project", []string{"prj1", "prj2"})
+			err = pm.AddProject("project", []string{"prj1", "prj2"}, []string{"po11", "po12"})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "project 'project' already exits")
 		})
 		Convey("Adding a new project works", func() {
-			err = pm.AddProject("project2", []string{"prj21", "prj2"})
+			err = pm.AddProject("project2", []string{"prj21", "prj2"}, []string{"po21", "po22"})
 			So(err, ShouldBeNil)
 			So(gtl.NbGroup(), ShouldEqual, 3)
 			So(gtl.NbReposOrGroups(), ShouldEqual, 4)
@@ -512,9 +512,9 @@ repo gitolite-admin
     RW                                = projectowner
     RW   VREF/NAME/conf/subs/project  = projectowner
     -    VREF/NAME/                   = projectowner
-    RW                                = projadm21, prjadm22
-    RW   VREF/NAME/conf/subs/project2 = projadm21, prjadm22
-    -    VREF/NAME/                   = projadm21, prjadm22
+    RW                                = po21 po22
+    RW   VREF/NAME/conf/subs/project2 = po21 po22
+    -    VREF/NAME/                   = po21 po22
 
 `)
 			//So(pm.NbProjects(), ShouldEqual, 2)
