@@ -248,6 +248,8 @@ func (pm *Manager) AddProject(name string, projectNames, projOwnerNames []string
 	addProjectOwnerToRule(projOwnerNames, rule, gtl)
 	gtl.AddRuleToConfig(rule, config)
 
+	// todo sub conf
+
 	return nil
 }
 
