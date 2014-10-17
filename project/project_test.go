@@ -495,12 +495,12 @@ func TestProject(t *testing.T) {
 		Convey("Adding an existing project errors", func() {
 
 			So(err, ShouldBeNil)
-			err = pm.AddProject("project", []string{"prj1", "prj2"}, []string{"po11", "po12"})
+			err = pm.AddProject("project", []string{"prj1", "prj2"}, []string{"po11", "po12"}, []string{"user11", "user12"})
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "project 'project' already exits")
 		})
 		Convey("Adding a new project works", func() {
-			err = pm.AddProject("project2", []string{"prj21", "prj2"}, []string{"po21", "po22"})
+			err = pm.AddProject("project2", []string{"prj21", "prj2"}, []string{"po21", "po22"}, []string{"user21", "user22"})
 			So(err, ShouldBeNil)
 			So(gtl.NbGroup(), ShouldEqual, 3)
 			So(gtl.NbReposOrGroups(), ShouldEqual, 4)
