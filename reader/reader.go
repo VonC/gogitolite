@@ -195,8 +195,8 @@ func readRepo(c *content) (stateFn, error) {
 	return readRepoRules, nil
 }
 
-var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:@?[a-zA-Z0-9_-]+\s*?)+)(#.*?)?$`)
-var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?(?:\s([a-zA-Z0-9_.-/]+))?$`)
+var readRepoRuleRx = regexp.MustCompile(`(?m)^\s*?([^@=]+)\s*?=\s*?((?:@?[a-zA-Z0-9_.-]+\s*?)+)(#.*?)?$`)
+var repoRulePreRx = regexp.MustCompile(`(?m)^([RW+-]+?)\s*?(?:\s([a-zA-Z0-9_.\-/]+))?$`)
 var repoRuleDescRx = regexp.MustCompile(`(?m)^desc\s*?=\s*?(\S.*?)$`)
 
 func readRepoRulesDesc(c *content, config *gitolite.Config, t string) (bool, error) {
@@ -257,7 +257,7 @@ func readRepoRule(c *content, config *gitolite.Config, t string) (bool, error) {
 	}
 
 	respre := repoRulePreRx.FindStringSubmatchIndex(pre)
-	//fmt.Printf("\nrespre='%v' for '%v'\n", respre, pre)
+	fmt.Printf("\nrespre='%v' for '%v'\n", respre, pre)
 	if respre == nil {
 		return true, ParseError{msg: fmt.Sprintf("Incorrect access rule '%v' at line %v ('%v')", pre, c.l, t)}
 	}
