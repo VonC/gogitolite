@@ -64,7 +64,6 @@ func oerr() io.Writer {
 }
 
 func main() {
-
 	a := os.Args[1:]
 	if args != nil {
 		a = args
@@ -90,12 +89,12 @@ func main() {
 	if r.verbose {
 		fmt.Fprintf(out(), "Read file '%v'\n", filename)
 	}
-
 	r.gtl, err = r.process(filename, nil)
 	if err == nil {
 		r.processSubconfs()
 		if *fauditPtr {
 			r.printAudit()
+			
 		}
 		if *flistPtr {
 			r.listProjects()
@@ -103,7 +102,10 @@ func main() {
 		if *fprintPtr {
 			fmt.Fprintf(out(), "%v", r.gtl.Print())
 		}
-	}
+		
+	} else {
+		    os.Exit(1)
+		}
 eop:
 }
 
@@ -124,6 +126,7 @@ func getGtl2(r io.Reader, gtl *gitolite.Gitolite) (*gitolite.Gitolite, error) {
 		gtl, err = reader.Read(r)
 	} else {
 		gtl, err = reader.Update(r, gtl)
+		fmt.Printf("%v\n", err)
 	}
 	if err != nil {
 		fmt.Fprintf(oerr(), "ERR %v\n", err.Error())
